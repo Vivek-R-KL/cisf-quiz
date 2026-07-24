@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CASO ASTI Interface</title>
+  
+  <!-- Chart.js for Rendering Candidate Bar Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root {
       --primary-red: #b31b1b;
@@ -30,7 +34,6 @@
       box-sizing: border-box;
     }
 
-    /* Professional Glassmorphism & Card Styles */
     .container {
       background: rgba(255, 255, 255, 0.95);
       padding: 40px;
@@ -43,15 +46,9 @@
       transition: all 0.3s ease;
     }
 
-    /* Auth Screen styling */
-    #authScreen {
-      max-width: 450px;
-    }
+    #authScreen { max-width: 450px; }
 
-    .header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
+    .header { text-align: center; margin-bottom: 25px; }
 
     .header h1 {
       margin: 0;
@@ -71,7 +68,6 @@
       font-weight: 600;
     }
 
-    /* ================= NOTICE BOARD STYLING ================= */
     .notice-board {
       background: #fffdf0;
       border: 2px solid var(--accent-yellow);
@@ -104,7 +100,6 @@
       gap: 8px;
     }
 
-    /* Flashing highlight effect */
     .highlight-badge {
       background-color: var(--accent-yellow);
       color: #000;
@@ -121,10 +116,7 @@
       50% { opacity: 0.4; }
     }
 
-    /* Form Fields */
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
 
     .form-group label {
       display: block;
@@ -145,19 +137,10 @@
       background: #fffafa;
     }
 
-    /* Password wrapper for positioning the toggle button */
-    .password-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
+    .password-wrapper { position: relative; display: flex; align-items: center; }
     .password-wrapper input[type="password"],
-    .password-wrapper input[type="text"] {
-      padding-right: 60px; 
-    }
+    .password-wrapper input[type="text"] { padding-right: 60px; }
 
-    /* Style for the Show/Hide toggle button */
     .toggle-password-btn {
       position: absolute;
       right: 12px;
@@ -171,18 +154,6 @@
       padding: 5px;
     }
 
-    .toggle-password-btn:hover {
-      color: #901212;
-    }
-
-    input[type="text"]:focus, input[type="password"]:focus {
-      outline: none;
-      border-color: var(--primary-red);
-      box-shadow: 0 0 0 3px rgba(179, 27, 27, 0.15);
-      background: #fff;
-    }
-
-    /* Buttons */
     .btn {
       width: 100%;
       background: linear-gradient(135deg, var(--primary-red) 0%, #901212 100%);
@@ -207,31 +178,6 @@
       filter: brightness(1.1);
     }
 
-    .btn-secondary {
-      background: linear-gradient(135deg, var(--accent-yellow) 0%, var(--dark-yellow) 100%);
-      color: #1c2833;
-      margin-top: 12px;
-      border: 1.5px solid var(--dark-yellow);
-    }
-
-    .btn-secondary:hover {
-      box-shadow: 0 6px 12px rgba(241, 196, 15, 0.3);
-    }
-
-    /* Course Summary Button styling */
-    .btn-summary {
-      background: #ffffff;
-      color: var(--primary-red);
-      border: 2px solid var(--primary-red);
-      margin-top: 15px;
-    }
-
-    .btn-summary:hover {
-      background: var(--light-red);
-      color: #901212;
-    }
-
-    /* Exit Button Style */
     .btn-exit {
       background: #34495e;
       color: white;
@@ -241,159 +187,60 @@
       font-size: 15px;
     }
 
-    .btn-exit:hover {
-      background: #2c3e50;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-    }
+    #mainDashboard { display: none; }
 
-    /* Main Dashboard Layout */
-    #mainDashboard {
-      display: none;
-    }
-
-    .search-box {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 25px;
-    }
-
-    .search-box input {
-      flex: 1;
-    }
-
-    .search-box .btn {
-      width: auto;
-      padding: 0 24px;
-    }
-
-    /* Action Deck for Batches */
     .batch-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 25px;
-      padding-top: 25px;
-      border-top: 2px dashed var(--border-color);
-    }
-
-    .summary-section {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(179, 27, 27, 0.15);
-    }
-
-    /* ================= FULL SCREEN DETAILS CONTAINER ================= */
-    #detailsScreen {
-      display: none;
-      width: 95%;          
-      max-width: 1400px;   
-      padding: 40px;
-    }
-
-    .profile-card {
-      background: var(--light-red);
-      border: 1.5px solid var(--border-color);
-      border-radius: 10px;
-      padding: 30px;
-      margin-top: 15px;
-      margin-bottom: 20px;
       display: flex;
       flex-direction: column;
-      gap: 30px;
-    }
-
-    .profile-info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px 40px;
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1.5px solid rgba(179, 27, 27, 0.1);
-    }
-
-    .label { 
-      font-weight: bold; 
-      color: var(--primary-red); 
-      margin-right: 20px; 
-      font-size: 15px; 
-    }
-    
-    .value { 
-      color: var(--text-dark); 
-      font-weight: 600; 
-      text-align: right; 
-      font-size: 15px; 
-    }
-
-    .tables-container {
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-    }
-
-    @media (max-width: 768px) {
-      #detailsScreen {
-        width: 100%;
-        padding: 20px;
-      }
-      .profile-info-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-      .profile-card {
-        padding: 15px;
-      }
+      gap: 10px;
+      margin-top: 15px;
     }
 
     .table-section {
       background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 20px;
+      padding: 0;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      overflow-x: auto;
-    }
-
-    .section-table-heading {
-      color: var(--primary-red);
-      font-size: 18px;
-      margin-top: 0;
-      margin-bottom: 15px;
-      text-transform: uppercase;
-      border-left: 4px solid var(--accent-yellow);
-      padding-left: 10px;
-      letter-spacing: 0.5px;
+      max-height: 520px;
+      overflow: auto;
+      position: relative;
     }
 
     .detail-table {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      min-width: 500px;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+      min-width: 800px;
     }
 
     .detail-table th, .detail-table td {
-      padding: 12px 15px;
+      padding: 10px 12px;
       text-align: center;
-      border: 1px solid rgba(179, 27, 27, 0.15);
+      border-right: 1px solid rgba(179, 27, 27, 0.15);
+      border-bottom: 1px solid rgba(179, 27, 27, 0.15);
+    }
+
+    /* FROZEN TABLE HEADER */
+    .detail-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: #fadbd8;
+      color: var(--primary-red);
+      font-weight: bold;
+      white-space: nowrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .detail-table td {
       color: var(--text-dark);
       font-weight: 600;
-      white-space: pre-line;
+      white-space: nowrap;
       vertical-align: middle;
     }
 
-    .detail-table tbody tr {
-      background-color: #fff;
-    }
-    
     .bottom-bar {
       width: 100%;
       text-align: center;
@@ -407,24 +254,7 @@
     }
     
     .error-msg { color: #d93025; text-align: center; display: none; font-weight: 600; margin-top: 15px; }
-    .loader { text-align: center; display: none; color: var(--primary-red); font-weight: 600; margin-top: 15px; }
 
-    .update-banner {
-      background-color: #fcf3cf;
-      border: 1px solid var(--accent-yellow);
-      border-radius: 6px;
-      padding: 8px 12px;
-      margin-bottom: 20px;
-      font-size: 12.5px;
-      font-weight: bold;
-      color: #7d6608;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* ================= MODAL / POPUP STYLES ================= */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -453,36 +283,29 @@
       position: relative;
     }
 
-    .course-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 25px;
-      font-size: 13px;
-    }
-
-    .course-table th {
-      background-color: #eaf2e8;
-      color: #1a252c;
+    /* Bar Chart Button Styling */
+    .btn-bar-chart {
+      background: #b31b1b;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
       font-weight: bold;
-      padding: 10px;
-      text-align: left;
-      border: 1px solid #7f8c8d;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .course-table td {
-      padding: 8px 10px;
-      border: 1px solid #7f8c8d;
-      font-weight: 600;
-    }
-
-    .course-header-row {
-      background-color: #e2efda !important;
-      text-align: center !important;
-      font-size: 15px;
-      font-weight: bold;
-      text-transform: uppercase;
+    .btn-bar-chart:hover {
+      background: #d4ac0d;
       color: #000;
-      padding: 12px !important;
+    }
+
+    .chart-box-container {
+      width: 100%;
+      height: 380px;
+      margin: 20px 0;
+      position: relative;
     }
   </style>
 </head>
@@ -528,32 +351,10 @@
       <p>CISF ASTI DELHI Course Database</p>
     </div>
 
-    <div id="lastUpdatedBanner" class="update-banner">
-      ⏳ Checking last spreadsheet database update...
-    </div>
-
-    <div class="search-box">
-      <input type="text" id="cisfInput" placeholder="Enter CISF Number">
-      <button class="btn" id="searchBtn">Search</button>
-    </div>
-
-    <div class="loader" id="loader">Accessing secure database...</div>
-    <div class="error-msg" id="errorMsg"></div>
-
     <!-- Batch Actions -->
     <div class="batch-actions">
-      <button class="btn btn-secondary" onclick="openBatchWindow('avsec')">
-         Current Basic AVSEC Batch performance report
-      </button>
-      <button class="btn btn-secondary" onclick="openBatchWindow('screener')">
-         Current Screener Certification Batch performance report
-      </button>
-    </div>
-
-    <!-- Course Summary & Course Data Area -->
-    <div class="summary-section">
-      <button class="btn btn-summary" onclick="openCourseDataModal()">
-         📋 COURSE DATA OF IGI
+      <button class="btn" style="background: linear-gradient(135deg, #16a085 0%, #117a65 100%); color: white;" onclick="openBatchProgressModal()">
+        📊 BATCH PROGRESS REPORT
       </button>
     </div>
 
@@ -563,88 +364,41 @@
   </div>
 
 
-  <!-- ================= EXPANDED FULL SCREEN DETAILS ================= -->
-  <div class="container" id="detailsScreen">
-    <div class="header">
-      <h1>Personnel Details</h1>
-      <p id="detailsSubheader">CISF Personnel Record Details</p>
+  <!-- ================= BATCH PROGRESS REPORT MODAL ================= -->
+  <div class="modal-overlay" id="batchProgressModal">
+    <div class="modal-content" style="max-width: 95%; width: 1350px;">
+      <h2 style="color: var(--primary-red); text-align: center; margin-top: 0;">BATCH PROGRESS REPORT</h2>
+      
+      <div id="batchLoader" style="text-align: center; color: var(--primary-red); font-weight: bold; margin: 20px 0;">
+        Loading batch progress details...
+      </div>
+
+      <div id="batchReportContainer" style="display: none;">
+        <!-- Scrollable Table Container with Fixed Frozen Header -->
+        <div class="table-section">
+          <table class="detail-table" id="batchReportTable">
+            <thead id="batchTableHead"></thead>
+            <tbody id="batchTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <button class="btn btn-exit" style="margin-top: 20px;" onclick="closeBatchProgressModal()">Close Report</button>
     </div>
-
-    <div class="profile-card" id="profileCard"></div>
-
-    <button class="btn btn-exit" onclick="closeDetails()">
-      ← Close & Exit to Search
-    </button>
   </div>
 
 
-  <!-- ================= COURSE DATA OF IGI POPUP MODAL ================= -->
-  <div class="modal-overlay" id="courseDataModal">
-    <div class="modal-content">
+  <!-- ================= BAR CHART POPUP MODAL ================= -->
+  <div class="modal-overlay" id="barChartModal" style="z-index: 1100;">
+    <div class="modal-content" style="max-width: 700px; text-align: center;">
+      <h3 id="barChartTitle" style="color: var(--primary-red); margin-top: 0;">Candidate Performance Analysis</h3>
+      <p id="barChartSubtitle" style="font-size: 13px; color: var(--text-light); margin-bottom: 15px;"></p>
       
-      <!-- Basic AVSEC Course Table -->
-      <table class="course-table">
-        <thead>
-          <tr>
-            <th colspan="3" class="course-header-row" id="avsec_title">DATA OF BASIC AVSEC COURSE</th>
-          </tr>
-          <tr>
-            <th style="width: 10%;">S.NO</th>
-            <th style="width: 70%;">PARTICULARS</th>
-            <th style="width: 20%;">NO. OF PERSONNEL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>1</td><td>TOTAL POSTED STRENGTH</td><td id="avsec_1">--</td></tr>
-          <tr><td>2</td><td>NO. OF PERSONNEL ELIGIBLE FOR BASIC AVSEC COURSE</td><td id="avsec_2">--</td></tr>
-          <tr><td>3</td><td>NO. OF PERSONNEL QUALIFIED</td><td id="avsec_3">--</td></tr>
-          <tr><td>4</td><td>NO. OF PERSONNEL NOT ELIGIBLE FOR BASIC AVSEC COURSE DUE TO EDUCATIONAL GROUND AND MEDICAL REASON(WITHOUT 05 TIME FAIL)</td><td id="avsec_4">--</td></tr>
-          <tr><td>5</td><td>NO. OF PERSONNEL NOT ELIGIBLE FOR BASIC AVSEC COURSE (5 TIMES FAIL)</td><td id="avsec_5">--</td></tr>
-          <tr><td>6</td><td>NO. OF PERSONNEL DUE FOR BASIC AVSEC</td><td id="avsec_6">--</td></tr>
-        </tbody>
-      </table>
+      <div class="chart-box-container">
+        <canvas id="candidateBarChartCanvas"></canvas>
+      </div>
 
-      <!-- Screener Certification Course Table -->
-      <table class="course-table">
-        <thead>
-          <tr>
-            <th colspan="3" class="course-header-row" id="scr_title">DATA OF SCREENER CERTIFICATION COURSE</th>
-          </tr>
-          <tr>
-            <th style="width: 10%;">S.NO</th>
-            <th style="width: 70%;">PARTICULARS</th>
-            <th style="width: 20%;">NO. OF PERSONNEL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>1</td><td>NO. OF PERSONNEL ELIGIBLE FOR SCREENER CERTIFICATION COURSE</td><td id="scr_1">--</td></tr>
-          <tr><td>2</td><td>NO. OF PERSONNEL QUALIFIED</td><td id="scr_2">--</td></tr>
-          <tr><td>3</td><td>NO. OF PERSONNEL DUE FOR SCREENER CERTIFICATION COURSE (INITIAL)</td><td id="scr_3">--</td></tr>
-          <tr><td>4</td><td>NO. OF PERSONNEL NOT ELIGIBLE FOR SCREENER CERTIFICATION COURSE (03 TIME FAIL)</td><td id="scr_4">--</td></tr>
-          <tr><td>5</td><td>NO. OF PERSONNEL HAVING VALID CERTIFICATION</td><td id="scr_5">--</td></tr>
-          <tr><td>6</td><td>NO. OF PERSONNEL DUE FOR RE CERTIFICATION</td><td id="scr_6">--</td></tr>
-        </tbody>
-      </table>
-
-      <!-- DGR CAT-12 Course Table -->
-      <table class="course-table">
-        <thead>
-          <tr>
-            <th colspan="3" class="course-header-row" id="dgr_title">DATA OF DGR CAT-12 COURSE</th>
-          </tr>
-          <tr>
-            <th style="width: 10%;">S.NO</th>
-            <th style="width: 70%;">PARTICULARS</th>
-            <th style="width: 20%;">NO. OF PERSONNEL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>1</td><td>NO. OF PERSONNEL ELIGIBLE FOR DGR CAT 12 COURSE</td><td id="dgr_1">--</td></tr>
-          <tr><td>2</td><td>NO. OF PERSONNEL QUALIFIED</td><td id="dgr_2">--</td></tr>
-          <tr><td>3</td><td>NO. OF PERSONNEL DUE DGR CAT 12 COURSE</td><td id="dgr_3">--</td></tr>
-        </tbody>
-      </table>
-<button class="btn btn-exit" style="margin-top:10px;" onclick="closeCourseDataModal()">Close</button>
+      <button class="btn btn-exit" style="margin-top: 15px;" onclick="closeBarChartModal()">Close Chart</button>
     </div>
   </div>
 
@@ -655,14 +409,13 @@
   </div>
 
 
-  <!-- ================= LOGIC & SYSTEM INTEGRATION ================= -->
+  <!-- ================= SCRIPT LOGIC ================= -->
   <script>
-    const SPREADSHEETS = {
-      avsec: "https://docs.google.com/spreadsheets/d/1oXLk_WotJo6WF7SrDyrXJ2HSA0ifriuIuR_3_XGS2Jo/edit?usp=sharing", 
-      screener: "https://docs.google.com/spreadsheets/d/1EDV8pBnPrpfDM1Hqi1kdqk4E_IwycyXleBIGyKxsOtk/edit?usp=sharing"
-    };
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxKA7D2Dx9EhLOBv8L09U6ADOCDmFTQdaLmd9C7iffbRXpCksK7ZrxPyjvWQJg90Y5j/exec";
 
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbySZ_BZNadmYh1BlKsmpx-p7b3A05kcRgs4Fq9H13jIhgiMSt5YVLch2nRiSa6wwIzzLw/exec";
+    let globalReportHeaders = [];
+    let globalReportRows = [];
+    let barChartInstance = null;
 
     function handleLogin() {
       const idVal = document.getElementById('username').value.trim();
@@ -676,112 +429,220 @@
         
         document.getElementById('username').value = '';
         document.getElementById('password').value = '';
-        
-        document.getElementById('cisfInput').focus();
-
-        fetchLastUpdatedTime();
       } else {
         authError.style.display = 'block';
       }
     }
 
-    async function fetchLastUpdatedTime() {
-      const banner = document.getElementById('lastUpdatedBanner');
+    /* ================= BATCH REPORT LOGIC ================= */
+    async function openBatchProgressModal() {
+      const modal = document.getElementById('batchProgressModal');
+      const loader = document.getElementById('batchLoader');
+      const container = document.getElementById('batchReportContainer');
+
+      modal.style.display = 'flex';
+      loader.style.display = 'block';
+      container.style.display = 'none';
+
       try {
-        const response = await fetch(`${WEB_APP_URL}?getTimestamp=true`);
+        const response = await fetch(`${WEB_APP_URL}?getBatchReport=true&_t=${new Date().getTime()}`);
         const result = await response.json();
+
+        if (result.status === 'success') {
+          loader.style.display = 'none';
+          container.style.display = 'block';
+          globalReportHeaders = result.headers;
+          globalReportRows = result.rows;
+          renderBatchTable(result.headers, result.rows);
+        } else {
+          loader.innerText = 'Failed to load report data: ' + (result.message || 'Unknown error');
+        }
+      } catch (error) {
+        console.error('Error fetching batch progress data:', error);
+        loader.innerText = 'Unable to fetch report from database.';
+      }
+    }
+
+    function renderBatchTable(headers, rows) {
+      const tableHead = document.getElementById('batchTableHead');
+      const tableBody = document.getElementById('batchTableBody');
+
+      let headHtml = '<tr>';
+      headers.forEach(h => headHtml += `<th>${h}</th>`);
+      headHtml += `<th>ACTION</th></tr>`;
+      tableHead.innerHTML = headHtml;
+
+      tableBody.innerHTML = '';
+      rows.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
         
-        if (result.status === "success" && result.timestamp) {
-          banner.innerHTML = `📅 <strong>Last Updated:</strong> ${result.timestamp}`;
-        } else {
-          banner.innerText = "📅 Last Updated: No updates recorded yet";
-        }
-      } catch (error) {
-        console.error("Failed to fetch timestamp:", error);
-        banner.innerText = "📅 Last Updated: Unable to load date";
-      }
+        headers.forEach((_, colIndex) => {
+          const td = document.createElement('td');
+          td.textContent = row[colIndex] !== undefined ? row[colIndex] : '';
+          tr.appendChild(td);
+        });
+
+        // Small Bar Chart Trigger Button
+        const actionTd = document.createElement('td');
+        actionTd.innerHTML = `
+          <button class="btn-bar-chart" onclick="showCandidateBarChart(${rowIndex})">
+            📊 Chart
+          </button>
+        `;
+        tr.appendChild(actionTd);
+        tableBody.appendChild(tr);
+      });
     }
 
-    /* Modal Popup Trigger & Dynamic Live Spreadsheet Mapping */
-    async function openCourseDataModal() {
-      document.getElementById('courseDataModal').style.display = 'flex';
+    /* Score Parser: Handles 10/10, 8/10, 85%, or plain numbers */
+    function parseScoreToPercentage(rawVal) {
+      if (rawVal === undefined || rawVal === null || rawVal === '') return 0;
       
-      try {
-        const response = await fetch(`${WEB_APP_URL}?getCourseData=true&_t=${new Date().getTime()}`);
-        const result = await response.json();
-
-        console.log("Course Data Fetch Result:", result);
-
-        if (result.status === "success" && result.data) {
-          const rows = result.data;
-
-          // Helper: Find the row index where a keyword appears in any column
-          const getHeaderRowIndex = (keyword) => {
-            return rows.findIndex(row => 
-              row.some(cell => cell && cell.toString().toLowerCase().includes(keyword.toLowerCase()))
-            );
-          };
-
-          // Helper: Extract full title text from the header row (joins non-empty cell values)
-          const getHeaderTitleText = (baseIndex, fallbackText) => {
-            if (baseIndex === -1 || !rows[baseIndex]) return fallbackText;
-            const titleText = rows[baseIndex].filter(cell => cell && cell.toString().trim() !== "").join(" ");
-            return titleText || fallbackText;
-          };
-
-          // Helper: Get cell value from Column C (index 2) relative to the header row
-          const getValRelative = (baseIndex, offset) => {
-            if (baseIndex === -1) return '--';
-            const targetRow = rows[baseIndex + offset];
-            return (targetRow && targetRow[2] !== undefined && targetRow[2] !== "") ? targetRow[2] : '--';
-          };
-
-          // 1. BASIC AVSEC SECTION
-          const avsecHeaderIndex = getHeaderRowIndex("BASIC AVSEC");
-          document.getElementById('avsec_title').innerText = getHeaderTitleText(avsecHeaderIndex, "DATA OF BASIC AVSEC COURSE");
-          document.getElementById('avsec_1').innerText = getValRelative(avsecHeaderIndex, 1);
-          document.getElementById('avsec_2').innerText = getValRelative(avsecHeaderIndex, 2);
-          document.getElementById('avsec_3').innerText = getValRelative(avsecHeaderIndex, 3);
-          document.getElementById('avsec_4').innerText = getValRelative(avsecHeaderIndex, 4);
-          document.getElementById('avsec_5').innerText = getValRelative(avsecHeaderIndex, 5);
-          document.getElementById('avsec_6').innerText = getValRelative(avsecHeaderIndex, 6);
-
-          // 2. SCREENER CERTIFICATION SECTION
-          const scrHeaderIndex = getHeaderRowIndex("SCREENER CERTIFICATION");
-          document.getElementById('scr_title').innerText = getHeaderTitleText(scrHeaderIndex, "DATA OF SCREENER CERTIFICATION COURSE");
-          document.getElementById('scr_1').innerText = getValRelative(scrHeaderIndex, 1);
-          document.getElementById('scr_2').innerText = getValRelative(scrHeaderIndex, 2);
-          document.getElementById('scr_3').innerText = getValRelative(scrHeaderIndex, 3);
-          document.getElementById('scr_4').innerText = getValRelative(scrHeaderIndex, 4);
-          document.getElementById('scr_5').innerText = getValRelative(scrHeaderIndex, 5);
-          document.getElementById('scr_6').innerText = getValRelative(scrHeaderIndex, 6);
-
-          // 3. DGR CAT-12 SECTION
-          const dgrHeaderIndex = getHeaderRowIndex("DGR");
-          document.getElementById('dgr_title').innerText = getHeaderTitleText(dgrHeaderIndex, "DATA OF DGR CAT-12 COURSE");
-          document.getElementById('dgr_1').innerText = getValRelative(dgrHeaderIndex, 1);
-          document.getElementById('dgr_2').innerText = getValRelative(dgrHeaderIndex, 2);
-          document.getElementById('dgr_3').innerText = getValRelative(dgrHeaderIndex, 3);
-
-        } else {
-          console.error("Backend error:", result.message);
+      let str = rawVal.toString().trim();
+      
+      // Case 1: Fraction format like "10/10", "8 / 10", "45/50"
+      if (str.includes('/')) {
+        const parts = str.split('/');
+        if (parts.length === 2) {
+          const obtained = parseFloat(parts[0].trim());
+          const total = parseFloat(parts[1].trim());
+          if (!isNaN(obtained) && !isNaN(total) && total > 0) {
+            return (obtained / total) * 100;
+          }
         }
-      } catch (error) {
-        console.error("Error updating popup data:", error);
+      }
+      
+      // Case 2: Percentage string like "85%"
+      if (str.includes('%')) {
+        const num = parseFloat(str.replace('%', ''));
+        return isNaN(num) ? 0 : num;
+      }
+      
+      // Case 3: Plain numeric value
+      const num = parseFloat(str);
+      return isNaN(num) ? 0 : num;
+    }
+
+    /* Target: Column J (Index 9) to Last Column */
+    function showCandidateBarChart(rowIndex) {
+      const row = globalReportRows[rowIndex];
+      if (!row) return;
+
+      const candidateName = row[1] || row[2] || `Candidate #${rowIndex + 1}`;
+      const startColIndex = 9; // Column J is index 9 (0-indexed: A=0, B=1, ... J=9)
+
+      const testNames = [];
+      const testPercentages = [];
+
+      // Extract marks from Column J through the last column
+      for (let i = startColIndex; i < globalReportHeaders.length; i++) {
+        const headerName = globalReportHeaders[i];
+        const rawVal = row[i];
+
+        if (headerName && headerName.trim() !== '') {
+          const calculatedPercentage = parseScoreToPercentage(rawVal);
+
+          testNames.push(headerName);
+          testPercentages.push(Math.round(calculatedPercentage * 100) / 100); // Rounded to 2 decimals
+        }
+      }
+
+      if (testNames.length === 0) {
+        alert("No test paper data found starting from Column J onwards for this candidate.");
+        return;
+      }
+
+      // Display Modal and Render Bar Chart
+      document.getElementById('barChartTitle').innerText = `${candidateName} - Test Scores Percentage`;
+      document.getElementById('barChartSubtitle').innerText = `X-Axis: Test Papers | Y-Axis: Percentage Marks (%)`;
+      document.getElementById('barChartModal').style.display = 'flex';
+
+      renderBarChart(testNames, testPercentages);
+    }
+
+    function renderBarChart(labels, percentages) {
+      const ctx = document.getElementById('candidateBarChartCanvas').getContext('2d');
+
+      if (barChartInstance) {
+        barChartInstance.destroy();
+      }
+
+      barChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Marks (%)',
+            data: percentages,
+            backgroundColor: 'rgba(179, 27, 27, 0.8)',
+            borderColor: '#b31b1b',
+            borderWidth: 1.5,
+            borderRadius: 4,
+            barThickness: labels.length > 8 ? 'flex' : 35
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ` Percentage: ${context.raw}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Test Papers',
+                color: '#b31b1b',
+                font: { weight: 'bold', size: 13 }
+              },
+              ticks: { font: { size: 11 }, maxRotation: 45, minRotation: 0 }
+            },
+            y: {
+              min: 0,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Percentage Marks (%)',
+                color: '#b31b1b',
+                font: { weight: 'bold', size: 13 }
+              },
+              ticks: {
+                stepSize: 10,
+                callback: function(value) {
+                  return value + '%';
+                },
+                font: { size: 11 }
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function closeBarChartModal() {
+      document.getElementById('barChartModal').style.display = 'none';
+      if (barChartInstance) {
+        barChartInstance.destroy();
+        barChartInstance = null;
       }
     }
 
-    function closeCourseDataModal() {
-      document.getElementById('courseDataModal').style.display = 'none';
+    function closeBatchProgressModal() {
+      document.getElementById('batchProgressModal').style.display = 'none';
     }
 
     function handleExit() {
-      document.getElementById('cisfInput').value = '';
-      document.getElementById('profileCard').innerHTML = '';
-      document.getElementById('errorMsg').style.display = 'none';
-      
       document.getElementById('mainDashboard').style.display = 'none';
-      document.getElementById('detailsScreen').style.display = 'none';
       document.getElementById('authScreen').style.display = 'block';
     }
 
@@ -789,145 +650,6 @@
       if (e.key === 'Enter') handleLogin();
     });
 
-    const searchBtn = document.getElementById('searchBtn');
-    const cisfInput = document.getElementById('cisfInput');
-    const errorMsg = document.getElementById('errorMsg');
-    const loader = document.getElementById('loader');
-    const profileCard = document.getElementById('profileCard');
-
-    searchBtn.addEventListener('click', performSearch);
-    cisfInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') performSearch();
-    });
-
-    async function performSearch() {
-      const query = cisfInput.value.trim();
-      if (!query) return;
-
-      errorMsg.style.display = 'none';
-      loader.style.display = 'block';
-
-      try {
-        const response = await fetch(`${WEB_APP_URL}?cisf=${encodeURIComponent(query)}`);
-        const result = await response.json();
-
-        loader.style.display = 'none';
-
-        if (result.status === "success") {
-          document.getElementById('mainDashboard').style.display = 'none';
-          document.getElementById('detailsScreen').style.display = 'block';
-          document.getElementById('detailsSubheader').textContent = `Showing Profile details for ${query.toUpperCase()}`;
-          
-          displayProfile(result.data);
-        } else {
-          showError(result.message);
-        }
-      } catch (error) {
-        loader.style.display = 'none';
-        showError("Could not connect to the database. Verify your Script Web App URL.");
-        console.error(error);
-      }
-    }
-
-    function displayProfile(data) {
-      profileCard.innerHTML = '';
-      
-      const keys = Object.keys(data);
-      
-      const profileGrid = document.createElement('div');
-      profileGrid.className = 'profile-info-grid';
-      
-      keys.forEach((key, index) => {
-        if (index < 6 || index >= 16) {
-          const row = document.createElement('div');
-          row.className = 'info-row';
-          row.innerHTML = `
-            <span class="label">${key}:</span>
-            <span class="value">${data[key] || 'N/A'}</span>
-          `;
-          profileGrid.appendChild(row);
-        }
-      });
-
-      const getDynamicKey = (keyword, occurrenceIndex, fallbackIndex) => {
-        const matched = keys.filter(k => k.toLowerCase().includes(keyword.toLowerCase()));
-        return matched[occurrenceIndex] || keys[fallbackIndex];
-      };
-
-      const avsec_from    = getDynamicKey('from', 0, 6);
-      const avsec_to      = getDynamicKey('to', 0, 7);
-      const avsec_venue   = getDynamicKey('venue', 0, 8);
-      const avsec_marks   = getDynamicKey('marks', 0, 9);
-      const avsec_result  = getDynamicKey('result', 0, 10);
-
-      const screener_from   = getDynamicKey('from', 1, 11);
-      const screener_to     = getDynamicKey('to', 1, 12);
-      const screener_venue  = getDynamicKey('venue', 1, 13);
-      const screener_marks  = getDynamicKey('marks', 1, 14);
-      const screener_result = getDynamicKey('result', 1, 15);
-
-      const tablesContainer = document.createElement('div');
-      tablesContainer.className = 'tables-container';
-
-      const avsecContainer = document.createElement('div');
-      avsecContainer.className = 'table-section';
-      avsecContainer.innerHTML = `
-        <h3 class="section-table-heading">Basic AVSEC</h3>
-        <table class="detail-table">
-          <thead>
-            <tr>
-              <th>From</th>
-              <th>To</th>
-              <th>Venue</th>
-              <th>Marks</th>
-              <th>Result</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>${data[avsec_from] || 'N/A'}</td>
-              <td>${data[avsec_to] || 'N/A'}</td>
-              <td>${data[avsec_venue] || 'N/A'}</td>
-              <td>${data[avsec_marks] || 'N/A'}</td>
-              <td>${data[avsec_result] || 'N/A'}</td>
-            </tr>
-          </tbody>
-        </table>
-      `;
-
-      const screenerContainer = document.createElement('div');
-      screenerContainer.className = 'table-section';
-      screenerContainer.innerHTML = `
-        <h3 class="section-table-heading">Details of Screener</h3>
-        <table class="detail-table">
-          <thead>
-            <tr>
-              <th>From</th>
-              <th>To</th>
-              <th>Venue</th>
-              <th>Marks</th>
-              <th>Result</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>${data[screener_from] || 'N/A'}</td>
-              <td>${data[screener_to] || 'N/A'}</td>
-              <td>${data[screener_venue] || 'N/A'}</td>
-              <td>${data[screener_marks] || 'N/A'}</td>
-              <td>${data[screener_result] || 'N/A'}</td>
-            </tr>
-          </tbody>
-        </table>
-      `;
-
-      tablesContainer.appendChild(avsecContainer);
-      tablesContainer.appendChild(screenerContainer);
-
-      profileCard.appendChild(profileGrid);
-      profileCard.appendChild(tablesContainer);
-    }
-    
     function togglePasswordVisibility() {
       const passwordInput = document.getElementById('password');
       const toggleBtn = document.getElementById('togglePassword');
@@ -938,28 +660,6 @@
       } else {
         passwordInput.type = 'password';
         toggleBtn.textContent = 'Show';
-      }
-    }
-
-    function closeDetails() {
-      document.getElementById('detailsScreen').style.display = 'none';
-      document.getElementById('mainDashboard').style.display = 'block';
-      cisfInput.value = '';
-      cisfInput.focus();
-      
-      fetchLastUpdatedTime();
-    }
-
-    function showError(msg) {
-      errorMsg.textContent = msg;
-      errorMsg.style.display = 'block';
-    }
-
-    function openBatchWindow(batchType) {
-      if (batchType === 'avsec') {
-        window.open(SPREADSHEETS.avsec, '_blank');
-      } else if (batchType === 'screener') {
-        window.open(SPREADSHEETS.screener, '_blank');
       }
     }
   </script>
