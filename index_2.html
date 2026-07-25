@@ -196,6 +196,34 @@
       margin-top: 15px;
     }
 
+    .batch-select-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: var(--light-red);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .batch-select-container label {
+      font-weight: bold;
+      color: var(--primary-red);
+      font-size: 14px;
+    }
+
+    .batch-select-container select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border-color);
+      font-weight: bold;
+      color: var(--text-dark);
+      outline: none;
+      cursor: pointer;
+    }
+
     .table-section {
       background: #ffffff;
       border: 1px solid var(--border-color);
@@ -363,12 +391,20 @@
     </button>
   </div>
 
-
   <!-- ================= BATCH PROGRESS REPORT MODAL ================= -->
   <div class="modal-overlay" id="batchProgressModal">
     <div class="modal-content" style="max-width: 95%; width: 1350px;">
-      <h2 style="color: var(--primary-red); text-align: center; margin-top: 0;">BATCH PROGRESS REPORT</h2>
+      <h2 style="color: var(--primary-red); text-align: center; margin-top: 0; margin-bottom: 15px;">BATCH PROGRESS REPORT</h2>
       
+      <!-- BATCH SELECTOR DROPDOWN -->
+      <div class="batch-select-container">
+        <label for="batchSelector">Select Batch Data:</label>
+        <select id="batchSelector" onchange="fetchBatchData()">
+          <option value="1">Basic Avsec</option>
+          <option value="2">Screener Certification</option>
+        </select>
+      </div>
+
       <div id="batchLoader" style="text-align: center; color: var(--primary-red); font-weight: bold; margin: 20px 0;">
         Loading batch progress details...
       </div>
@@ -411,7 +447,9 @@
 
   <!-- ================= SCRIPT LOGIC ================= -->
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxKA7D2Dx9EhLOBv8L09U6ADOCDmFTQdaLmd9C7iffbRXpCksK7ZrxPyjvWQJg90Y5j/exec";
+    // WEB APP URLS FOR BOTH BATCHES
+    const WEB_APP_URL_BATCH_1 = "https://script.google.com/macros/s/AKfycbyuyLnBuZ8w-kilq-T-fyocFjp1j4_OZwGMK_UaJpqYOUuUxFiHGJIgBHvA_VOiFxC3dg/exec";
+    const WEB_APP_URL_BATCH_2 = "https://script.google.com/macros/s/AKfycbwl6aEfp-wB7FgNBZnCAFa6pZED2xdC97qIBPZ1Y93U113SlyXm2AFMCVsKiWt7LT6G/exec"; // <-- Paste Web App URL of Sheet 2 here
 
     let globalReportHeaders = [];
     let globalReportRows = [];
@@ -435,17 +473,26 @@
     }
 
     /* ================= BATCH REPORT LOGIC ================= */
-    async function openBatchProgressModal() {
+    function openBatchProgressModal() {
       const modal = document.getElementById('batchProgressModal');
+      modal.style.display = 'flex';
+      fetchBatchData();
+    }
+
+    async function fetchBatchData() {
       const loader = document.getElementById('batchLoader');
       const container = document.getElementById('batchReportContainer');
+      const selectedBatch = document.getElementById('batchSelector').value;
 
-      modal.style.display = 'flex';
       loader.style.display = 'block';
+      loader.innerText = `Loading Batch ${selectedBatch} progress details...`;
       container.style.display = 'none';
 
+      // Pick URL according to dropdown selection
+      const targetUrl = selectedBatch === "2" ? WEB_APP_URL_BATCH_2 : WEB_APP_URL_BATCH_1;
+
       try {
-        const response = await fetch(`${WEB_APP_URL}?getBatchReport=true&_t=${new Date().getTime()}`);
+        const response = await fetch(`${targetUrl}?getBatchReport=true&_t=${new Date().getTime()}`);
         const result = await response.json();
 
         if (result.status === 'success') {
@@ -459,7 +506,7 @@
         }
       } catch (error) {
         console.error('Error fetching batch progress data:', error);
-        loader.innerText = 'Unable to fetch report from database.';
+        loader.innerText = `Unable to fetch Batch ${selectedBatch} report from database. Ensure Web App URL is correctly configured.`;
       }
     }
 
