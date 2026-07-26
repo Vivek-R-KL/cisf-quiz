@@ -7,8 +7,8 @@
   
   <!-- Chart.js for Rendering Candidate Bar Charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- ADD THIS DATALABELS PLUGIN FOR SHOWING VALUES ON TOP OF BARS -->
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <!-- DATALABELS PLUGIN FOR SHOWING VALUES ON TOP OF BARS -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
   <!-- HTML2Canvas & jsPDF for PDF Generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -342,13 +342,6 @@
       cursor: pointer;
     }
 
-    .chart-box-container {
-      width: 100%;
-      height: 350px;
-      margin: 20px 0;
-      position: relative;
-    }
-
     .student-info-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -430,7 +423,7 @@
         </div>
 
         <button class="btn-download" onclick="downloadBatchCsv()">
-          ⬇ Download Entire Batch Report (CSV)
+          📥 Download Entire Batch Report (CSV)
         </button>
       </div>
 
@@ -460,9 +453,8 @@
       
       <div id="studentDetailsGrid" class="student-info-grid"></div>
 
-      <div class="chart-box-container">
-        <canvas id="candidateBarChartCanvas"></canvas>
-      </div>
+      <!-- DYNAMIC MULTI-LINE BAR CHART CONTAINER -->
+      <div id="chartBoxesWrapper" style="width: 100%; display: flex; flex-direction: column; gap: 20px; margin: 20px 0;"></div>
 
       <!-- Action Buttons (with 'no-print' class so they hide automatically inside PDF) -->
       <div class="no-print" style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
@@ -486,39 +478,37 @@
 
     let globalReportHeaders = [];
     let globalReportRows = [];
-    let barChartInstance = null;
+    let barChartInstances = [];
     let selectedStudentIndex = 0;
 
     // Helper function to format any date string into strict DD-MM-YYYY format
     function formatDateToDDMMYYYY(val) {
-      if (val === undefined || val === null || val === '') return 'N/A';
-      
-      let strVal = val.toString().trim();
+  if (val === undefined || val === null || val === '') return ''; // 👈 Changed from 'N/A' to ''
+  
+  let strVal = val.toString().trim();
 
-      // If it's already in DD-MM-YYYY or DD/MM/YYYY format, standardize to DD-MM-YYYY
-      if (/^\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}$/.test(strVal)) {
-        const parts = strVal.split(/[\/.-]/);
-        const day = parts[0].padStart(2, '0');
-        const month = parts[1].padStart(2, '0');
-        let year = parts[2];
-        if (year.length === 2) year = '20' + year;
-        return `${day}-${month}-${year}`;
-      }
+  if (/^\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}$/.test(strVal)) {
+    const parts = strVal.split(/[\/.-]/);
+    const day = parts[0].padStart(2, '0');
+    const month = parts[1].padStart(2, '0');
+    let year = parts[2];
+    if (year.length === 2) year = '20' + year;
+    return `${day}-${month}-${year}`;
+  }
 
-      // Handle ISO strings, GMT strings, or JS Date objects
-      const parsedDate = new Date(val);
-      if (!isNaN(parsedDate.getTime()) && typeof val !== 'number') {
-        const day = String(parsedDate.getDate()).padStart(2, '0');
-        const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
-        const year = parsedDate.getFullYear();
-        
-        if (year > 1900 && year < 2100) {
-          return `${day}-${month}-${year}`;
-        }
-      }
-
-      return strVal;
+  const parsedDate = new Date(val);
+  if (!isNaN(parsedDate.getTime()) && typeof val !== 'number') {
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const year = parsedDate.getFullYear();
+    
+    if (year > 1900 && year < 2100) {
+      return `${day}-${month}-${year}`;
     }
+  }
+
+  return strVal;
+}
 
     // Helper function to detect date-related column headers
     function isDateHeader(headerName) {
@@ -591,43 +581,6 @@
       }
     }
 
-    function renderBatchTable(headers, rows) {
-      const tableHead = document.getElementById('batchTableHead');
-      const tableBody = document.getElementById('batchTableBody');
-
-      let headHtml = '<tr>';
-      headers.forEach(h => headHtml += `<th>${h}</th>`);
-      headHtml += `<th>ACTIONS</th></tr>`;
-      tableHead.innerHTML = headHtml;
-
-      tableBody.innerHTML = '';
-      rows.forEach((row, rowIndex) => {
-        const tr = document.createElement('tr');
-        
-        headers.forEach((headerName, colIndex) => {
-          const td = document.createElement('td');
-          let cellValue = row[colIndex] !== undefined ? row[colIndex] : '';
-
-          // Format D.O.B, D.O.A, DOA, etc. to DD-MM-YYYY
-          if (isDateHeader(headerName)) {
-            cellValue = formatDateToDDMMYYYY(cellValue);
-          }
-
-          td.textContent = cellValue;
-          tr.appendChild(td);
-        });
-
-        const actionTd = document.createElement('td');
-        actionTd.innerHTML = `
-          <button class="btn-bar-chart" onclick="showCandidateBarChart(${rowIndex})">
-            📊 View
-          </button>
-        `;
-        tr.appendChild(actionTd);
-        tableBody.appendChild(tr);
-      });
-    }
-
     function parseScoreToPercentage(rawVal) {
       if (rawVal === undefined || rawVal === null || rawVal === '') return 0;
       let str = rawVal.toString().trim();
@@ -650,28 +603,101 @@
       return isNaN(num) ? 0 : num;
     }
 
+    function formatMultiLineDates(rawVal) {
+      if (rawVal === undefined || rawVal === null || rawVal === '') return 'N/A';
+
+      const lines = rawVal.toString().split(/\r?\n/);
+      
+      const formattedLines = lines.map(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return '';
+        return formatDateToDDMMYYYY(trimmed);
+      }).filter(line => line !== '');
+
+      return formattedLines.join('<br>');
+    }
+
     function showCandidateBarChart(rowIndex) {
       selectedStudentIndex = rowIndex;
       const row = globalReportRows[rowIndex];
       if (!row) return;
 
       const candidateName = row[1] || row[2] || `Candidate #${rowIndex + 1}`;
-      const startColIndex = 9;
-
+      
+      const startColIndex = 13;
       const detailsGrid = document.getElementById('studentDetailsGrid');
-      let detailsHtml = '';
+      
+      let basicDetailsHtml = '';
+      
+      let summaryData = {
+        from: 'N/A',
+        to: 'N/A',
+        venue: 'N/A',
+        marks: 'N/A',
+        result: 'N/A'
+      };
+
       for (let i = 0; i < Math.min(startColIndex, globalReportHeaders.length); i++) {
         const headerName = globalReportHeaders[i];
-        let val = row[i] !== undefined ? row[i] : 'N/A';
-        
-        // Format dates in candidate details grid
-        if (isDateHeader(headerName)) {
-          val = formatDateToDDMMYYYY(val);
-        }
+        const rawVal = row[i];
+        let val = rawVal !== undefined && rawVal !== null ? rawVal : '';
 
-        detailsHtml += `<div><strong>${headerName}:</strong> ${val}</div>`;
+        const hLower = headerName ? headerName.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+
+        if (hLower.includes('from')) {
+          summaryData.from = formatMultiLineDates(val);
+        } else if (hLower.includes('to') && !hLower.includes('total')) {
+          summaryData.to = formatMultiLineDates(val);
+        } else if (hLower.includes('venue') || hLower.includes('place') || hLower.includes('center')) {
+          summaryData.venue = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
+        } else if (hLower.includes('mark') || hLower.includes('score')) {
+          summaryData.marks = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
+        } else if (hLower.includes('result') || hLower.includes('status')) {
+          summaryData.result = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
+        } else {
+          let formattedVal = isDateHeader(headerName) ? formatMultiLineDates(val) : (val || 'N/A');
+          basicDetailsHtml += `<div><strong>${headerName}:</strong> ${formattedVal}</div>`;
+        }
       }
-      detailsGrid.innerHTML = detailsHtml;
+
+      const selectedBatch = document.getElementById('batchSelector').value;
+      const sectionTitle = selectedBatch === "2" 
+        ? "PREVIOUS SCREENER CERTIFICATION COURSE DATA" 
+        : "PREVIOUS BASIC AVSEC COURSE DATA";
+
+      let finalHtml = `
+        <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 8px; text-align: left; font-size: 12px;">
+          ${basicDetailsHtml}
+        </div>
+
+        <div style="grid-column: 1 / -1; width: 100%; margin-top: 4px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; background: #fff; border: 1px solid var(--border-color);">
+            <thead>
+              <tr style="background-color: var(--primary-red); color: #ffffff; font-weight: bold; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <th colspan="5" style="padding: 5px 8px; border-bottom: 1px solid var(--border-color);">${sectionTitle}</th>
+              </tr>
+              <tr style="background-color: var(--light-red); color: var(--primary-red); border-bottom: 1px solid var(--border-color); font-weight: bold;">
+                <th style="padding: 4px 6px; border-right: 1px solid var(--border-color); width: 20%;">FROM</th>
+                <th style="padding: 4px 6px; border-right: 1px solid var(--border-color); width: 20%;">TO</th>
+                <th style="padding: 4px 6px; border-right: 1px solid var(--border-color); width: 25%;">VENUE</th>
+                <th style="padding: 4px 6px; border-right: 1px solid var(--border-color); width: 17%;">MARKS</th>
+                <th style="padding: 4px 6px; width: 18%;">RESULT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 4px 6px; border-right: 1px solid rgba(179,27,27,0.15); vertical-align: middle; white-space: nowrap;">${summaryData.from}</td>
+                <td style="padding: 4px 6px; border-right: 1px solid rgba(179,27,27,0.15); vertical-align: middle; white-space: nowrap;">${summaryData.to}</td>
+                <td style="padding: 4px 6px; border-right: 1px solid rgba(179,27,27,0.15); vertical-align: middle;">${summaryData.venue}</td>
+                <td style="padding: 4px 6px; border-right: 1px solid rgba(179,27,27,0.15); vertical-align: middle; font-weight: bold;">${summaryData.marks}</td>
+                <td style="padding: 4px 6px; vertical-align: middle; font-weight: bold; color: var(--primary-red);">${summaryData.result}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      detailsGrid.innerHTML = finalHtml;
 
       const testNames = [];
       const testPercentages = [];
@@ -680,7 +706,7 @@
         const headerName = globalReportHeaders[i];
         const rawVal = row[i];
 
-        if (headerName && headerName.trim() !== '') {
+        if (headerName && headerName.trim() !== '' && rawVal !== undefined && rawVal !== null && rawVal.toString().trim() !== '') {
           const calculatedPercentage = parseScoreToPercentage(rawVal);
           testNames.push(headerName);
           testPercentages.push(Math.round(calculatedPercentage * 100) / 100);
@@ -691,113 +717,248 @@
       document.getElementById('barChartSubtitle').innerText = `X-Axis: Test Papers | Y-Axis: Percentage Marks (%)`;
       document.getElementById('barChartModal').style.display = 'flex';
 
-      renderBarChart(testNames, testPercentages);
+      renderMultiLineBarCharts(testNames, testPercentages);
     }
 
-    function renderBarChart(labels, percentages) {
-      const ctx = document.getElementById('candidateBarChartCanvas').getContext('2d');
+    function renderMultiLineBarCharts(labels, percentages) {
+      const container = document.getElementById('chartBoxesWrapper');
+      container.innerHTML = '';
 
-      // Register the DataLabels plugin
-      Chart.register(ChartDataLabels);
+      barChartInstances.forEach(instance => {
+        if (instance) instance.destroy();
+      });
+      barChartInstances = [];
 
-      if (barChartInstance) barChartInstance.destroy();
+      if (typeof ChartDataLabels !== 'undefined') {
+        Chart.register(ChartDataLabels);
+      }
 
-      barChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Marks (%)',
-            data: percentages,
-            backgroundColor: 'rgba(179, 27, 27, 0.85)',
-            borderColor: '#b31b1b',
-            borderWidth: 1.5,
-            borderRadius: 4,
-            barThickness: labels.length > 8 ? 'flex' : 35
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: {
-            padding: {
-              top: 25 // Adds top padding so labels don't get clipped at 100%
-            }
+      const chunkSize = 20;
+      const totalChunks = Math.ceil(labels.length / chunkSize);
+
+      for (let c = 0; c < totalChunks; c++) {
+        const chunkLabels = labels.slice(c * chunkSize, (c + 1) * chunkSize);
+        const chunkPercentages = percentages.slice(c * chunkSize, (c + 1) * chunkSize);
+
+        const chartDiv = document.createElement('div');
+        chartDiv.style.width = '100%';
+        chartDiv.style.height = '280px';
+        chartDiv.style.position = 'relative';
+
+        const canvas = document.createElement('canvas');
+        canvas.id = `candidateBarChartCanvas_${c}`;
+        chartDiv.appendChild(canvas);
+        container.appendChild(chartDiv);
+
+        const ctx = canvas.getContext('2d');
+
+        const chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: chunkLabels,
+            datasets: [{
+              label: 'Marks (%)',
+              data: chunkPercentages,
+              backgroundColor: 'rgba(179, 27, 27, 0.85)',
+              borderColor: '#b31b1b',
+              borderWidth: 1.5,
+              borderRadius: 4,
+              barThickness: chunkLabels.length > 10 ? 'flex' : 30
+            }]
           },
-          plugins: {
-            // Configure numbers/percentages to display above bars
-            datalabels: {
-              anchor: 'end',
-              align: 'top',
-              color: '#b31b1b',
-              font: {
-                weight: 'bold',
-                size: 11
-              },
-              formatter: function(value) {
-                return value + '%'; // Appends '%' sign above each bar
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            layout: {
+              padding: {
+                top: 25,
+                bottom: 10
               }
             },
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            x: { 
-              title: { display: true, text: 'Test Papers', color: '#b31b1b', font: { weight: 'bold' } } 
+            plugins: {
+              datalabels: {
+                anchor: 'end',
+                align: 'top',
+                color: '#b31b1b',
+                font: {
+                  weight: 'bold',
+                  size: 10
+                },
+                formatter: function(value) {
+                  return value + '%';
+                }
+              },
+              legend: {
+                display: false
+              }
             },
-            y: { 
-              min: 0, 
-              max: 100, 
-              title: { display: true, text: 'Percentage (%)', color: '#b31b1b', font: { weight: 'bold' } } 
+            scales: {
+              x: { 
+                title: { 
+                  display: true, 
+                  text: totalChunks > 1 ? `Test Papers (Batch ${c + 1})` : 'Test Papers', 
+                  color: '#b31b1b', 
+                  font: { weight: 'bold', size: 11 } 
+                },
+                ticks: {
+                  autoSkip: false,
+                  maxRotation: 45,
+                  minRotation: 0,
+                  font: {
+                    size: 9
+                  }
+                }
+              },
+              y: { 
+                min: 0, 
+                max: 100, 
+                title: { display: true, text: 'Percentage (%)', color: '#b31b1b', font: { weight: 'bold' } } 
+              }
             }
           }
-        }
-      });
-    }
-    /* DOWNLOAD INDIVIDUAL STUDENT PDF (Hides Download and Close Buttons in output) */
-    async function downloadIndividualStudentPdf() {
-      const { jsPDF } = window.jspdf;
-      const reportElement = document.getElementById('printableReportCard');
-      const actionButtons = reportElement.querySelectorAll('.no-print');
-
-      // 1. Temporarily hide Download and Close buttons
-      actionButtons.forEach(btn => btn.style.display = 'none');
-
-      try {
-        // 2. Render report card to canvas
-        const canvas = await html2canvas(reportElement, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff'
         });
 
-        // 3. Create PDF
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const imgWidth = pageWidth - 20; 
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
-
-        const row = globalReportRows[selectedStudentIndex];
-        const candidateName = row ? (row[1] || row[0] || "Student").toString().trim().replace(/[^a-zA-Z0-9]/g, "_") : "Student";
-
-        // 4. Save and trigger PDF download
-        pdf.save(`${candidateName}_Performance_Report.pdf`);
-
-      } catch (error) {
-        console.error("PDF Download Error:", error);
-        alert("Failed to generate PDF document.");
-      } finally {
-        // 5. Restore Download & Close buttons back on UI
-        actionButtons.forEach(btn => btn.style.display = 'flex');
+        barChartInstances.push(chartInstance);
       }
     }
 
-    /* DOWNLOAD BATCH REPORT CSV */
+   function renderBatchTable(headers, rows) {
+  const tableHead = document.getElementById('batchTableHead');
+  const tableBody = document.getElementById('batchTableBody');
+  const selectedBatch = document.getElementById('batchSelector').value;
+
+  const sectionTitle = selectedBatch === "2" 
+    ? "PREVIOUS SCREENER CERTIFICATION COURSE DATA" 
+    : "PREVIOUS BASIC AVSEC COURSE DATA";
+
+  let summaryStartIndex = -1;
+  let summarySpanCount = 0;
+
+  headers.forEach((h, idx) => {
+    const hLower = h.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (hLower.includes('from') || hLower.includes('to') || hLower.includes('venue') || hLower.includes('mark') || hLower.includes('result')) {
+      if (summaryStartIndex === -1) summaryStartIndex = idx;
+      summarySpanCount++;
+    }
+  });
+
+  let headHtml = '<tr>';
+
+  if (summaryStartIndex !== -1 && summarySpanCount > 0) {
+    if (summaryStartIndex > 0) {
+      headHtml += `<th colspan="${summaryStartIndex}">PERSONAL DETAILS</th>`;
+    }
+    headHtml += `<th colspan="${summarySpanCount}" style="background-color: var(--primary-red); color: #ffffff; text-transform: uppercase;">${sectionTitle}</th>`;
+    
+    const remainingCols = (headers.length + 1) - (summaryStartIndex + summarySpanCount);
+    if (remainingCols > 0) {
+      headHtml += `<th colspan="${remainingCols}">PERFORMANCE MARKS & BAR CHART</th>`;
+    }
+    headHtml += '</tr><tr>';
+  }
+
+  headers.forEach(h => headHtml += `<th>${h}</th>`);
+  headHtml += `<th>VIEW REPORT</th></tr>`;
+  tableHead.innerHTML = headHtml;
+
+  tableBody.innerHTML = '';
+  rows.forEach((row, rowIndex) => {
+    const tr = document.createElement('tr');
+    
+    headers.forEach((headerName, colIndex) => {
+      const td = document.createElement('td');
+      let cellValue = row[colIndex] !== undefined && row[colIndex] !== null ? row[colIndex] : '';
+
+      if (isDateHeader(headerName) || headerName.toLowerCase().includes('from') || headerName.toLowerCase().includes('to')) {
+        td.innerHTML = formatMultiLineDates(cellValue);
+      } else {
+        // 👈 Changed from '|| N/A' to render empty text if cellValue is blank
+        td.innerHTML = cellValue.toString().replace(/\r?\n/g, '<br>').trim();
+      }
+
+      tr.appendChild(td);
+    });
+
+    const actionTd = document.createElement('td');
+    actionTd.innerHTML = `
+      <button class="btn-bar-chart" onclick="showCandidateBarChart(${rowIndex})">
+        📊 View
+      </button>
+    `;
+    tr.appendChild(actionTd);
+    tableBody.appendChild(tr);
+  });
+}
+
+    /* DOWNLOAD INDIVIDUAL STUDENT PDF (Fits everything dynamically onto a single page) */
+async function downloadIndividualStudentPdf() {
+  const { jsPDF } = window.jspdf;
+  const reportElement = document.getElementById('printableReportCard');
+  const modalOverlay = document.getElementById('barChartModal');
+  const actionButtons = reportElement.querySelectorAll('.no-print');
+
+  // 1. Temporarily hide action buttons
+  actionButtons.forEach(btn => btn.style.display = 'none');
+
+  // 2. Save original style states
+  const originalReportStyle = reportElement.getAttribute('style') || '';
+  const originalOverlayStyle = modalOverlay.getAttribute('style') || '';
+
+  try {
+    // 3. Temporarily expand modal/card to display ALL contents without scrollbars
+    modalOverlay.style.overflow = 'visible';
+    modalOverlay.style.height = 'auto';
+    modalOverlay.style.position = 'absolute';
+
+    reportElement.style.maxHeight = 'none';
+    reportElement.style.height = 'auto';
+    reportElement.style.overflow = 'visible';
+
+    // Wait briefly to allow Chart.js canvas elements to redraw completely
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // 4. Capture full container view with html2canvas
+    const canvas = await html2canvas(reportElement, {
+      scale: 2,             // High resolution rendering
+      useCORS: true,
+      scrollX: 0,
+      scrollY: -window.scrollY,
+      backgroundColor: '#ffffff'
+    });
+
+    // 5. Calculate PDF dimensions so EVERYTHING fits on a single PDF page dynamically
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    
+    // Page width standard A4 = 210mm
+    const pdfWidth = 210; 
+    // Dynamically set PDF page height based on captured card aspect ratio (no cutoff!)
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    // Create custom page size [pdfWidth, pdfHeight] to keep all details & bar charts on a single page
+    const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
+
+    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+    // 6. Get Candidate Name for File Saving
+    const row = globalReportRows[selectedStudentIndex];
+    const candidateName = row 
+      ? (row[1] || row[0] || "Student").toString().trim().replace(/[^a-zA-Z0-9]/g, "_") 
+      : "Student";
+
+    pdf.save(`${candidateName}_Performance_Report.pdf`);
+
+  } catch (error) {
+    console.error("PDF Download Error:", error);
+    alert("Failed to generate PDF document.");
+  } finally {
+    // 7. Restore initial styling & reveal buttons back on UI
+    reportElement.setAttribute('style', originalReportStyle);
+    modalOverlay.setAttribute('style', originalOverlayStyle);
+    actionButtons.forEach(btn => btn.style.display = 'flex');
+  }
+}
+
     function downloadBatchCsv() {
       if (!globalReportHeaders.length || !globalReportRows.length) {
         alert("No batch data available to download.");
@@ -829,10 +990,10 @@
 
     function closeBarChartModal() {
       document.getElementById('barChartModal').style.display = 'none';
-      if (barChartInstance) {
-        barChartInstance.destroy();
-        barChartInstance = null;
-      }
+      barChartInstances.forEach(instance => {
+        if (instance) instance.destroy();
+      });
+      barChartInstances = [];
     }
 
     function closeBatchProgressModal() {
