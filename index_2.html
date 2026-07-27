@@ -892,6 +892,8 @@
 }
 
     /* DOWNLOAD INDIVIDUAL STUDENT PDF (Fits everything dynamically onto a single page) */
+/* DOWNLOAD INDIVIDUAL STUDENT PDF WITH PAGE NUMBERING */
+/* DOWNLOAD INDIVIDUAL STUDENT PDF (Clean Page Breaks + No Split Charts) */
 async function downloadIndividualStudentPdf() {
   const { jsPDF } = window.jspdf;
   const reportElement = document.getElementById('printableReportCard');
@@ -906,7 +908,7 @@ async function downloadIndividualStudentPdf() {
   const originalOverlayStyle = modalOverlay.getAttribute('style') || '';
 
   try {
-    // 3. Temporarily expand modal/card to display ALL contents without scrollbars
+    // 3. Temporarily expand modal view
     modalOverlay.style.overflow = 'visible';
     modalOverlay.style.height = 'auto';
     modalOverlay.style.position = 'absolute';
@@ -915,32 +917,76 @@ async function downloadIndividualStudentPdf() {
     reportElement.style.height = 'auto';
     reportElement.style.overflow = 'visible';
 
-    // Wait briefly to allow Chart.js canvas elements to redraw completely
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    // 4. Capture full container view with html2canvas
-    const canvas = await html2canvas(reportElement, {
-      scale: 2,             // High resolution rendering
-      useCORS: true,
-      scrollX: 0,
-      scrollY: -window.scrollY,
-      backgroundColor: '#ffffff'
-    });
+    // 4. Initialize Standard A4 PDF (210mm x 297mm)
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = 210;
+    const pdfHeight = 297;
+    const margin = 10;
+    const usableWidth = pdfWidth - (margin * 2);
+    const maxUsableHeight = pdfHeight - margin - 15; // Reserve 15mm bottom space for page numbers
 
-    // 5. Calculate PDF dimensions so EVERYTHING fits on a single PDF page dynamically
-    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    let currentY = margin;
+
+    // Helper: Capture a specific DOM element to Canvas Image
+    async function getElementImage(element) {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+      const imgHeight = (canvas.height * usableWidth) / canvas.width;
+      return {
+        imgData: canvas.toDataURL('image/jpeg', 1.0),
+        height: imgHeight
+      };
+    }
+
+    // --- STEP A: Render Header & Candidate Details on Page 1 ---
+    const headerWrapper = document.createElement('div');
+    headerWrapper.style.background = '#ffffff';
+    headerWrapper.style.padding = '10px';
     
-    // Page width standard A4 = 210mm
-    const pdfWidth = 210; 
-    // Dynamically set PDF page height based on captured card aspect ratio (no cutoff!)
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    // Clone header title, subtitle, and info grid for crisp rendering
+    headerWrapper.appendChild(document.getElementById('barChartTitle').cloneNode(true));
+    headerWrapper.appendChild(document.getElementById('barChartSubtitle').cloneNode(true));
+    headerWrapper.appendChild(document.getElementById('studentDetailsGrid').cloneNode(true));
+    
+    reportElement.appendChild(headerWrapper);
+    const headerData = await getElementImage(headerWrapper);
+    reportElement.removeChild(headerWrapper);
 
-    // Create custom page size [pdfWidth, pdfHeight] to keep all details & bar charts on a single page
-    const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
+    pdf.addImage(headerData.imgData, 'JPEG', margin, currentY, usableWidth, headerData.height);
+    currentY += headerData.height + 5;
 
-    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+    // --- STEP B: Render Each Bar Chart Container Safely ---
+    const chartBoxes = document.querySelectorAll('#chartBoxesWrapper > div');
 
-    // 6. Get Candidate Name for File Saving
+    for (let i = 0; i < chartBoxes.length; i++) {
+      const chartBox = chartBoxes[i];
+      const chartData = await getElementImage(chartBox);
+
+      // Check if adding this chart exceeds the current page bottom
+      if (currentY + chartData.height > maxUsableHeight) {
+        pdf.addPage();
+        currentY = margin; // Reset to top margin on Page 2
+      }
+
+      pdf.addImage(chartData.imgData, 'JPEG', margin, currentY, usableWidth, chartData.height);
+      currentY += chartData.height + 5;
+    }
+
+    // --- STEP C: Add Centered Page Numbers ("Page X of Y") ---
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      pdf.setPage(p);
+      pdf.setFontSize(10);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text(`Page ${p} of ${totalPages}`, pdfWidth / 2, pdfHeight - 8, { align: 'center' });
+    }
+
+    // --- STEP D: Save PDF File ---
     const row = globalReportRows[selectedStudentIndex];
     const candidateName = row 
       ? (row[1] || row[0] || "Student").toString().trim().replace(/[^a-zA-Z0-9]/g, "_") 
@@ -952,13 +998,12 @@ async function downloadIndividualStudentPdf() {
     console.error("PDF Download Error:", error);
     alert("Failed to generate PDF document.");
   } finally {
-    // 7. Restore initial styling & reveal buttons back on UI
+    // Restore UI states
     reportElement.setAttribute('style', originalReportStyle);
     modalOverlay.setAttribute('style', originalOverlayStyle);
     actionButtons.forEach(btn => btn.style.display = 'flex');
   }
 }
-
     function downloadBatchCsv() {
       if (!globalReportHeaders.length || !globalReportRows.length) {
         alert("No batch data available to download.");
