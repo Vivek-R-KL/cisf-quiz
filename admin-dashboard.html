@@ -6,16 +6,18 @@
     <title>Admin Portal - CISF ASTI</title>
     <style>
         :root { 
-            --bg-main: #0a0a0a;
-            --card-bg: #141414;
-            --card-border: #262626;
-            --text-primary: #f5f5f5;
-            --text-muted: #a3a3a3;
-            --accent-yellow: #f59e0b;
-            --accent-yellow-hover: #d97706;
+            --bg-main: #f4f6f9;
+            --card-bg: #ffffff;
+            --card-border: #d1d5db;
+            --text-primary: #1f2937;
+            --text-muted: #6b7280;
+            --accent-yellow: #d97706;
+            --accent-yellow-hover: #b45309;
             --accent-red: #ef4444;
             --accent-red-hover: #dc2626;
             --accent-red-dark: #991b1b;
+            --accent-green: #10b981;
+            --accent-green-hover: #059669;
         }
 
         body { 
@@ -29,8 +31,8 @@
 
         /* HEADER BAR */
         .header-bar { 
-            background: #000000; 
-            border: 1px solid var(--accent-yellow); 
+            background: #ffffff; 
+            border: 2px solid var(--accent-yellow); 
             color: var(--accent-yellow); 
             padding: 20px; 
             border-radius: 10px; 
@@ -38,7 +40,7 @@
             justify-content: space-between; 
             align-items: center; 
             margin-bottom: 20px; 
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
 
         .header-bar h2 {
@@ -75,9 +77,9 @@
 
         .tab-btn.active { 
             background: var(--accent-yellow); 
-            color: #000000; 
+            color: #ffffff; 
             border-color: var(--accent-yellow);
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 10px rgba(217, 119, 6, 0.3);
         }
 
         /* GRID LAYOUT */
@@ -91,7 +93,7 @@
             background: var(--card-bg); 
             padding: 20px; 
             border-radius: 8px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
             border: 1px solid var(--card-border); 
         }
 
@@ -111,7 +113,7 @@
             width: 100%; 
             padding: 10px; 
             margin-top: 8px; 
-            background-color: #1a1a1a;
+            background-color: #f9fafb;
             color: var(--text-primary);
             border: 1px solid var(--card-border); 
             border-radius: 5px; 
@@ -122,6 +124,7 @@
         input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--accent-yellow);
+            background-color: #ffffff;
         }
 
         button {
@@ -131,7 +134,7 @@
 
         button.btn-primary { 
             background: var(--accent-yellow); 
-            color: #000000; 
+            color: #ffffff; 
             border: none; 
             font-weight: bold; 
             padding: 10px;
@@ -142,6 +145,11 @@
 
         button.btn-primary:hover {
             background: var(--accent-yellow-hover);
+        }
+
+        button.btn-primary:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
         }
 
         button.btn-danger {
@@ -160,13 +168,13 @@
         }
 
         .scroll-list { 
-            max-height: 180px; 
+            max-height: 220px; 
             overflow-y: auto; 
             margin-top: 10px; 
             border: 1px solid var(--card-border); 
             border-radius: 4px; 
             padding: 5px; 
-            background: #0d0d0d;
+            background: #f8fafc;
         }
 
         .item-row { 
@@ -174,11 +182,55 @@
             justify-content: space-between; 
             align-items: center;
             padding: 8px; 
-            background: #181818; 
+            background: #ffffff; 
             margin-bottom: 4px; 
             border-radius: 4px; 
             font-size: 13px; 
             border-left: 3px solid var(--accent-yellow);
+            border-top: 1px solid #e5e7eb;
+            border-right: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        /* STATUS BADGES & TOGGLE BUTTONS */
+        .status-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 5px;
+            text-transform: uppercase;
+        }
+        .status-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .status-inactive {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .btn-toggle {
+            width: auto;
+            margin: 0 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-toggle-active {
+            background: var(--accent-green);
+        }
+        .btn-toggle-active:hover {
+            background: var(--accent-green-hover);
+        }
+        .btn-toggle-inactive {
+            background: #6b7280;
+        }
+        .btn-toggle-inactive:hover {
+            background: #4b5563;
         }
 
         /* BOTTOM BAR */
@@ -187,10 +239,10 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: #000000;
+            background: #ffffff;
             border-top: 2px solid var(--accent-red);
             padding: 15px 30px;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.8);
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -235,7 +287,7 @@
 
     <!-- USER MANAGEMENT SECTION -->
     <div class="card" style="grid-column: span 2;">
-        <h3>👥 User Management (<span id="userSectionLabel" style="color: white;">BASIC</span>)</h3>
+        <h3>👥 User Management (<span id="userSectionLabel" style="color: var(--accent-yellow);">BASIC</span>)</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             
             <!-- ADD SINGLE USER -->
@@ -283,7 +335,7 @@
         <input type="text" id="qTitle" placeholder="Quiz Title">
         <input type="text" id="qUrl" placeholder="GitHub Pages URL">
         <input type="number" id="qTime" placeholder="Duration (Mins)">
-        <button class="btn-primary" onclick="addQuiz()">Publish Quiz</button>
+        <button class="btn-primary" id="btnPublishQuiz" onclick="addQuiz()">Upload Quiz</button>
         <div id="quizList" class="scroll-list"></div>
     </div>
 
@@ -320,6 +372,9 @@
     let SPREADSHEET_ID = localStorage.getItem('globalSpreadsheetId') || "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
     let activeSection = 'basic';
 
+    // Local cache to keep state fast in memory
+    let cachedQuizzes = [];
+
     window.onload = () => {
         document.getElementById('globalSpreadsheetId').value = SPREADSHEET_ID;
         loadAllData();
@@ -347,18 +402,65 @@
 
     async function loadAllData() {
         let users = await apiCall({ action: "loadData", key: "Users" });
-        let quizzes = await apiCall({ action: "loadData", key: "Quizzes" });
+        cachedQuizzes = (await apiCall({ action: "loadData", key: "Quizzes" })) || [];
         let materials = await apiCall({ action: "loadData", key: "Materials" });
         let forms = await apiCall({ action: "loadData", key: "Forms" });
 
         renderUserList((users || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection));
-        renderList('quizList', (quizzes || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'quizTitle');
-        renderList('materialList', (materials || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'title');
-        renderList('formList', (forms || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'formTitle');
+        renderQuizList();
+        renderList('materialList', (materials || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'title', 'materialId', deleteMaterial);
+        renderList('formList', (forms || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'formTitle', 'formId', deleteForm);
     }
 
-    function renderList(elemId, list, key) {
-        document.getElementById(elemId).innerHTML = list.map(i => `<div class="item-row"><span>${i[key]}</span></div>`).join('') || '<small style="color:var(--text-muted)">No records found.</small>';
+    /* INSTANTLY RENDER QUIZZES FROM LOCAL CACHE */
+    function renderQuizList() {
+        const quizContainer = document.getElementById('quizList');
+        let filteredQuizzes = cachedQuizzes.filter(x => (x.section || 'basic').toLowerCase() === activeSection);
+
+        if (!filteredQuizzes || filteredQuizzes.length === 0) {
+            quizContainer.innerHTML = '<small style="color:var(--text-muted)">No quizzes found.</small>';
+            return;
+        }
+
+        quizContainer.innerHTML = filteredQuizzes.map(q => {
+            const isVisible = q.isVisible !== false; 
+            return `
+                <div class="item-row" id="quiz-row-${q.quizId}" style="${!isVisible ? 'opacity: 0.65; background: #f3f4f6;' : ''}">
+                    <div>
+                        <strong>${q.quizTitle}</strong>
+                        <span class="status-badge ${isVisible ? 'status-active' : 'status-inactive'}">
+                            ${isVisible ? 'Live for Students' : 'Hidden'}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="btn-toggle ${isVisible ? 'btn-toggle-active' : 'btn-toggle-inactive'}" 
+                                onclick="toggleQuizVisibility('${q.quizId}')">
+                            ${isVisible ? '🙈 Hide' : '👁️ Share'}
+                        </button>
+                        <button class="btn-danger" style="width: auto; margin: 0; padding: 4px 8px; font-size: 11px;" 
+                                onclick="deleteQuiz('${q.quizId}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderList(elemId, list, titleKey, idKey, deleteFn) {
+        if (!list || list.length === 0) {
+            document.getElementById(elemId).innerHTML = '<small style="color:var(--text-muted)">No records found.</small>';
+            return;
+        }
+
+        document.getElementById(elemId).innerHTML = list.map(i => `
+            <div class="item-row">
+                <span>${i[titleKey]}</span>
+                <button class="btn-danger" style="width: auto; margin: 0; padding: 4px 10px; font-size: 11px;" onclick="${deleteFn.name}('${i[idKey]}')">
+                    🗑️ Delete
+                </button>
+            </div>
+        `).join('');
     }
 
     function renderUserList(users) {
@@ -379,6 +481,76 @@
                 </button>
             </div>
         `).join('');
+    }
+
+    /* FAST ADD QUIZ */
+    async function addQuiz() {
+        let title = document.getElementById('qTitle').value.trim();
+        let url = document.getElementById('qUrl').value.trim();
+        let time = document.getElementById('qTime').value.trim();
+
+        if(!title || !url) return alert("Please enter both quiz title and GitHub URL.");
+
+        const pubBtn = document.getElementById('btnPublishQuiz');
+        pubBtn.disabled = true;
+
+        let newQuiz = { 
+            quizId: 'q_' + Date.now(), 
+            quizTitle: title, 
+            quizUrl: url, 
+            durationMinutes: time, 
+            section: activeSection,
+            isVisible: true 
+        };
+
+        // 1. Instant local update
+        cachedQuizzes.push(newQuiz);
+        renderQuizList();
+
+        document.getElementById('qTitle').value = "";
+        document.getElementById('qUrl').value = "";
+        document.getElementById('qTime').value = "";
+        pubBtn.disabled = false;
+
+        // 2. Save in background
+        try {
+            await apiCall({ action: "saveData", key: "Quizzes", data: cachedQuizzes });
+        } catch(e) {
+            alert("Warning: Failed to sync quiz to server. Please check your connection.");
+        }
+    }
+
+    /* FAST INSTANT TOGGLE VISIBILITY */
+    async function toggleQuizVisibility(id) {
+        let quiz = cachedQuizzes.find(q => q.quizId === id);
+        if (quiz) {
+            // 1. Toggle state instantly in memory and re-render immediately
+            quiz.isVisible = quiz.isVisible === false ? true : false;
+            renderQuizList();
+
+            // 2. Sync changes in background
+            try {
+                await apiCall({ action: "saveData", key: "Quizzes", data: cachedQuizzes });
+            } catch(e) {
+                alert("Failed to save changes to cloud server.");
+            }
+        }
+    }
+
+    /* FAST INSTANT DELETE QUIZ */
+    async function deleteQuiz(id) {
+        if(!confirm("Are you sure you want to delete this quiz link?")) return;
+
+        // 1. Remove instantly from memory & re-render immediately
+        cachedQuizzes = cachedQuizzes.filter(q => q.quizId !== id);
+        renderQuizList();
+
+        // 2. Sync deletion in background
+        try {
+            await apiCall({ action: "saveData", key: "Quizzes", data: cachedQuizzes });
+        } catch(e) {
+            alert("Failed to update database on cloud server.");
+        }
     }
 
     /* USER MANAGEMENT ACTIONS */
@@ -417,7 +589,6 @@
         let existingUsers = await apiCall({ action: "loadData", key: "Users" });
         if (!Array.isArray(existingUsers)) return;
 
-        // Filter out the requested user matching username and section
         let updatedUsers = existingUsers.filter(u => 
             !(String(u.username).trim().toLowerCase() === String(username).trim().toLowerCase() && 
               (u.section || 'basic').toLowerCase() === activeSection)
@@ -474,7 +645,7 @@
         }
     }
 
-    /* CONTENT MANAGEMENT ACTIONS */
+    /* OTHER ACTIONS */
     async function broadcastInstruction() {
         let msg = document.getElementById('instructionText').value.trim();
         if(!msg) return alert("Write an instruction.");
@@ -483,27 +654,57 @@
         document.getElementById('instructionText').value = "";
     }
 
-    async function addQuiz() {
-        let quizzes = await apiCall({ action: "loadData", key: "Quizzes" });
-        if(!Array.isArray(quizzes)) quizzes = [];
-        quizzes.push({ quizId: 'q_' + Date.now(), quizTitle: document.getElementById('qTitle').value, quizUrl: document.getElementById('qUrl').value, durationMinutes: document.getElementById('qTime').value, section: activeSection });
-        await apiCall({ action: "saveData", key: "Quizzes", data: quizzes });
+    async function addMaterial() {
+        let title = document.getElementById('mTitle').value.trim();
+        let url = document.getElementById('mUrl').value.trim();
+
+        if(!title || !url) return alert("Please enter material name and Google Drive link.");
+
+        let materials = await apiCall({ action: "loadData", key: "Materials" });
+        if(!Array.isArray(materials)) materials = [];
+
+        materials.push({ materialId: 'm_' + Date.now(), title: title, driveUrl: url, section: activeSection });
+        await apiCall({ action: "saveData", key: "Materials", data: materials });
+
+        document.getElementById('mTitle').value = "";
+        document.getElementById('mUrl').value = "";
         loadAllData();
     }
 
-    async function addMaterial() {
+    async function deleteMaterial(id) {
+        if(!confirm("Are you sure you want to delete this Google Drive link?")) return;
         let materials = await apiCall({ action: "loadData", key: "Materials" });
-        if(!Array.isArray(materials)) materials = [];
-        materials.push({ materialId: 'm_' + Date.now(), title: document.getElementById('mTitle').value, driveUrl: document.getElementById('mUrl').value, section: activeSection });
-        await apiCall({ action: "saveData", key: "Materials", data: materials });
+        if(!Array.isArray(materials)) return;
+
+        let updated = materials.filter(m => m.materialId !== id);
+        await apiCall({ action: "saveData", key: "Materials", data: updated });
         loadAllData();
     }
 
     async function addForm() {
+        let title = document.getElementById('fTitle').value.trim();
+        let url = document.getElementById('fUrl').value.trim();
+
+        if(!title || !url) return alert("Please enter form title and Google Form link.");
+
         let forms = await apiCall({ action: "loadData", key: "Forms" });
         if(!Array.isArray(forms)) forms = [];
-        forms.push({ formId: 'f_' + Date.now(), formTitle: document.getElementById('fTitle').value, formUrl: document.getElementById('fUrl').value, section: activeSection });
+
+        forms.push({ formId: 'f_' + Date.now(), formTitle: title, formUrl: url, section: activeSection });
         await apiCall({ action: "saveData", key: "Forms", data: forms });
+
+        document.getElementById('fTitle').value = "";
+        document.getElementById('fUrl').value = "";
+        loadAllData();
+    }
+
+    async function deleteForm(id) {
+        if(!confirm("Are you sure you want to delete this Google Form link?")) return;
+        let forms = await apiCall({ action: "loadData", key: "Forms" });
+        if(!Array.isArray(forms)) return;
+
+        let updated = forms.filter(f => f.formId !== id);
+        await apiCall({ action: "saveData", key: "Forms", data: updated });
         loadAllData();
     }
 
