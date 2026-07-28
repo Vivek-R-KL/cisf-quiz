@@ -95,11 +95,18 @@ document.getElementById('instructionBox').innerHTML = currentInst
     : `📢 <strong>Notice:</strong> No active announcements.`;
 
         // 2. Render Quizzes
-        renderItems('quizContainer', (data.quizzes || []).filter(q => (q.section || 'basic').toLowerCase() === userSection), q => `
-            <div class="action-item">
-                <div><strong>${q.quizTitle}</strong><br><small>${q.durationMinutes || 30} Mins</small></div>
-                <button class="btn" onclick="launchQuiz('${q.quizUrl}', '${q.quizTitle}')">Start Test</button>
-            </div>`);
+       // 2. Render Quizzes (Filters by Section AND excludes Hidden Quizzes)
+renderItems('quizContainer', (data.quizzes || []).filter(q => {
+    const isSectionMatch = (q.section || 'basic').toLowerCase() === userSection;
+    // Checks both boolean and string values coming from Google Sheets/JSON
+    const isVisible = q.isVisible !== false && q.isVisible !== "false"; 
+    
+    return isSectionMatch && isVisible;
+}), q => `
+    <div class="action-item">
+        <div><strong>${q.quizTitle}</strong><br><small>${q.durationMinutes || 30} Mins</small></div>
+        <button class="btn" onclick="launchQuiz('${q.quizUrl}', '${q.quizTitle}')">Start Test</button>
+    </div>`);
 
         // 3. Render Drive Materials
         renderItems('materialContainer', (data.materials || []).filter(m => (m.section || 'basic').toLowerCase() === userSection), m => `
