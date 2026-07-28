@@ -227,6 +227,7 @@
       padding: 12px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
+      flex-wrap: wrap;
     }
 
     .batch-select-container label {
@@ -415,16 +416,31 @@
       
       <div class="batch-select-container">
         <div>
-          <label for="batchSelector">Select Batch Data: </label>
+          <label for="batchSelector">Select Course Section: </label>
           <select id="batchSelector" onchange="fetchBatchData()">
             <option value="1">Basic Avsec</option>
             <option value="2">Screener Certification</option>
           </select>
         </div>
 
-        <button class="btn-download" onclick="downloadBatchCsv()">
-          📥 Download Entire Batch Report (CSV)
-        </button>
+        <!-- NEW SUB-SECTION / BATCH FILTER DROPDOWN -->
+        <div>
+          <label for="subBatchFilter">Filter By Batch: </label>
+          <select id="subBatchFilter" onchange="applyBatchFilter()">
+            <option value="ALL">All Batches</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <!-- BUTTON FOR FILTERED SPECIAL BATCH CSV -->
+          <button class="btn-download" style="background: linear-gradient(135deg, #d35400 0%, #a04000 100%);" onclick="downloadSpecialBatchCsv()">
+            📥 Download Special Batch CSV Report
+          </button>
+          
+          <button class="btn-download" onclick="downloadBatchCsv()">
+            📥 Download Entire Section Report (CSV)
+          </button>
+        </div>
       </div>
 
       <div id="batchLoader" style="text-align: center; color: var(--primary-red); font-weight: bold; margin: 20px 0;">
@@ -478,8 +494,10 @@
 
     let globalReportHeaders = [];
     let globalReportRows = [];
+    let filteredReportRows = []; // Filtered data subset
     let barChartInstances = [];
     let selectedStudentIndex = 0;
+    let batchColumnIndex = -1;
 
     // Helper function to format any date string into strict DD-MM-YYYY format
     function formatDateToDDMMYYYY(val) {
@@ -571,7 +589,12 @@
           container.style.display = 'block';
           globalReportHeaders = result.headers;
           globalReportRows = result.rows;
-          renderBatchTable(result.headers, result.rows);
+          
+          // Locate the "Batch" column index dynamically
+          batchColumnIndex = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'batch');
+          
+          populateSubBatchDropdown();
+          applyBatchFilter();
         } else {
           loader.innerText = 'Failed to load report data: ' + (result.message || 'Unknown error');
         }
@@ -579,6 +602,45 @@
         console.error('Error fetching batch progress data:', error);
         loader.innerText = `Unable to fetch Batch ${selectedBatch} report from database.`;
       }
+    }
+
+    // Dynamic extraction of unique batch names for dropdown selection
+    function populateSubBatchDropdown() {
+      const filterSelect = document.getElementById('subBatchFilter');
+      filterSelect.innerHTML = '<option value="ALL">All Batches</option>';
+
+      if (batchColumnIndex === -1) return;
+
+      const uniqueBatches = new Set();
+      globalReportRows.forEach(row => {
+        const val = row[batchColumnIndex];
+        if (val && val.toString().trim() !== '') {
+          uniqueBatches.add(val.toString().trim());
+        }
+      });
+
+      Array.from(uniqueBatches).sort().forEach(batchName => {
+        const opt = document.createElement('option');
+        opt.value = batchName;
+        opt.textContent = batchName;
+        filterSelect.appendChild(opt);
+      });
+    }
+
+    // Filters table based on Batch Dropdown selection
+    function applyBatchFilter() {
+      const selectedSubBatch = document.getElementById('subBatchFilter').value;
+
+      if (selectedSubBatch === 'ALL' || batchColumnIndex === -1) {
+        filteredReportRows = globalReportRows;
+      } else {
+        filteredReportRows = globalReportRows.filter(row => {
+          const val = row[batchColumnIndex];
+          return val && val.toString().trim() === selectedSubBatch;
+        });
+      }
+
+      renderBatchTable(globalReportHeaders, filteredReportRows);
     }
 
     function parseScoreToPercentage(rawVal) {
@@ -619,7 +681,7 @@
 
     function showCandidateBarChart(rowIndex) {
       selectedStudentIndex = rowIndex;
-      const row = globalReportRows[rowIndex];
+      const row = filteredReportRows[rowIndex];
       if (!row) return;
 
       // Dynamically locate Candidate Name from Headers
@@ -632,7 +694,7 @@
         candidateName = row[1] || row[0] || candidateName;
       }
       
-      const startColIndex = 13;
+      const startColIndex = 14;
       const detailsGrid = document.getElementById('studentDetailsGrid');
       
       let basicDetailsHtml = '';
@@ -981,7 +1043,7 @@
           pdf.text(`Page ${p} of ${totalPages}`, pdfWidth / 2, pdfHeight - 8, { align: 'center' });
         }
 
-        const row = globalReportRows[selectedStudentIndex];
+        const row = filteredReportRows[selectedStudentIndex];
         let candidateName = "Student";
         const nameIndex = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'name');
         if (nameIndex !== -1 && row && row[nameIndex]) {
@@ -1000,16 +1062,33 @@
       }
     }
 
+    // Function to download the Filtered Special Batch CSV Report
+    function downloadSpecialBatchCsv() {
+      const selectedBatchName = document.getElementById('subBatchFilter').value;
+      if (selectedBatchName === 'ALL') {
+        alert("Please select a specific batch from the 'Filter By Batch' dropdown first.");
+        return;
+      }
+      exportRowsToCsv(filteredReportRows, `Special_Batch_${selectedBatchName}_Report.csv`);
+    }
+
+    // Function to download the Entire CSV Report
     function downloadBatchCsv() {
-      if (!globalReportHeaders.length || !globalReportRows.length) {
-        alert("No batch data available to download.");
+      const selectedSection = document.getElementById('batchSelector').value;
+      exportRowsToCsv(globalReportRows, `Full_Section_${selectedSection}_Report.csv`);
+    }
+
+    // Utility for exporting array of rows into CSV download
+    function exportRowsToCsv(rowsToExport, fileName) {
+      if (!globalReportHeaders.length || !rowsToExport.length) {
+        alert("No data available to download.");
         return;
       }
 
       let csvContent = "data:text/csv;charset=utf-8,";
       csvContent += globalReportHeaders.map(e => `"${e}"`).join(",") + "\n";
 
-      globalReportRows.forEach(row => {
+      rowsToExport.forEach(row => {
         csvContent += row.map((e, colIdx) => {
           let cellVal = e !== undefined ? e : '';
           if (isDateHeader(globalReportHeaders[colIdx])) {
@@ -1021,9 +1100,8 @@
 
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
-      const selectedBatch = document.getElementById('batchSelector').value;
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Batch_${selectedBatch}_Report.csv`);
+      link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
