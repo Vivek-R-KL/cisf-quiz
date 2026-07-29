@@ -195,9 +195,7 @@
       cursor: pointer;
     }
 
-    .btn-download:hover {
-      filter: brightness(1.1);
-    }
+    .btn-download:hover { filter: brightness(1.1); }
 
     .btn-exit {
       background: #34495e;
@@ -332,6 +330,37 @@
       position: relative;
     }
 
+    /* FULL PAGE BATCH PROGRESS REPORT MODAL STYLES */
+    .modal-overlay#batchProgressModal {
+      padding: 0;
+      align-items: flex-start;
+    }
+
+    .modal-overlay#batchProgressModal .modal-content {
+      max-width: 100vw !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-overlay#batchProgressModal #batchReportContainer {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-overlay#batchProgressModal .table-section {
+      max-height: none !important;
+      flex: 1;
+      overflow: auto;
+    }
+
     .btn-bar-chart {
       background: #b31b1b;
       color: white;
@@ -354,6 +383,35 @@
       margin-bottom: 15px;
       text-align: left;
       font-size: 13px;
+    }
+
+    /* Quiz Analysis Styles */
+    .quiz-analysis-container {
+      background: #fcf8e3;
+      border: 1px solid #faebcc;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+    .criteria-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .criteria-btn {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      color: var(--primary-red);
+      padding: 6px 10px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .criteria-btn:hover {
+      background: var(--primary-red);
+      color: #fff;
     }
   </style>
 </head>
@@ -409,9 +467,9 @@
     </button>
   </div>
 
-  <!-- BATCH PROGRESS REPORT MODAL -->
+  <!-- BATCH PROGRESS REPORT MODAL (FULL PAGE) -->
   <div class="modal-overlay" id="batchProgressModal">
-    <div class="modal-content" style="max-width: 95%; width: 1350px;">
+    <div class="modal-content">
       <h2 id="batchModalTitle" style="color: var(--primary-red); text-align: center; margin-top: 0; margin-bottom: 15px;">BATCH PROGRESS REPORT</h2>
       
       <div class="batch-select-container">
@@ -423,7 +481,6 @@
           </select>
         </div>
 
-        <!-- NEW SUB-SECTION / BATCH FILTER DROPDOWN -->
         <div>
           <label for="subBatchFilter">Filter By Batch: </label>
           <select id="subBatchFilter" onchange="applyBatchFilter()">
@@ -432,7 +489,6 @@
         </div>
 
         <div style="display: flex; gap: 8px;">
-          <!-- BUTTON FOR FILTERED SPECIAL BATCH CSV -->
           <button class="btn-download" style="background: linear-gradient(135deg, #d35400 0%, #a04000 100%);" onclick="downloadSpecialBatchCsv()">
             📥 Download Special Batch CSV Report
           </button>
@@ -441,6 +497,17 @@
             📥 Download Entire Section Report (CSV)
           </button>
         </div>
+      </div>
+
+      <!-- QUIZ ANALYSIS & CRITERIA SECTION -->
+      <div class="quiz-analysis-container">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label for="quizSelector" style="font-weight: bold; color: var(--primary-red);">Select Quiz Paper: </label>
+          <select id="quizSelector" onchange="calculateQuizCriteria()" style="padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-color);">
+            <option value="">-- Select Quiz Paper --</option>
+          </select>
+        </div>
+        <div class="criteria-buttons" id="criteriaButtonsWrapper"></div>
       </div>
 
       <div id="batchLoader" style="text-align: center; color: var(--primary-red); font-weight: bold; margin: 20px 0;">
@@ -456,7 +523,7 @@
         </div>
       </div>
 
-      <button class="btn btn-exit" style="margin-top: 20px;" onclick="closeBatchProgressModal()">Close Report</button>
+      <button class="btn btn-exit" style="margin-top: 15px; margin-bottom: 0;" onclick="closeBatchProgressModal()">Close Report</button>
     </div>
   </div>
 
@@ -475,12 +542,34 @@
       <!-- Action Buttons -->
       <div class="no-print" style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
         <button class="btn-download" onclick="downloadIndividualStudentPdf()">
-          📄 Download PDF Report
+          📢 Download PDF Report
         </button>
         <button class="btn btn-exit" style="margin: 0; padding: 8px 18px; font-size: 13px;" onclick="closeBarChartModal()">
           Close
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- CRITERIA STUDENT LIST MODAL -->
+  <div class="modal-overlay" id="criteriaStudentModal" style="z-index: 1200;">
+    <div class="modal-content" style="max-width: 700px;">
+      <h3 id="criteriaModalTitle" style="color: var(--primary-red); margin-top:0;">Student Range Details</h3>
+      <div class="table-section" style="max-height: 400px; margin-bottom: 15px;">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Designation</th>
+              <th>Name</th>
+              <th>Coy</th>
+              <th>Marks Score</th>
+            </tr>
+          </thead>
+          <tbody id="criteriaStudentTableBody"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-exit" style="margin:0;" onclick="closeCriteriaModal()">Close</button>
     </div>
   </div>
 
@@ -494,17 +583,17 @@
 
     let globalReportHeaders = [];
     let globalReportRows = [];
-    let filteredReportRows = []; // Filtered data subset
+    let filteredReportRows = [];
     let barChartInstances = [];
     let selectedStudentIndex = 0;
     let batchColumnIndex = -1;
 
-    // Helper function to format any date string into strict DD-MM-YYYY format
+    const startColIndex = 14; // Index where test papers start
+    let criteriaFilteredStudentsMap = {};
+
     function formatDateToDDMMYYYY(val) {
       if (val === undefined || val === null || val === '') return '';
-      
       let strVal = val.toString().trim();
-
       if (/^\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}$/.test(strVal)) {
         const parts = strVal.split(/[\/.-]/);
         const day = parts[0].padStart(2, '0');
@@ -513,32 +602,20 @@
         if (year.length === 2) year = '20' + year;
         return `${day}-${month}-${year}`;
       }
-
       const parsedDate = new Date(val);
       if (!isNaN(parsedDate.getTime()) && typeof val !== 'number') {
         const day = String(parsedDate.getDate()).padStart(2, '0');
         const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
         const year = parsedDate.getFullYear();
-        
-        if (year > 1900 && year < 2100) {
-          return `${day}-${month}-${year}`;
-        }
+        if (year > 1900 && year < 2100) return `${day}-${month}-${year}`;
       }
-
       return strVal;
     }
 
-    // Helper function to detect date-related column headers
     function isDateHeader(headerName) {
       if (!headerName) return false;
       const h = headerName.toLowerCase().replace(/[^a-z]/g, '');
-      
-      return h.includes('date') || 
-             h.includes('dob') || 
-             h.includes('doa') || 
-             h === 'do' || 
-             h.includes('joining') || 
-             h.includes('admission');
+      return h.includes('date') || h.includes('dob') || h.includes('doa') || h === 'do' || h.includes('joining') || h.includes('admission');
     }
 
     function handleLogin() {
@@ -550,7 +627,6 @@
         authError.style.display = 'none';
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('mainDashboard').style.display = 'block';
-        
         document.getElementById('username').value = '';
         document.getElementById('password').value = '';
       } else {
@@ -586,14 +662,14 @@
           }
 
           loader.style.display = 'none';
-          container.style.display = 'block';
+          container.style.display = 'flex';
           globalReportHeaders = result.headers;
           globalReportRows = result.rows;
           
-          // Locate the "Batch" column index dynamically
           batchColumnIndex = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'batch');
           
           populateSubBatchDropdown();
+          populateQuizDropdown();
           applyBatchFilter();
         } else {
           loader.innerText = 'Failed to load report data: ' + (result.message || 'Unknown error');
@@ -604,19 +680,15 @@
       }
     }
 
-    // Dynamic extraction of unique batch names for dropdown selection
     function populateSubBatchDropdown() {
       const filterSelect = document.getElementById('subBatchFilter');
       filterSelect.innerHTML = '<option value="ALL">All Batches</option>';
-
       if (batchColumnIndex === -1) return;
 
       const uniqueBatches = new Set();
       globalReportRows.forEach(row => {
         const val = row[batchColumnIndex];
-        if (val && val.toString().trim() !== '') {
-          uniqueBatches.add(val.toString().trim());
-        }
+        if (val && val.toString().trim() !== '') uniqueBatches.add(val.toString().trim());
       });
 
       Array.from(uniqueBatches).sort().forEach(batchName => {
@@ -627,7 +699,21 @@
       });
     }
 
-    // Filters table based on Batch Dropdown selection
+    function populateQuizDropdown() {
+      const quizSelector = document.getElementById('quizSelector');
+      quizSelector.innerHTML = '<option value="">-- Select Quiz Paper --</option>';
+
+      for (let i = startColIndex; i < globalReportHeaders.length; i++) {
+        if (globalReportHeaders[i] && globalReportHeaders[i].trim() !== '') {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = globalReportHeaders[i];
+          quizSelector.appendChild(opt);
+        }
+      }
+      document.getElementById('criteriaButtonsWrapper').innerHTML = '';
+    }
+
     function applyBatchFilter() {
       const selectedSubBatch = document.getElementById('subBatchFilter').value;
 
@@ -641,41 +727,138 @@
       }
 
       renderBatchTable(globalReportHeaders, filteredReportRows);
+      calculateQuizCriteria();
     }
 
+    /* Helper Function to Parse Multiple Attempt Scores (Newlines or Comma-Separated) */
     function parseScoreToPercentage(rawVal) {
       if (rawVal === undefined || rawVal === null || rawVal === '') return 0;
-      let str = rawVal.toString().trim();
       
-      if (str.includes('/')) {
-        const parts = str.split('/');
-        if (parts.length === 2) {
-          const obtained = parseFloat(parts[0].trim());
-          const total = parseFloat(parts[1].trim());
-          if (!isNaN(obtained) && !isNaN(total) && total > 0) {
-            return (obtained / total) * 100;
+      // Split multiple attempt entries by newlines OR commas
+      const attempts = rawVal.toString().trim().split(/[\r\n]+|,/);
+      let maxPercentage = 0;
+
+      attempts.forEach(item => {
+        const trimmed = item.trim();
+        if (!trimmed) return;
+        
+        let pct = 0;
+
+        if (trimmed.includes('/')) {
+          const parts = trimmed.split('/');
+          if (parts.length === 2) {
+            const obtained = parseFloat(parts[0].trim());
+            const total = parseFloat(parts[1].trim());
+            if (!isNaN(obtained) && !isNaN(total) && total > 0) {
+              pct = (obtained / total) * 100;
+            }
           }
+        } else if (trimmed.includes('%')) {
+          const num = parseFloat(trimmed.replace('%', ''));
+          if (!isNaN(num)) pct = num;
+        } else {
+          const num = parseFloat(trimmed);
+          if (!isNaN(num)) pct = num;
         }
+
+        if (pct > maxPercentage) maxPercentage = pct;
+      });
+
+      return maxPercentage;
+    }
+
+    function calculateQuizCriteria() {
+      const quizColIndex = document.getElementById('quizSelector').value;
+      const buttonsWrapper = document.getElementById('criteriaButtonsWrapper');
+      buttonsWrapper.innerHTML = '';
+      criteriaFilteredStudentsMap = {};
+
+      if (!quizColIndex) return;
+
+      const ranges = [
+        { label: 'Below 10%', min: 0, max: 10, key: 'b10' },
+        { label: '10% to 20%', min: 10, max: 20, key: '10_20' },
+        { label: '20% to 30%', min: 20, max: 30, key: '20_30' },
+        { label: '30% to 40%', min: 30, max: 40, key: '30_40' },
+        { label: '40% to 50%', min: 40, max: 50, key: '40_50' },
+        { label: '50% to 60%', min: 50, max: 60, key: '50_60' },
+        { label: '60% to 70%', min: 60, max: 70, key: '60_70' },
+        { label: '70% to 80%', min: 70, max: 80, key: '70_80' },
+        { label: '80% to 90%', min: 80, max: 90, key: '80_90' },
+        { label: '90% to 100%', min: 90, max: 100.001, key: '90_100' }
+      ];
+
+      ranges.forEach(r => criteriaFilteredStudentsMap[r.key] = []);
+
+      const usernameIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'username');
+      const desigIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'designation');
+      const nameIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'name');
+      const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'coy');
+
+      filteredReportRows.forEach(row => {
+        const rawScore = row[quizColIndex];
+        if (rawScore !== undefined && rawScore !== null && rawScore.toString().trim() !== '') {
+          const maxPct = parseScoreToPercentage(rawScore);
+
+          ranges.forEach(r => {
+            if (maxPct >= r.min && maxPct < r.max) {
+              criteriaFilteredStudentsMap[r.key].push({
+                username: usernameIdx !== -1 ? row[usernameIdx] : (row[0] || 'N/A'),
+                designation: desigIdx !== -1 ? row[desigIdx] : 'N/A',
+                name: nameIdx !== -1 ? row[nameIdx] : 'N/A',
+                coy: coyIdx !== -1 ? row[coyIdx] : 'N/A',
+                score: rawScore
+              });
+            }
+          });
+        }
+      });
+
+      ranges.forEach(r => {
+        const count = criteriaFilteredStudentsMap[r.key].length;
+        const btn = document.createElement('button');
+        btn.className = 'criteria-btn';
+        btn.innerHTML = `${r.label}: <strong>${count}</strong> Students`;
+        btn.onclick = () => showCriteriaStudentsModal(r.label, criteriaFilteredStudentsMap[r.key]);
+        buttonsWrapper.appendChild(btn);
+      });
+    }
+
+    function showCriteriaStudentsModal(label, studentList) {
+      document.getElementById('criteriaModalTitle').innerText = `Students in ${label} Range (${studentList.length})`;
+      const tbody = document.getElementById('criteriaStudentTableBody');
+      tbody.innerHTML = '';
+
+      if (studentList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5">No students found in this range.</td></tr>';
+      } else {
+        studentList.forEach(s => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${s.username}</td>
+            <td>${s.designation}</td>
+            <td>${s.name}</td>
+            <td>${s.coy}</td>
+            <td>${s.score}</td>
+          `;
+          tbody.appendChild(tr);
+        });
       }
-      if (str.includes('%')) {
-        const num = parseFloat(str.replace('%', ''));
-        return isNaN(num) ? 0 : num;
-      }
-      const num = parseFloat(str);
-      return isNaN(num) ? 0 : num;
+
+      document.getElementById('criteriaStudentModal').style.display = 'flex';
+    }
+
+    function closeCriteriaModal() {
+      document.getElementById('criteriaStudentModal').style.display = 'none';
     }
 
     function formatMultiLineDates(rawVal) {
       if (rawVal === undefined || rawVal === null || rawVal === '') return 'N/A';
-
       const lines = rawVal.toString().split(/\r?\n/);
-      
       const formattedLines = lines.map(line => {
         const trimmed = line.trim();
-        if (!trimmed) return '';
-        return formatDateToDDMMYYYY(trimmed);
+        return trimmed ? formatDateToDDMMYYYY(trimmed) : '';
       }).filter(line => line !== '');
-
       return formattedLines.join('<br>');
     }
 
@@ -684,7 +867,6 @@
       const row = filteredReportRows[rowIndex];
       if (!row) return;
 
-      // Dynamically locate Candidate Name from Headers
       let candidateName = `Candidate #${rowIndex + 1}`;
       const nameIndex = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'name');
 
@@ -694,52 +876,34 @@
         candidateName = row[1] || row[0] || candidateName;
       }
       
-      const startColIndex = 14;
       const detailsGrid = document.getElementById('studentDetailsGrid');
-      
       let basicDetailsHtml = '';
-      
-      let summaryData = {
-        from: 'N/A',
-        to: 'N/A',
-        venue: 'N/A',
-        marks: 'N/A',
-        result: 'N/A'
-      };
+      let summaryData = { from: 'N/A', to: 'N/A', venue: 'N/A', marks: 'N/A', result: 'N/A' };
 
       for (let i = 0; i < Math.min(startColIndex, globalReportHeaders.length); i++) {
         const headerName = globalReportHeaders[i];
         const rawVal = row[i];
         let val = rawVal !== undefined && rawVal !== null ? rawVal : '';
-
         const hLower = headerName ? headerName.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
 
-        if (hLower.includes('from')) {
-          summaryData.from = formatMultiLineDates(val);
-        } else if (hLower.includes('to') && !hLower.includes('total')) {
-          summaryData.to = formatMultiLineDates(val);
-        } else if (hLower.includes('venue') || hLower.includes('place') || hLower.includes('center')) {
-          summaryData.venue = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
-        } else if (hLower.includes('mark') || hLower.includes('score')) {
-          summaryData.marks = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
-        } else if (hLower.includes('result') || hLower.includes('status')) {
-          summaryData.result = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
-        } else {
+        if (hLower.includes('from')) summaryData.from = formatMultiLineDates(val);
+        else if (hLower.includes('to') && !hLower.includes('total')) summaryData.to = formatMultiLineDates(val);
+        else if (hLower.includes('venue') || hLower.includes('place') || hLower.includes('center')) summaryData.venue = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
+        else if (hLower.includes('mark') || hLower.includes('score')) summaryData.marks = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
+        else if (hLower.includes('result') || hLower.includes('status')) summaryData.result = val.toString().replace(/\r?\n/g, '<br>').trim() || 'N/A';
+        else {
           let formattedVal = isDateHeader(headerName) ? formatMultiLineDates(val) : (val || 'N/A');
           basicDetailsHtml += `<div><strong>${headerName}:</strong> ${formattedVal}</div>`;
         }
       }
 
       const selectedBatch = document.getElementById('batchSelector').value;
-      const sectionTitle = selectedBatch === "2" 
-        ? "PREVIOUS SCREENER CERTIFICATION COURSE DATA" 
-        : "PREVIOUS BASIC AVSEC COURSE DATA";
+      const sectionTitle = selectedBatch === "2" ? "PREVIOUS SCREENER CERTIFICATION COURSE DATA" : "PREVIOUS BASIC AVSEC COURSE DATA";
 
       let finalHtml = `
         <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 8px; text-align: left; font-size: 12px;">
           ${basicDetailsHtml}
         </div>
-
         <div style="grid-column: 1 / -1; width: 100%; margin-top: 4px;">
           <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; background: #fff; border: 1px solid var(--border-color);">
             <thead>
@@ -777,13 +941,13 @@
         const rawVal = row[i];
 
         if (headerName && headerName.trim() !== '' && rawVal !== undefined && rawVal !== null && rawVal.toString().trim() !== '') {
+          // parseScoreToPercentage extracts max score out of multi-attempt entries
           const calculatedPercentage = parseScoreToPercentage(rawVal);
           testNames.push(headerName);
           testPercentages.push(Math.round(calculatedPercentage * 100) / 100);
         }
       }
 
-      // Dynamic Title Set to NAME PERFORMANCE REPORT
       document.getElementById('barChartTitle').innerText = `${candidateName} PERFORMANCE REPORT`;
       document.getElementById('barChartSubtitle').innerText = `X-Axis: Test Papers | Y-Axis: Percentage Marks (%)`;
       document.getElementById('barChartModal').style.display = 'flex';
@@ -795,14 +959,10 @@
       const container = document.getElementById('chartBoxesWrapper');
       container.innerHTML = '';
 
-      barChartInstances.forEach(instance => {
-        if (instance) instance.destroy();
-      });
+      barChartInstances.forEach(instance => { if (instance) instance.destroy(); });
       barChartInstances = [];
 
-      if (typeof ChartDataLabels !== 'undefined') {
-        Chart.register(ChartDataLabels);
-      }
+      if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
 
       const chunkSize = 20;
       const totalChunks = Math.ceil(labels.length / chunkSize);
@@ -841,51 +1001,23 @@
             responsive: true,
             maintainAspectRatio: false,
             animation: false,
-            layout: {
-              padding: {
-                top: 25,
-                bottom: 10
-              }
-            },
+            layout: { padding: { top: 25, bottom: 10 } },
             plugins: {
               datalabels: {
                 anchor: 'end',
                 align: 'top',
                 color: '#b31b1b',
-                font: {
-                  weight: 'bold',
-                  size: 10
-                },
-                formatter: function(value) {
-                  return value + '%';
-                }
+                font: { weight: 'bold', size: 10 },
+                formatter: function(value) { return value + '%'; }
               },
-              legend: {
-                display: false
-              }
+              legend: { display: false }
             },
             scales: {
               x: { 
-                title: { 
-                  display: true, 
-                  text: totalChunks > 1 ? `Test Papers (Batch ${c + 1})` : 'Test Papers', 
-                  color: '#b31b1b', 
-                  font: { weight: 'bold', size: 11 } 
-                },
-                ticks: {
-                  autoSkip: false,
-                  maxRotation: 45,
-                  minRotation: 0,
-                  font: {
-                    size: 9
-                  }
-                }
+                title: { display: true, text: totalChunks > 1 ? `Test Papers (Batch ${c + 1})` : 'Test Papers', color: '#b31b1b', font: { weight: 'bold', size: 11 } },
+                ticks: { autoSkip: false, maxRotation: 45, minRotation: 0, font: { size: 9 } }
               },
-              y: { 
-                min: 0, 
-                max: 100, 
-                title: { display: true, text: 'Percentage (%)', color: '#b31b1b', font: { weight: 'bold' } } 
-              }
+              y: { min: 0, max: 100, title: { display: true, text: 'Percentage (%)', color: '#b31b1b', font: { weight: 'bold' } } }
             }
           }
         });
@@ -899,9 +1031,7 @@
       const tableBody = document.getElementById('batchTableBody');
       const selectedBatch = document.getElementById('batchSelector').value;
 
-      const sectionTitle = selectedBatch === "2" 
-        ? "PREVIOUS SCREENER CERTIFICATION COURSE DATA" 
-        : "PREVIOUS BASIC AVSEC COURSE DATA";
+      const sectionTitle = selectedBatch === "2" ? "PREVIOUS SCREENER CERTIFICATION COURSE DATA" : "PREVIOUS BASIC AVSEC COURSE DATA";
 
       let summaryStartIndex = -1;
       let summarySpanCount = 0;
@@ -915,17 +1045,12 @@
       });
 
       let headHtml = '<tr>';
-
       if (summaryStartIndex !== -1 && summarySpanCount > 0) {
-        if (summaryStartIndex > 0) {
-          headHtml += `<th colspan="${summaryStartIndex}">PERSONAL DETAILS</th>`;
-        }
+        if (summaryStartIndex > 0) headHtml += `<th colspan="${summaryStartIndex}">PERSONAL DETAILS</th>`;
         headHtml += `<th colspan="${summarySpanCount}" style="background-color: var(--primary-red); color: #ffffff; text-transform: uppercase;">${sectionTitle}</th>`;
         
         const remainingCols = (headers.length + 1) - (summaryStartIndex + summarySpanCount);
-        if (remainingCols > 0) {
-          headHtml += `<th colspan="${remainingCols}">PERFORMANCE MARKS & BAR CHART</th>`;
-        }
+        if (remainingCols > 0) headHtml += `<th colspan="${remainingCols}">PERFORMANCE MARKS & BAR CHART</th>`;
         headHtml += '</tr><tr>';
       }
 
@@ -936,7 +1061,6 @@
       tableBody.innerHTML = '';
       rows.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
-        
         headers.forEach((headerName, colIndex) => {
           const td = document.createElement('td');
           let cellValue = row[colIndex] !== undefined && row[colIndex] !== null ? row[colIndex] : '';
@@ -946,16 +1070,11 @@
           } else {
             td.innerHTML = cellValue.toString().replace(/\r?\n/g, '<br>').trim();
           }
-
           tr.appendChild(td);
         });
 
         const actionTd = document.createElement('td');
-        actionTd.innerHTML = `
-          <button class="btn-bar-chart" onclick="showCandidateBarChart(${rowIndex})">
-            📊 View
-          </button>
-        `;
+        actionTd.innerHTML = `<button class="btn-bar-chart" onclick="showCandidateBarChart(${rowIndex})">📊 View</button>`;
         tr.appendChild(actionTd);
         tableBody.appendChild(tr);
       });
@@ -993,16 +1112,9 @@
         let currentY = margin;
 
         async function getElementImage(element) {
-          const canvas = await html2canvas(element, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff'
-          });
+          const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
           const imgHeight = (canvas.height * usableWidth) / canvas.width;
-          return {
-            imgData: canvas.toDataURL('image/jpeg', 1.0),
-            height: imgHeight
-          };
+          return { imgData: canvas.toDataURL('image/jpeg', 1.0), height: imgHeight };
         }
 
         const headerWrapper = document.createElement('div');
@@ -1062,7 +1174,6 @@
       }
     }
 
-    // Function to download the Filtered Special Batch CSV Report
     function downloadSpecialBatchCsv() {
       const selectedBatchName = document.getElementById('subBatchFilter').value;
       if (selectedBatchName === 'ALL') {
@@ -1072,13 +1183,11 @@
       exportRowsToCsv(filteredReportRows, `Special_Batch_${selectedBatchName}_Report.csv`);
     }
 
-    // Function to download the Entire CSV Report
     function downloadBatchCsv() {
       const selectedSection = document.getElementById('batchSelector').value;
       exportRowsToCsv(globalReportRows, `Full_Section_${selectedSection}_Report.csv`);
     }
 
-    // Utility for exporting array of rows into CSV download
     function exportRowsToCsv(rowsToExport, fileName) {
       if (!globalReportHeaders.length || !rowsToExport.length) {
         alert("No data available to download.");
@@ -1091,9 +1200,7 @@
       rowsToExport.forEach(row => {
         csvContent += row.map((e, colIdx) => {
           let cellVal = e !== undefined ? e : '';
-          if (isDateHeader(globalReportHeaders[colIdx])) {
-            cellVal = formatDateToDDMMYYYY(cellVal);
-          }
+          if (isDateHeader(globalReportHeaders[colIdx])) cellVal = formatDateToDDMMYYYY(cellVal);
           return `"${cellVal}"`;
         }).join(",") + "\n";
       });
@@ -1109,9 +1216,7 @@
 
     function closeBarChartModal() {
       document.getElementById('barChartModal').style.display = 'none';
-      barChartInstances.forEach(instance => {
-        if (instance) instance.destroy();
-      });
+      barChartInstances.forEach(instance => { if (instance) instance.destroy(); });
       barChartInstances = [];
     }
 
