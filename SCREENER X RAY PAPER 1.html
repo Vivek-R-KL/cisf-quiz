@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>ASTI Delhi – SCREENER X RAY PAPER-1 (60 Questions | 35 Min)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>ASTI Delhi – SCREENER X RAY PAPER 1 (60 Questions | 35 Min)</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
@@ -212,14 +212,14 @@ body.lang-hindi-global .hindi-text { display: inline !important; }
 }
 .zoom-controls{position:fixed;top:70px;left:10px;z-index:9999;display:none;flex-direction:row;gap:8px}
 .zoom-controls button{padding:6px 12px;background:#0ea5e9;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer}
-footer { background-color: #0284c7; color: white; text-align: center; padding: 12px; font-size: 0.85em; font-weight: 500; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 80; }
+footer { background-color: #0284c7; color: white; text-align: center; padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); font-size: 0.85em; font-weight: 500; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 80; box-sizing: border-box; }
 
 .palette-toggle-btn { display: none; }
 .sidebar-close-btn { display: none; }
 .sidebar-backdrop { display: none; }
 @media (max-width:768px){
 .header{flex-wrap:wrap;height:auto;padding:8px 10px;position: relative;}
-.main-content{display:block!important;padding-top:10px; padding-bottom: 260px !important;}
+.main-content{display:block!important;padding-top:10px; padding-bottom: 260px;}
 .question-area{margin-right:0!important;padding:10px 10px 20px 10px!important;min-height:auto; width: 100%;}
 .sidebar{position:fixed!important;top:0!important;right:0!important;left:auto!important;width:85%!important;max-width:340px;height:100%!important;border-left:none!important;box-shadow:-3px 0 12px rgba(0,0,0,0.3)!important;padding: 16px; padding-top: 55px!important; margin-bottom: 0px !important; z-index:998!important; transform: translateX(100%); transition: transform 0.25s ease; overflow-y:auto!important;}
 .sidebar.open{transform: translateX(0);}
@@ -253,7 +253,7 @@ footer { background-color: #0284c7; color: white; text-align: center; padding: 1
   <div id="setup-topbar">
     <div>
       <div class="setup-org">ASTI Delhi</div>
-      <div class="setup-exam-name">SCREENER X RAY PAPER-1</div>
+      <div class="setup-exam-name">SCREENER X RAY PAPER 1</div>
     </div>
     <div class="setup-meta">
       <span>Questions: 60</span>
@@ -273,7 +273,7 @@ footer { background-color: #0284c7; color: white; text-align: center; padding: 1
       <div class="mock-row">
         <div class="mock-header-bar" style="justify-content: space-between;">
           <div>
-            <div style="font-weight: 700; font-size: 0.95em;">SCREENER X RAY PAPER-1</div>
+            <div style="font-weight: 700; font-size: 0.95em;">SCREENER X RAY PAPER 1</div>
             <div style="font-size: 0.75em; opacity: 0.75;">ASTI Delhi</div>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -358,7 +358,7 @@ footer { background-color: #0284c7; color: white; text-align: center; padding: 1
 
 <div class="header" style="display: none;" id="main-header">
 <div class="test-title">
-<h3 style="font-size: 1.5em;">SCREENER X RAY PAPER-1</h3>
+<h3 style="font-size: 1.5em;">SCREENER X RAY PAPER 1</h3>
 <div class="institute-logo">ASTI Delhi</div>
 </div>
 <div class="user-info">
@@ -452,6 +452,22 @@ let quizInProgress = false;
 let quizLocked = false;
 const MAX_TAB_SWITCHES = 2; // Exam auto-submits after this many screen switches/minimizes
 
+// Safe storage wrapper: some mobile browsers (notably iPhone Safari in Private
+// Browsing, or when the file is opened directly from Files/WhatsApp instead of
+// through the browser) throw a SecurityError on any localStorage access, which
+// otherwise stops the script and can make the exam page fail silently.
+const safeStorage = {
+    _mem: {},
+    get(key) {
+        try { return localStorage.getItem(key); }
+        catch (e) { return this._mem[key] || null; }
+    },
+    set(key, value) {
+        try { localStorage.setItem(key, value); }
+        catch (e) { this._mem[key] = value; }
+    }
+};
+
 const questionsContainer = document.getElementById('questions-container'); 
 const questionGrid = document.getElementById('question-grid');
 const optionButtonsContainer = document.getElementById('option-buttons'); 
@@ -529,19 +545,52 @@ window.addEventListener('pagehide', () => {
     if (quizInProgress && !isExamSubmitted) registerTabSwitch();
 });
 
+// Keeps the fixed bottom control bar from ever overlapping the question text.
+// The bar's real height varies a lot by phone width (buttons wrap differently
+// on a small screen vs a large one), so instead of guessing a fixed padding
+// we measure it live and push the question area down by exactly that much.
+function adjustMobileLayout() {
+    if (window.innerWidth > 768) {
+        const questionArea = document.querySelector('.question-area');
+        const mainContent = document.querySelector('.main-content');
+        if (questionArea) questionArea.style.paddingBottom = '';
+        if (mainContent) mainContent.style.paddingBottom = '';
+        return;
+    }
+    const controlPanel = document.getElementById('exam-control-panel');
+    const footerEl = document.querySelector('footer');
+    const questionArea = document.querySelector('.question-area');
+    const mainContent = document.querySelector('.main-content');
+    if (!controlPanel || !footerEl || !questionArea || !mainContent) return;
+
+    const footerHeight = footerEl.offsetHeight;
+    const panelHeight = controlPanel.offsetHeight;
+
+    // Pin the control panel directly above the footer, whatever height the
+    // footer actually renders at on this device.
+    controlPanel.style.bottom = footerHeight + 'px';
+
+    // Reserve exactly enough space below the last question option so the
+    // fixed control panel + footer never covers it, plus a small buffer.
+    const totalReserved = panelHeight + footerHeight + 24;
+    mainContent.style.paddingBottom = totalReserved + 'px';
+    questionArea.style.paddingBottom = '20px';
+}
+
 window.addEventListener('load', () => {
+    adjustMobileLayout();
     const urlParams = new URLSearchParams(window.location.search);
     const urlStudentName = urlParams.get('studentName');
     const urlUsername = urlParams.get('username');
     const urlDesignation = urlParams.get('designation');
     const urlSection = urlParams.get('section');
 
-    if (urlStudentName) localStorage.setItem('currentStudent', urlStudentName);
-    if (urlUsername) localStorage.setItem('currentUsername', urlUsername);
-    if (urlDesignation) localStorage.setItem('currentDesignation', urlDesignation);
-    if (urlSection) localStorage.setItem('studentSectionContext', urlSection);
+    if (urlStudentName) safeStorage.set('currentStudent', urlStudentName);
+    if (urlUsername) safeStorage.set('currentUsername', urlUsername);
+    if (urlDesignation) safeStorage.set('currentDesignation', urlDesignation);
+    if (urlSection) safeStorage.set('studentSectionContext', urlSection);
 
-    const activeUser = urlStudentName || localStorage.getItem('currentStudent');
+    const activeUser = urlStudentName || safeStorage.get('currentStudent');
     if (activeUser) {
         document.getElementById('user-name-input').value = activeUser;
     }
@@ -573,8 +622,14 @@ document.getElementById('start-btn').addEventListener('click', () => {
         displayQuestion(0); 
         startTimer(); 
         quizInProgress = true;
+        // Panel is hidden (display:none) until now, so its real height can
+        // only be measured once it's actually visible on screen.
+        setTimeout(adjustMobileLayout, 50);
     }
 });
+
+window.addEventListener('resize', adjustMobileLayout);
+window.addEventListener('orientationchange', () => setTimeout(adjustMobileLayout, 200));
 
 function generateQuestions() {
     questionsContainer.innerHTML = ''; 
@@ -933,11 +988,11 @@ function submitTest() {
             body: JSON.stringify({
                 action: "submitScore",
                 spreadsheetId: SPREADSHEET_ID,
-                studentName: userName || localStorage.getItem('currentStudent') || "Trainee User",
-                username: localStorage.getItem('currentUsername') || "trainee",
-                studentSection: localStorage.getItem('studentSectionContext') || "SCREENER",
-                designation: localStorage.getItem('currentDesignation') || "Trainee",
-                quizName: "SCREENER X RAY PAPER-1",
+                studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
+                username: safeStorage.get('currentUsername') || "trainee",
+                studentSection: safeStorage.get('studentSectionContext') || "SCREENER",
+                designation: safeStorage.get('currentDesignation') || "Trainee",
+                quizName: "SCREENER X RAY PAPER 1",
                 score: finalScoreString,
                 tabSwitchCount: tabSwitchCount,
                 timestamp: new Date().toLocaleString()
@@ -1000,8 +1055,8 @@ function downloadSummaryOnly(score, wrongCount, unattemptedCount) {
     let statusText = (finalPercentage >= 80) ? "PASS" : "FAIL";
     let statusColor = (finalPercentage >= 80) ? "#16a34a" : "#dc3545";
 
-    const candidateDesignation = localStorage.getItem('currentDesignation') || "N/A";
-    const candidateSection = localStorage.getItem('studentSectionContext') || "N/A";
+    const candidateDesignation = safeStorage.get('currentDesignation') || "N/A";
+    const candidateSection = safeStorage.get('studentSectionContext') || "N/A";
     const submissionTime = new Date().toLocaleString();
 
     // Create wrapper for rendering
@@ -1037,7 +1092,7 @@ function downloadSummaryOnly(score, wrongCount, unattemptedCount) {
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                 <tr>
                     <td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>
-                    <td style="padding: 6px 0;">SCREENER X RAY PAPER-1</td>
+                    <td style="padding: 6px 0;">SCREENER X RAY PAPER 1</td>
                 </tr>
                 <tr>
                     <td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>
