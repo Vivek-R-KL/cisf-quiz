@@ -1002,10 +1002,17 @@
 
     function calculatePerformanceAndSort() {
       const selectedQuizCol = document.getElementById('overallQuizFilter').value;
-      const usernameIdx = globalReportHeaders.findIndex(h => h && (h.toLowerCase().includes('user') || h.toLowerCase().includes('id')));
-      const desigIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('desig'));
-      const nameIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('name'));
-      const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('coy'));
+      // Find Username/ID column
+const usernameIdx = globalReportHeaders.findIndex(h => h && (h.toLowerCase().includes('user') || h.toLowerCase().includes('id')));
+
+// Find Designation column
+const desigIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('desig'));
+
+// Find Name column specifically (excluding 'username')
+const nameIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'name' || (h.toLowerCase().includes('name') && !h.toLowerCase().includes('user')));
+
+// Find Coy column
+const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('coy'));
 
       const quizStartColIndex = 14;
 
