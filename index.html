@@ -123,7 +123,7 @@
     <footer>created and developed by Vivek R ,ALL RIGHTS RESERVED 2026</footer>
 
     <script>
-       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEzXfIthir3MhyuMjoMqoXHlZqQfKpi4l_FqvvT-HlMFiu4ftH4JWr6H_J-LmUOIsi/exec"; 
+       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-t_tt029X67EBvGeWdOu9QOGm4L4gaykBHehiqAibcLw0jS7Y676tOgX7GDQUKtQ/exec"; 
        const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk"; 
 
 async function loginStudent() {
@@ -215,10 +215,22 @@ async function loginStudent() {
     loginBtn.innerText = "Access Dashboard";
 }
 
-// Warm up Google Apps Script Cache immediately upon opening index.html non-blockingly
+// Warm up Google Apps Script Cache upon opening index.html — but throttled.
+// Previously this fired on EVERY page load with no throttle. When many
+// students opened the login page in the same window (e.g. right before an
+// exam), dozens of "warmup" requests hit Apps Script at once and competed
+// with the real "verifyUser" login requests for execution slots — this was
+// a major reason logins felt slow. The server-side time trigger already
+// keeps the cache warm every 1-2 hours, so the client only needs to nudge it
+// occasionally as a fallback, not on every single visit.
 (function warmUpBackendCache() {
+    const WARM_THROTTLE_MS = 20 * 60 * 1000; // once every 20 minutes per browser
+    const lastWarm = parseInt(localStorage.getItem('lastWarmupPing') || '0', 10);
+    if (Date.now() - lastWarm < WARM_THROTTLE_MS) return;
+    localStorage.setItem('lastWarmupPing', Date.now().toString());
+
     const payload = JSON.stringify({ action: "warmup", spreadsheetId: SPREADSHEET_ID });
-    
+
     if (navigator.sendBeacon) {
         navigator.sendBeacon(APPS_SCRIPT_URL, payload);
     } else {
