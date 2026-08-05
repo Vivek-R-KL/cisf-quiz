@@ -300,7 +300,7 @@
                 <button class="btn-primary" onclick="addSingleUser()">Add User</button>
             </div>
 
-            <!-- CSV IMPORT, USER LIST & CLEAR USERS -->
+            <!-- CSV IMPORT & BULK ACTIONS -->
             <div style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <h4 style="margin: 0 0 10px 0; color: var(--text-muted);">Bulk CSV Upload</h4>
@@ -309,15 +309,21 @@
                     <button class="btn-primary" onclick="uploadCSVUsers()">Upload CSV Data</button>
                 </div>
                 
-                <div style="margin-top: 15px; border-top: 1px dashed var(--accent-red); padding-top: 10px;">
-                    <button class="btn-danger" onclick="clearAllUsers()">⚠️ Clear All Users</button>
+                <div style="margin-top: 15px; border-top: 1px dashed var(--accent-red); padding-top: 10px; display: flex; gap: 10px;">
+                    <button class="btn-danger" style="flex: 1;" onclick="deleteSelectedUsers()">🗑️ Delete Selected</button>
+                    <button class="btn-danger" style="flex: 1;" onclick="clearAllUsers()">⚠️ Clear All Users</button>
                 </div>
             </div>
         </div>
 
-        <!-- USER LIST DISPLAY WITH DELETE SINGLE USER ACTION -->
+        <!-- USER LIST DISPLAY WITH MULTI-SELECT CHECKBOXES -->
         <div style="margin-top: 20px; border-top: 1px solid var(--card-border); padding-top: 15px;">
-            <h4 style="margin: 0 0 10px 0; color: var(--text-muted);">Registered Users List</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0; color: var(--text-muted);">Registered Users List</h4>
+                <label style="font-size: 13px; cursor: pointer; color: var(--text-primary); font-weight: bold;">
+                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAllUsers(this)" style="width: auto; margin: 0 5px 0 0;"> Select All
+                </label>
+            </div>
             <div id="userList" class="scroll-list" style="max-height: 220px;"></div>
         </div>
     </div>
@@ -368,7 +374,7 @@
 </div>
 
 <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-t_tt029X67EBvGeWdOu9QOGm4L4gaykBHehiqAibcLw0jS7Y676tOgX7GDQUKtQ/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxiF1wDLm96ePrJ-evJKpNSmNigw2Pc7IjUfJkMU0tWGHwk6rtRa_GxbVrzQenAvDL/exec";
     let SPREADSHEET_ID = localStorage.getItem('globalSpreadsheetId') || "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
     let activeSection = 'basic';
 
@@ -463,8 +469,12 @@
         `).join('');
     }
 
+    /* RENDER USER LIST WITH CHECKBOXES */
     function renderUserList(users) {
         const userContainer = document.getElementById('userList');
+        const selectAllCb = document.getElementById('selectAllCheckbox');
+        if (selectAllCb) selectAllCb.checked = false;
+
         if (!users || users.length === 0) {
             userContainer.innerHTML = '<small style="color:var(--text-muted)">No users found in this section.</small>';
             return;
@@ -472,15 +482,24 @@
 
         userContainer.innerHTML = users.map(u => `
             <div class="item-row">
-                <div>
-                    <strong>${u.name || u.username}</strong> 
-                    <small style="color: var(--text-muted);">(${u.username}${u.designation ? ' - ' + u.designation : ''})</small>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" class="user-select-cb" value="${u.username}" style="width: auto; margin: 0; cursor: pointer;">
+                    <div>
+                        <strong>${u.name || u.username}</strong> 
+                        <small style="color: var(--text-muted);">(${u.username}${u.designation ? ' - ' + u.designation : ''})</small>
+                    </div>
                 </div>
                 <button class="btn-danger" style="width: auto; margin: 0; padding: 4px 10px; font-size: 11px;" onclick="deleteSingleUser('${u.username}')">
                     🗑️ Delete
                 </button>
             </div>
         `).join('');
+    }
+
+    /* TOGGLE SELECT ALL CHECKBOXES */
+    function toggleSelectAllUsers(masterCheckbox) {
+        const checkboxes = document.querySelectorAll('.user-select-cb');
+        checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
     }
 
     /* FAST ADD QUIZ */
@@ -594,8 +613,41 @@
               (u.section || 'basic').toLowerCase() === activeSection)
         );
 
+        // Clear local storage profile cache for deleted user
+        localStorage.removeItem('user_profile_' + String(username).trim().toLowerCase());
+
         await apiCall({ action: "saveData", key: "Users", data: updatedUsers });
         alert(`User "${username}" deleted successfully.`);
+        loadAllData();
+    }
+
+    /* DELETE MULTIPLE SELECTED USERS */
+    async function deleteSelectedUsers() {
+        const selectedCheckboxes = document.querySelectorAll('.user-select-cb:checked');
+        const selectedUsernames = Array.from(selectedCheckboxes).map(cb => cb.value.trim().toLowerCase());
+
+        if (selectedUsernames.length === 0) {
+            return alert("Please select at least one user to delete.");
+        }
+
+        if (!confirm(`Are you sure you want to delete ${selectedUsernames.length} selected user(s)?`)) return;
+
+        let existingUsers = await apiCall({ action: "loadData", key: "Users" });
+        if (!Array.isArray(existingUsers)) return;
+
+        let updatedUsers = existingUsers.filter(u => {
+            const isSelected = selectedUsernames.includes(String(u.username).trim().toLowerCase());
+            const isCurrentSection = (u.section || 'basic').toLowerCase() === activeSection;
+
+            if (isSelected && isCurrentSection) {
+                localStorage.removeItem('user_profile_' + String(u.username).trim().toLowerCase());
+            }
+
+            return !(isSelected && isCurrentSection);
+        });
+
+        await apiCall({ action: "saveData", key: "Users", data: updatedUsers });
+        alert(`${selectedUsernames.length} user(s) deleted successfully.`);
         loadAllData();
     }
 
