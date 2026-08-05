@@ -150,7 +150,7 @@ e.preventDefault();
 <button type="button" class="btn-control btn-prev" onclick="navigateQuestion(-1)">◀ Previous</button>
 <button type="button" class="btn-control btn-next" onclick="navigateQuestion(1)">Next ▶</button>
 </div>
-<button type="button" class="btn-control btn-submit-test" onclick="confirmSubmit()">Submit Exam</button>
+<button type="button" class="btn-control btn-submit-test" id="submitQuizBtn" onclick="confirmSubmit()">Submit Exam</button>
 </div>
 <div class="exam-note">Note : You must click on the <strong>Save &amp; Next</strong> button to save your answer. If not your answer will not be saved.</div>
 </div>
@@ -229,6 +229,68 @@ const optionButtonsContainer = document.getElementById('option-buttons');
 const timerDisplay = document.getElementById('timer-display'); 
 const resultDisplay = document.getElementById('result-display');
 const controlPanel = document.getElementById('exam-control-panel');
+// 1. Safe retry submission function
+async function submitQuizResult(payload, attempt = 0) {
+const MAX_ATTEMPTS = 10;
+try {
+const response = await fetch(APPS_SCRIPT_URL, {
+method: "POST",
+body: JSON.stringify(payload)
+});
+const result = await response.json();
+if (result.status === "success") {
+return result;
+} 
+// Server hit a lock timeout block
+if (result.status === "busy" && attempt < MAX_ATTEMPTS) {
+// Wait 3 seconds before trying again
+await new Promise(resolve => setTimeout(resolve, 3000));
+return submitQuizResult(payload, attempt + 1);
+}
+throw new Error(result.message || "Submission failed");
+} catch (error) {
+// Catches network glitches or 503/429 HTML error pages from Google
+if (attempt < MAX_ATTEMPTS) {
+const delay = Math.floor(Math.random() * 2000) + 3000; // Wait 3-5 seconds
+await new Promise(resolve => setTimeout(resolve, delay));
+return submitQuizResult(payload, attempt + 1);
+} else {
+throw error;
+}
+}
+}
+// 2. Attach it to your "Submit Exam" button click
+async function onFinishQuizClick() {
+const submitBtn = document.getElementById("submitQuizBtn");
+if (submitBtn) {
+submitBtn.disabled = true;
+submitBtn.innerText = "Submitting Score... Please wait";
+}
+// Retrieve student details (passed via URL query params or localStorage)
+const urlParams = new URLSearchParams(window.location.search);
+const payload = {
+action: "submitScore",
+spreadsheetId: SPREADSHEET_ID,
+username: urlParams.get('username') || safeStorage.get('currentUsername') || 'N/A',
+studentName: urlParams.get('studentName') || safeStorage.get('currentStudent') || userName || 'Trainee',
+designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || 'Trainee',
+section: urlParams.get('section') || safeStorage.get('studentSectionContext') || 'basic',
+quizName: "SPECIAL PAPER 24/03/25", 
+score: `${savedAnswers.filter((ans, idx) => ans && ans.toString() === questionData[idx][1].toString()).length}/${TOTAL_QUESTIONS}`,
+timestamp: new Date().toLocaleString()
+};
+try {
+await submitQuizResult(payload);
+alert("Your quiz has been successfully saved!");
+// window.location.href = "student-dashboard.html"; // Uncomment if redirection is needed
+} catch (err) {
+alert("Server is extremely busy right now. Please click 'Submit' one more time.");
+if (submitBtn) {
+submitBtn.disabled = false;
+submitBtn.innerText = "Retry Submission";
+}
+}
+}
 function handleVisibilityChange() {
 if (!quizInProgress || isExamSubmitted) return;
 if (document.hidden) {
@@ -630,7 +692,7 @@ if (confirm(confirmationMessage)) {
 submitTest();
 }
 }
-function submitTest() {
+async function submitTest() {
 if (isExamSubmitted) return;
 isExamSubmitted = true;
 quizInProgress = false;
@@ -704,32 +766,27 @@ ${optionsHtml}
 });
 displayResults(score, wrongCount, unattemptedCount, detailedResultsHtml);
 const finalScoreString = `${score} / ${TOTAL_QUESTIONS}`;
-if (APPS_SCRIPT_URL) {
-fetch(APPS_SCRIPT_URL, {
-method: "POST",
-mode: "cors",
-redirect: "follow",
-headers: { "Content-Type": "text/plain;charset=utf-8" },
-body: JSON.stringify({
+const urlParams = new URLSearchParams(window.location.search);
+const payload = {
 action: "submitScore",
 spreadsheetId: SPREADSHEET_ID,
 studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
-username: safeStorage.get('currentUsername') || "trainee",
-studentSection: safeStorage.get('studentSectionContext') || "SCREENER",
-designation: safeStorage.get('currentDesignation') || "Trainee",
+username: urlParams.get('username') || safeStorage.get('currentUsername') || "trainee",
+studentSection: urlParams.get('section') || safeStorage.get('studentSectionContext') || "SCREENER",
+designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || "Trainee",
 quizName: "SPECIAL PAPER 24/03/25",
 score: finalScoreString,
 tabSwitchCount: tabSwitchCount,
 timestamp: new Date().toLocaleString()
-})
-})
-.then(res => res.json())
-.then(data => {
-if(data.status === "success") {
+};
+if (APPS_SCRIPT_URL) {
+try {
+await submitQuizResult(payload);
 alert("Your score (" + finalScoreString + ") has been saved successfully!");
+} catch (err) {
+console.error("Score logging error:", err);
+alert("Server is extremely busy right now, but your results have been rendered locally.");
 }
-})
-.catch(err => console.error("Score logging error:", err));
 }
 }
 function displayResults(score, wrongCount, unattemptedCount, detailedHtml) {

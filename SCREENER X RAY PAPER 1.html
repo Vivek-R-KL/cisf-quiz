@@ -7,355 +7,114 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-  document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'F12' || (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'i' || e.key === 'j'))) {
-      e.preventDefault();
-    }
-  });
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
+document.addEventListener('keydown', function(e) {
+if (e.key === 'F12' || (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'i' || e.key === 'j'))) {
+e.preventDefault();
+}
+});
 </script>
-<style>
-* { box-sizing: border-box; }
-body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background: linear-gradient(160deg, #f0faff 0%, #f0fdf4 100%); color: #333; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; }
-.header { background: linear-gradient(90deg, #aedcf6 0%, #d9f0fc 55%, #eef9ff 100%); color: #123b66; padding: 10px 22px; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; width: 100%; box-shadow: 0 2px 6px rgba(20, 90, 140, 0.25); z-index: 100; height: 60px; border-bottom: 3px solid #7ec4ea; }
-.header .test-title h3 { margin: 0; font-size: 1.4em; font-weight: 700; color: #0c3b66; }
-.header .institute-logo { font-size: 0.95em; font-weight: 600; opacity: 0.85; margin-top: 3px; color: #14527f; }
-.main-content { display: flex; padding-top: 60px; flex: 1; }
-.question-area { flex: 1; padding: 20px 20px 150px 20px; min-height: calc(100vh - 60px); margin-right: 420px; }
-.sidebar { width: 400px; background-color: #dbeefc; padding: 16px; box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); position: fixed; right: 0; top: 60px; bottom: 0; overflow-y: auto; z-index: 50; border-left: 4px solid #7ec4ea; }
-.sidebar h3 { color: #0c3b66; font-size: 1.05em; margin-top: 0; }
-#timer-display { font-size: 1.15em; font-weight: 700; background-color: #fff3cd; color: #b02a2a; padding: 5px 12px; border-radius: 5px; border: 1px solid #f0c96b; }
-.user-info span { font-weight: 600; margin-right: 15px; color: #123b66; }
-.question-box { background-color: #ffffff; border: 1px solid #cfe6f7; border-left: 5px solid #38bdf8; padding: 15px 20px; margin-bottom: 25px; border-radius: 8px; min-height: 250px; display: none; }
-.question-box.active { display: block; }
-.question-text { font-size: 1.2em; font-weight: 600; margin-bottom: 15px; line-height: 1.5; color: #1a1a1a; }
-.option-text-container { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
-.option-label { display: block; margin: 5px 0; padding: 5px; font-size: 1em; }
-.hindi-text { display: none; }
-.english-text { display: inline; }
-body.lang-hindi-global .english-text { display: none !important; }
-body.lang-hindi-global .hindi-text { display: inline !important; }
-.lang-toggle-container { display: flex; justify-content: flex-end; margin-bottom: 15px; }
-.lang-toggle-btn { padding: 8px 30px 8px 16px; background-color: #ffffff; border: 1px solid #7ec4ea; border-radius: 6px; font-weight: 600; color: #14527f; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.08); position: relative; appearance: none; }
-.lang-toggle-btn::after { content: "\25BE"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #14527f; }
-.status-legend { padding: 10px; border: 1px solid #a9d3ef; border-radius: 8px; margin-bottom: 15px; background-color: #eef8ff; }
-.status-legend div { margin-bottom: 8px; font-size: 0.85em; display: flex; align-items: center; color: #123b66; }
-.legend-box { display: inline-block; width: 15px; height: 15px; margin-right: 8px; border-radius: 3px; border: 1px solid #666; }
-.legend-box.status-1 { background-color: #b9c9ea !important; color: #333; border-radius: 3px; border-color: #93a8d6; }
-.legend-box.status-2 { clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background-color: #16a34a !important; border-color: #16a34a; }
-.legend-box.status-3 { border-radius: 50%; background-color: #ffc107 !important; border-color: #ffc107; }
-.legend-box.status-4 { border-radius: 50%; background-color: #fd7e14 !important; border-color: #fd7e14; }
-#question-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 15px; }
-.q-button { height: 32px; width: 100%; line-height: 32px; padding: 0; border: 1px solid #93a8d6; border-radius: 5px; cursor: pointer; text-align: center; font-weight: 600; font-size: 0.85em; transition: background-color 0.2s; }
-.status-1, .status-0 { background-color: #b9c9ea; color: #1a2c56; border-radius: 5px; border-color: #93a8d6; }
-.status-2 { background-color: #16a34a; color: white; clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); border-radius: 0; border-color: #16a34a; }
-.status-3 { background-color: #ffc107; color: #333; border-radius: 50%; border-color: #ffc107; }
-.status-4 { background-color: #fd7e14; color: white; border-radius: 50%; border-color: #fd7e14; }
-.control-panel { display: flex; flex-direction: column; padding: 0; background-color: #ffffff; border-top: 2px solid #cfe6f7; position: fixed; bottom: 0; left: 0; width: calc(100% - 420px); z-index: 90; box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); }
-.control-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; }
-.option-action-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #ddd; margin-bottom: 0; justify-content: space-between; }
-.option-buttons-container { display: flex; gap: 12px; margin: 0 20px; }
-.btn-option { width: 38px; height: 38px; padding: 0; font-size: 1em; font-weight: 700; border: 2px solid #007bff; border-radius: 50%; cursor: pointer; background-color: #ffffff; color: #007bff; transition: background-color 0.2s; }
-.btn-option.selected { background-color: #007bff; color: white; }
-.btn-control { padding: 10px 15px; font-size: 0.95em; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; transition: filter 0.2s; margin: 0 5px; min-width: 100px; }
-.btn-mark { background-color: #eaa93e; color: #402a00; margin-left: 0; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
-.mark-checkbox { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 2px solid #402a00; border-radius: 3px; background-color: #fff9ee; flex-shrink: 0; }
-.mark-checkbox::after { content: ''; }
-.mark-checkbox.checked { background-color: #402a00; }
-.mark-checkbox.checked::after { content: '✔'; color: #ffffff; font-size: 11px; line-height: 1; font-weight: 900; }
-.btn-save-next { background-color: #1e8449; color: white; }
-.btn-erase { background-color: #8256c4; color: white; margin-right: 0; }
-.btn-prev, .btn-next { background-color: #ffffff; color: #0a6fb0; border: 2px solid #7ec4ea; border-radius: 20px; font-weight: 700; }
-.btn-prev:hover, .btn-next:hover { background-color: #eaf7ff; }
-.btn-submit-test { background-color: #0c3b66; color: white; padding: 10px 25px; font-size: 1em; font-weight: 700; border-radius: 6px; }
-.btn-control:hover { filter: brightness(1.08); }
-.navigation-row { display: flex; justify-content: space-between; background-color: #f3f6f9; padding: 10px 15px; }
-.exam-note { background-color: #f6e9c2; border-top: 1px solid #e6d097; color: #4a3a10; font-size: 0.85em; padding: 8px 15px; }
-.exam-note strong { color: #4a3a10; }
-
-/* Review Panel Layout */
-#result-display {
-    width: 95%;
-    max-width: 1100px;
-    margin: 30px auto 100px auto;
-    padding: 25px;
-    background-color: #ffffff;
-    border: 2px solid #38bdf8;
-    border-radius: 10px;
-    display: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-}
-.result-question {
-    padding: 15px 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    background-color: #f9fbfd;
-    width: 100%;
-}
-.result-option {
-    padding: 10px 14px;
-    margin-top: 8px;
-    border-radius: 5px;
-    font-size: 0.95em;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    border: 1px solid #e2e8f0;
-}
-.result-option.correct { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
-.result-option.wrong { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-
-.filter-container {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin: 25px 0;
-    flex-wrap: wrap;
-}
-.filter-btn {
-    padding: 10px 20px;
-    font-size: 0.95em;
-    font-weight: 600;
-    border: 2px solid transparent;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: white;
-    min-width: 110px;
-    text-align: center;
-}
-.filter-btn:hover { opacity: 0.9; }
-.filter-btn.active {
-    border-color: #000;
-    transform: scale(1.03);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-.btn-download-pdf {
-    background-color: #17a2b8;
-    color: white;
-    padding: 10px 20px;
-    font-size: 1em;
-    font-weight: 600;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.btn-download-pdf:hover { background-color: #138496; }
-
-#initial-setup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f0faff; z-index: 200; display: flex; justify-content: center; align-items: stretch; }
-#setup-box { background-color: white; border-radius: 0; text-align: left; box-shadow: none; font-family: 'Poppins', sans-serif; width: 100%; max-width: 100%; height: 100%; max-height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-@media (min-width: 1300px) {
-  #setup-box { max-width: 1200px; }
-}
-.mock-exam-wrap { border: 1px solid #d7ecec; border-radius: 8px; padding: 14px; background: #f8fdff; margin-bottom: 14px; }
-.mock-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
-.mock-header-bar { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid #cfe8f5; border-radius: 6px; padding: 8px 14px; flex: 1; min-width: 260px; }
-.mock-logo-box { border: 1px solid #999; border-radius: 4px; padding: 4px 8px; font-size: 0.65em; font-weight: 700; text-align: center; color: #555; line-height: 1.2; }
-.mock-timer { background: #ffc107; color: #333; font-weight: 700; padding: 4px 10px; border-radius: 5px; font-size: 0.85em; }
-.mock-candidate { font-size: 0.78em; color: #333; }
-.mock-qno-bar { flex: 1; min-width: 260px; background: #fff; border: 1px solid #cfe8f5; border-radius: 6px; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 0.85em; }
-.mock-btn-mini { border: 1px solid #999; background: #eee; border-radius: 4px; padding: 2px 6px; font-size: 0.72em; margin-left: 4px; font-weight: 700; }
-.mock-lang-mini { font-size: 0.72em; margin-left: 8px; }
-.callout { background: #ffe4c4; border: 2px solid #7a2e0e; border-radius: 6px; padding: 8px 10px; font-size: 0.76em; color: #3a2410; line-height: 1.4; flex: 1; min-width: 200px; }
-.callout strong { color: #7a2e0e; }
-.mock-split { display: flex; gap: 14px; flex-wrap: wrap; }
-.mock-question-col { flex: 1.4; min-width: 260px; }
-.mock-grid-col { flex: 1; min-width: 220px; }
-.mock-question-box { background: #fff; border: 1px solid #cfe8f5; border-left: 4px solid #38bdf8; border-radius: 6px; padding: 10px 14px; font-size: 0.85em; margin-bottom: 8px; }
-.mock-option { padding: 2px 0; font-size: 0.85em; }
-.mock-answer-pad { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: #fff; border: 1px solid #cfe8f5; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; font-size: 0.8em; }
-.mock-check { display: flex; align-items: center; gap: 4px; font-weight: 600; }
-.mock-opt-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid #007bff; border-radius: 4px; color: #007bff; font-weight: 700; font-size: 0.75em; }
-.mock-opt-btn.selected { background: #007bff; color: #fff; }
-.mock-btn-green, .mock-btn-red, .mock-btn-grey, .mock-btn-blue { color: #fff; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.75em; font-weight: 700; }
-.mock-btn-green { background: #16a34a; }
-.mock-btn-red { background: #dc3545; }
-.mock-btn-grey { background: #6c757d; }
-.mock-btn-blue { background: #007bff; }
-.mock-nav-row { display: flex; justify-content: space-between; margin-top: 6px; }
-.mock-grid-summary { font-size: 0.7em; margin-bottom: 6px; line-height: 1.6; }
-.dot { display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: middle; }
-.dot-green { background: #16a34a; } .dot-grey { background: #f0f0f0; border: 1px solid #ccc; } .dot-orange { background: #fd7e14; border-radius: 50%; } .dot-yellow { background: #ffc107; border-radius: 50%; }
-.mock-qgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
-.qg { display: flex; align-items: center; justify-content: center; height: 20px; font-size: 0.65em; font-weight: 700; border-radius: 3px; color: #fff; }
-.qg.green { background: #16a34a; } .qg.grey { background: #f0f0f0; color: #333; border: 1px solid #ccc; } .qg.orange { background: #fd7e14; border-radius: 50%; } .qg.yellow { background: #ffc107; color: #333; border-radius: 50%; }
-.post-submit-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
-.callout-mini { flex: 1; min-width: 200px; }
-.safety-note { background: #fff3e0; border: 1px solid #f0b37e; border-left: 4px solid #dc3545; border-radius: 6px; padding: 10px 14px; font-size: 0.85em; color: #333; }
-#setup-topbar { background: linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%); color: #fff; padding: 14px 22px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 20px; flex-shrink: 0; }
-#setup-topbar .setup-org { font-size: 0.95em; font-weight: 700; opacity: 0.95; }
-#setup-topbar .setup-exam-name { font-size: 1.15em; font-weight: 700; }
-#setup-topbar .setup-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.9em; font-weight: 600; }
-#setup-topbar .setup-meta span { background: rgba(255,255,255,0.18); padding: 4px 10px; border-radius: 5px; }
-#setup-name-row { display: flex; align-items: center; gap: 10px; padding: 14px 22px; border-bottom: 1px solid #eee; flex-shrink: 0; flex-wrap: wrap; }
-#setup-name-row label { font-weight: 600; color: #333; }
-#setup-box input#user-name-input { padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; flex: 1; min-width: 180px; font-family: 'Poppins', sans-serif; }
-#setup-instructions { padding: 16px 22px; overflow-y: auto; flex: 1; min-height: 0; }
-#setup-instructions h3 { color: #0284c7; margin: 14px 0 8px 0; font-size: 1em; }
-#setup-instructions h3:first-child { margin-top: 0; }
-#setup-instructions ul { margin: 0 0 4px 0; padding-left: 20px; }
-#setup-instructions li { margin-bottom: 6px; font-size: 0.92em; line-height: 1.5; color: #333; }
-#setup-declaration { display: flex; align-items: flex-start; gap: 10px; padding: 14px 22px; border-top: 1px solid #eee; background: #f8fafc; flex-shrink: 0; }
-#setup-declaration input[type="checkbox"] { margin-top: 3px; width: 17px; height: 17px; flex-shrink: 0; cursor: pointer; }
-#setup-declaration label { font-size: 0.92em; font-weight: 600; color: #333; cursor: pointer; }
-#setup-footer-row { padding: 14px 22px; flex-shrink: 0; text-align: center; }
-#start-btn { background-color: #16a34a; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1.05em; transition: background-color 0.2s, opacity 0.2s; }
-#start-btn:disabled { background-color: #9ca3af; cursor: not-allowed; opacity: 0.8; }
-@media (max-width: 600px) {
-  #setup-topbar { flex-direction: column; align-items: flex-start; }
-}
-.zoom-controls{position:fixed;top:70px;left:10px;z-index:9999;display:none;flex-direction:row;gap:8px}
-.zoom-controls button{padding:6px 12px;background:#0ea5e9;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer}
-footer { background-color: #0284c7; color: white; text-align: center; padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); font-size: 0.85em; font-weight: 500; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 80; box-sizing: border-box; }
-
-.palette-toggle-btn { display: none; }
-.sidebar-close-btn { display: none; }
-.sidebar-backdrop { display: none; }
-@media (max-width:768px){
-.header{flex-wrap:wrap;height:auto;padding:8px 10px;position: relative;}
-.main-content{display:block!important;padding-top:10px; padding-bottom: 260px;}
-.question-area{margin-right:0!important;padding:10px 10px 20px 10px!important;min-height:auto; width: 100%;}
-.sidebar{position:fixed!important;top:0!important;right:0!important;left:auto!important;width:85%!important;max-width:340px;height:100%!important;border-left:none!important;box-shadow:-3px 0 12px rgba(0,0,0,0.3)!important;padding: 16px; padding-top: 55px!important; margin-bottom: 0px !important; z-index:998!important; transform: translateX(100%); transition: transform 0.25s ease; overflow-y:auto!important;}
-.sidebar.open{transform: translateX(0);}
-.control-panel{width:100%!important;left:0!important;position: fixed; bottom: 40px;}
-.option-action-row,.control-row,.navigation-row{flex-wrap:wrap;gap:8px;justify-content:center}
-.option-buttons-container{flex-wrap:wrap;justify-content:center;margin:0}
-.btn-control{min-width:120px}
-.zoom-controls{position: static; margin: 10px; display: flex;}
-.question-text,.option-label{word-break:break-word}
-.q-button{height:26px;font-size:0.7em;}
-.exam-note{position:relative;}
-#question-grid {grid-template-columns: repeat(10, 1fr); gap: 4px;}
-#result-display { width: 98%; padding: 15px; margin-top: 15px; }
-.palette-toggle-btn { display: flex; position: fixed; right: 14px; bottom: 90px; z-index: 96; background: #0ea5e9; color: #fff; border: none; border-radius: 24px; padding: 10px 16px; align-items: center; gap: 6px; font-weight: 700; font-size: 0.85em; box-shadow: 0 3px 10px rgba(0,0,0,0.3); cursor: pointer; }
-.sidebar-close-btn { display: block; position: fixed; top: 10px; right: 10px; background: #dc3545; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-weight: 700; font-size: 0.8em; cursor: pointer; z-index: 999; }
-.sidebar { display: flex; flex-direction: column; overflow: hidden !important; }
-.sidebar-scroll-body { flex: 1; min-height: 0; overflow-y: auto; }
-.sidebar-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 997; }
-.sidebar-backdrop.open { display: block; }
-}
-</style>
+<style>*{box-sizing:border-box}body{font-family:'Poppins',sans-serif;margin:0;padding:0;background:linear-gradient(160deg,#f0faff 0%,#f0fdf4 100%);color:#333;overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}.header{background:linear-gradient(90deg,#aedcf6 0%,#d9f0fc 55%,#eef9ff 100%);color:#123b66;padding:10px 22px;display:flex;justify-content:space-between;align-items:center;position:fixed;top:0;left:0;width:100%;box-shadow:0 2px 6px rgba(20,90,140,0.25);z-index:100;height:60px;border-bottom:3px solid #7ec4ea}.header .test-title h3{margin:0;font-size:1.4em;font-weight:700;color:#0c3b66}.header .institute-logo{font-size:0.95em;font-weight:600;opacity:0.85;margin-top:3px;color:#14527f}.main-content{display:flex;padding-top:60px;flex:1}.question-area{flex:1;padding:20px 20px 150px 20px;min-height:calc(100vh - 60px);margin-right:420px}.sidebar{width:400px;background-color:#dbeefc;padding:16px;box-shadow:-2px 0 5px rgba(0,0,0,0.1);position:fixed;right:0;top:60px;bottom:0;overflow-y:auto;z-index:50;border-left:4px solid #7ec4ea}.sidebar h3{color:#0c3b66;font-size:1.05em;margin-top:0}#timer-display{font-size:1.15em;font-weight:700;background-color:#fff3cd;color:#b02a2a;padding:5px 12px;border-radius:5px;border:1px solid #f0c96b}.user-info span{font-weight:600;margin-right:15px;color:#123b66}.question-box{background-color:#ffffff;border:1px solid #cfe6f7;border-left:5px solid #38bdf8;padding:15px 20px;margin-bottom:25px;border-radius:8px;min-height:250px;display:none}.question-box.active{display:block}.question-text{font-size:1.2em;font-weight:600;margin-bottom:15px;line-height:1.5;color:#1a1a1a}.option-text-container{margin-top:20px;border-top:1px solid #ccc;padding-top:10px}.option-label{display:block;margin:5px 0;padding:5px;font-size:1em}.hindi-text{display:none}.english-text{display:inline}body.lang-hindi-global .english-text{display:none !important}body.lang-hindi-global .hindi-text{display:inline !important}.lang-toggle-container{display:flex;justify-content:flex-end;margin-bottom:15px}.lang-toggle-btn{padding:8px 30px 8px 16px;background-color:#ffffff;border:1px solid #7ec4ea;border-radius:6px;font-weight:600;color:#14527f;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.08);position:relative;appearance:none}.lang-toggle-btn::after{content:"\25BE";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#14527f}.status-legend{padding:10px;border:1px solid #a9d3ef;border-radius:8px;margin-bottom:15px;background-color:#eef8ff}.status-legend div{margin-bottom:8px;font-size:0.85em;display:flex;align-items:center;color:#123b66}.legend-box{display:inline-block;width:15px;height:15px;margin-right:8px;border-radius:3px;border:1px solid #666}.legend-box.status-1{background-color:#b9c9ea !important;color:#333;border-radius:3px;border-color:#93a8d6}.legend-box.status-2{clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background-color:#16a34a !important;border-color:#16a34a}.legend-box.status-3{border-radius:50%;background-color:#ffc107 !important;border-color:#ffc107}.legend-box.status-4{border-radius:50%;background-color:#fd7e14 !important;border-color:#fd7e14}#question-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:15px}.q-button{height:32px;width:100%;line-height:32px;padding:0;border:1px solid #93a8d6;border-radius:5px;cursor:pointer;text-align:center;font-weight:600;font-size:0.85em;transition:background-color 0.2s}.status-1,.status-0{background-color:#b9c9ea;color:#1a2c56;border-radius:5px;border-color:#93a8d6}.status-2{background-color:#16a34a;color:white;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);border-radius:0;border-color:#16a34a}.status-3{background-color:#ffc107;color:#333;border-radius:50%;border-color:#ffc107}.status-4{background-color:#fd7e14;color:white;border-radius:50%;border-color:#fd7e14}.control-panel{display:flex;flex-direction:column;padding:0;background-color:#ffffff;border-top:2px solid #cfe6f7;position:fixed;bottom:0;left:0;width:calc(100% - 420px);z-index:90;box-shadow:0 -2px 5px rgba(0,0,0,0.1)}.control-row{display:flex;align-items:center;justify-content:space-between;padding:10px 15px}.option-action-row{display:flex;align-items:center;padding:10px 15px;border-bottom:1px solid #ddd;margin-bottom:0;justify-content:space-between}.option-buttons-container{display:flex;gap:12px;margin:0 20px}.btn-option{width:38px;height:38px;padding:0;font-size:1em;font-weight:700;border:2px solid #007bff;border-radius:50%;cursor:pointer;background-color:#ffffff;color:#007bff;transition:background-color 0.2s}.btn-option.selected{background-color:#007bff;color:white}.btn-control{padding:10px 15px;font-size:0.95em;font-weight:600;border:none;border-radius:6px;cursor:pointer;transition:filter 0.2s;margin:0 5px;min-width:100px}.btn-mark{background-color:#eaa93e;color:#402a00;margin-left:0;border-radius:20px;display:inline-flex;align-items:center;gap:6px}.mark-checkbox{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:2px solid #402a00;border-radius:3px;background-color:#fff9ee;flex-shrink:0}.mark-checkbox::after{content:''}.mark-checkbox.checked{background-color:#402a00}.mark-checkbox.checked::after{content:'✔';color:#ffffff;font-size:11px;line-height:1;font-weight:900}.btn-save-next{background-color:#1e8449;color:white}.btn-erase{background-color:#8256c4;color:white;margin-right:0}.btn-prev,.btn-next{background-color:#ffffff;color:#0a6fb0;border:2px solid #7ec4ea;border-radius:20px;font-weight:700}.btn-prev:hover,.btn-next:hover{background-color:#eaf7ff}.btn-submit-test{background-color:#0c3b66;color:white;padding:10px 25px;font-size:1em;font-weight:700;border-radius:6px}.btn-control:hover{filter:brightness(1.08)}.navigation-row{display:flex;justify-content:space-between;background-color:#f3f6f9;padding:10px 15px}.exam-note{background-color:#f6e9c2;border-top:1px solid #e6d097;color:#4a3a10;font-size:0.85em;padding:8px 15px}.exam-note strong{color:#4a3a10}#result-display{width:95%;max-width:1100px;margin:30px auto 100px auto;padding:25px;background-color:#ffffff;border:2px solid #38bdf8;border-radius:10px;display:none;box-shadow:0 4px 15px rgba(0,0,0,0.08)}.result-question{padding:15px 20px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:15px;background-color:#f9fbfd;width:100%}.result-option{padding:10px 14px;margin-top:8px;border-radius:5px;font-size:0.95em;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border:1px solid #e2e8f0}.result-option.correct{background-color:#d4edda;color:#155724;border-color:#c3e6cb}.result-option.wrong{background-color:#f8d7da;color:#721c24;border-color:#f5c6cb}.filter-container{display:flex;justify-content:center;gap:12px;margin:25px 0;flex-wrap:wrap}.filter-btn{padding:10px 20px;font-size:0.95em;font-weight:600;border:2px solid transparent;border-radius:6px;cursor:pointer;transition:all 0.2s ease;color:white;min-width:110px;text-align:center}.filter-btn:hover{opacity:0.9}.filter-btn.active{border-color:#000;transform:scale(1.03);box-shadow:0 4px 8px rgba(0,0,0,0.2)}.btn-download-pdf{background-color:#17a2b8;color:white;padding:10px 20px;font-size:1em;font-weight:600;border:none;border-radius:5px;cursor:pointer;transition:background-color 0.2s;box-shadow:0 2px 5px rgba(0,0,0,0.1)}.btn-download-pdf:hover{background-color:#138496}#initial-setup{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#f0faff;z-index:200;display:flex;justify-content:center;align-items:stretch}#setup-box{background-color:white;border-radius:0;text-align:left;box-shadow:none;font-family:'Poppins',sans-serif;width:100%;max-width:100%;height:100%;max-height:100%;display:flex;flex-direction:column;overflow:hidden}@media (min-width:1300px){#setup-box{max-width:1200px}}.mock-exam-wrap{border:1px solid #d7ecec;border-radius:8px;padding:14px;background:#f8fdff;margin-bottom:14px}.mock-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}.mock-header-bar{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 14px;flex:1;min-width:260px}.mock-logo-box{border:1px solid #999;border-radius:4px;padding:4px 8px;font-size:0.65em;font-weight:700;text-align:center;color:#555;line-height:1.2}.mock-timer{background:#ffc107;color:#333;font-weight:700;padding:4px 10px;border-radius:5px;font-size:0.85em}.mock-candidate{font-size:0.78em;color:#333}.mock-qno-bar{flex:1;min-width:260px;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:0.85em}.mock-btn-mini{border:1px solid #999;background:#eee;border-radius:4px;padding:2px 6px;font-size:0.72em;margin-left:4px;font-weight:700}.mock-lang-mini{font-size:0.72em;margin-left:8px}.callout{background:#ffe4c4;border:2px solid #7a2e0e;border-radius:6px;padding:8px 10px;font-size:0.76em;color:#3a2410;line-height:1.4;flex:1;min-width:200px}.callout strong{color:#7a2e0e}.mock-split{display:flex;gap:14px;flex-wrap:wrap}.mock-question-col{flex:1.4;min-width:260px}.mock-grid-col{flex:1;min-width:220px}.mock-question-box{background:#fff;border:1px solid #cfe8f5;border-left:4px solid #38bdf8;border-radius:6px;padding:10px 14px;font-size:0.85em;margin-bottom:8px}.mock-option{padding:2px 0;font-size:0.85em}.mock-answer-pad{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:0.8em}.mock-check{display:flex;align-items:center;gap:4px;font-weight:600}.mock-opt-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid #007bff;border-radius:4px;color:#007bff;font-weight:700;font-size:0.75em}.mock-opt-btn.selected{background:#007bff;color:#fff}.mock-btn-green,.mock-btn-red,.mock-btn-grey,.mock-btn-blue{color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:0.75em;font-weight:700}.mock-btn-green{background:#16a34a}.mock-btn-red{background:#dc3545}.mock-btn-grey{background:#6c757d}.mock-btn-blue{background:#007bff}.mock-nav-row{display:flex;justify-content:space-between;margin-top:6px}.mock-grid-summary{font-size:0.7em;margin-bottom:6px;line-height:1.6}.dot{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle}.dot-green{background:#16a34a}.dot-grey{background:#f0f0f0;border:1px solid #ccc}.dot-orange{background:#fd7e14;border-radius:50%}.dot-yellow{background:#ffc107;border-radius:50%}.mock-qgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:8px}.qg{display:flex;align-items:center;justify-content:center;height:20px;font-size:0.65em;font-weight:700;border-radius:3px;color:#fff}.qg.green{background:#16a34a}.qg.grey{background:#f0f0f0;color:#333;border:1px solid #ccc}.qg.orange{background:#fd7e14;border-radius:50%}.qg.yellow{background:#ffc107;color:#333;border-radius:50%}.post-submit-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}.callout-mini{flex:1;min-width:200px}.safety-note{background:#fff3e0;border:1px solid #f0b37e;border-left:4px solid #dc3545;border-radius:6px;padding:10px 14px;font-size:0.85em;color:#333}#setup-topbar{background:linear-gradient(135deg,#0ea5e9 0%,#22c55e 100%);color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 20px;flex-shrink:0}#setup-topbar .setup-org{font-size:0.95em;font-weight:700;opacity:0.95}#setup-topbar .setup-exam-name{font-size:1.15em;font-weight:700}#setup-topbar .setup-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:0.9em;font-weight:600}#setup-topbar .setup-meta span{background:rgba(255,255,255,0.18);padding:4px 10px;border-radius:5px}#setup-name-row{display:flex;align-items:center;gap:10px;padding:14px 22px;border-bottom:1px solid #eee;flex-shrink:0;flex-wrap:wrap}#setup-name-row label{font-weight:600;color:#333}#setup-box input#user-name-input{padding:9px 12px;border:1px solid #ccc;border-radius:5px;font-size:1em;flex:1;min-width:180px;font-family:'Poppins',sans-serif}#setup-instructions{padding:16px 22px;overflow-y:auto;flex:1;min-height:0}#setup-instructions h3{color:#0284c7;margin:14px 0 8px 0;font-size:1em}#setup-instructions h3:first-child{margin-top:0}#setup-instructions ul{margin:0 0 4px 0;padding-left:20px}#setup-instructions li{margin-bottom:6px;font-size:0.92em;line-height:1.5;color:#333}#setup-declaration{display:flex;align-items:flex-start;gap:10px;padding:14px 22px;border-top:1px solid #eee;background:#f8fafc;flex-shrink:0}#setup-declaration input[type="checkbox"]{margin-top:3px;width:17px;height:17px;flex-shrink:0;cursor:pointer}#setup-declaration label{font-size:0.92em;font-weight:600;color:#333;cursor:pointer}#setup-footer-row{padding:14px 22px;flex-shrink:0;text-align:center}#start-btn{background-color:#16a34a;color:white;padding:10px 20px;border:none;border-radius:5px;font-weight:600;cursor:pointer;width:100%;font-size:1.05em;transition:background-color 0.2s,opacity 0.2s}#start-btn:disabled{background-color:#9ca3af;cursor:not-allowed;opacity:0.8}@media (max-width:600px){#setup-topbar{flex-direction:column;align-items:flex-start}}.zoom-controls{position:fixed;top:70px;left:10px;z-index:9999;display:none;flex-direction:row;gap:8px}.zoom-controls button{padding:6px 12px;background:#0ea5e9;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer}footer{background-color:#0284c7;color:white;text-align:center;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));font-size:0.85em;font-weight:500;position:fixed;bottom:0;left:0;width:100%;z-index:80;box-sizing:border-box}.palette-toggle-btn{display:none}.sidebar-close-btn{display:none}.sidebar-backdrop{display:none}@media (max-width:768px){.header{flex-wrap:wrap;height:auto;padding:8px 10px;position:relative}.main-content{display:block!important;padding-top:10px;padding-bottom:260px}.question-area{margin-right:0!important;padding:10px 10px 20px 10px!important;min-height:auto;width:100%}.sidebar{position:fixed!important;top:0!important;right:0!important;left:auto!important;width:85%!important;max-width:340px;height:100%!important;border-left:none!important;box-shadow:-3px 0 12px rgba(0,0,0,0.3)!important;padding:16px;padding-top:55px!important;margin-bottom:0px !important;z-index:998!important;transform:translateX(100%);transition:transform 0.25s ease;overflow-y:auto!important}.sidebar.open{transform:translateX(0)}.control-panel{width:100%!important;left:0!important;position:fixed;bottom:40px}.option-action-row,.control-row,.navigation-row{flex-wrap:wrap;gap:8px;justify-content:center}.option-buttons-container{flex-wrap:wrap;justify-content:center;margin:0}.btn-control{min-width:120px}.zoom-controls{position:static;margin:10px;display:flex}.question-text,.option-label{word-break:break-word}.q-button{height:26px;font-size:0.7em}.exam-note{position:relative}#question-grid{grid-template-columns:repeat(10,1fr);gap:4px}#result-display{width:98%;padding:15px;margin-top:15px}.palette-toggle-btn{display:flex;position:fixed;right:14px;bottom:90px;z-index:96;background:#0ea5e9;color:#fff;border:none;border-radius:24px;padding:10px 16px;align-items:center;gap:6px;font-weight:700;font-size:0.85em;box-shadow:0 3px 10px rgba(0,0,0,0.3);cursor:pointer}.sidebar-close-btn{display:block;position:fixed;top:10px;right:10px;background:#dc3545;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:700;font-size:0.8em;cursor:pointer;z-index:999}.sidebar{display:flex;flex-direction:column;overflow:hidden !important}.sidebar-scroll-body{flex:1;min-height:0;overflow-y:auto}.sidebar-backdrop{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:997}.sidebar-backdrop.open{display:block}}</style>
 </head>
 <body>
-
 <div class='zoom-controls'><button onclick='setQuestionZoom(0.1)'>A+</button><button onclick='setQuestionZoom(-0.1)'>A-</button></div>
 <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closePalette()"></div>
 <button type="button" class="palette-toggle-btn" id="palette-toggle-btn" onclick="togglePalette()">📋 Palette</button>
-
 <div id="initial-setup">
 <div id="setup-box">
-  <div id="setup-topbar">
-    <div>
-      <div class="setup-org">ASTI Delhi</div>
-      <div class="setup-exam-name">SCREENER X RAY PAPER 1</div>
-    </div>
-    <div class="setup-meta">
-      <span>Questions: 60</span>
-      <span>Duration: 35 Min</span>
-    </div>
-  </div>
-
-  <div id="setup-name-row">
-    <label for="user-name-input">Candidate Name:</label>
-    <input type="text" id="user-name-input" placeholder="Enter Your Full Name" required>
-  </div>
-
-  <div id="setup-instructions">
-    <p style="margin: 0 0 10px 0; font-weight: 600; color: #0284c7; font-size: 0.95em;">Here's how your exam screen works:</p>
-
-    <div class="mock-exam-wrap">
-      <div class="mock-row">
-        <div class="mock-header-bar" style="justify-content: space-between;">
-          <div>
-            <div style="font-weight: 700; font-size: 0.95em;">SCREENER X RAY PAPER 1</div>
-            <div style="font-size: 0.75em; opacity: 0.75;">ASTI Delhi</div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-weight: 600; font-size: 0.8em;">Candidate: Your Name</span>
-            <span class="mock-timer">35:00</span>
-          </div>
-        </div>
-        <div class="callout">⏱️ <strong>HEADER &amp; TIMER</strong><br>Your name, the exam title, and the remaining time are always visible at the top and count down automatically.</div>
-      </div>
-
-      <div class="mock-row">
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button class="mock-btn-mini" style="padding: 5px 10px;">A+</button>
-          <button class="mock-btn-mini" style="padding: 5px 10px;">A-</button>
-          <button class="mock-btn-mini" style="padding: 5px 10px;">Toggle Hindi / English</button>
-        </div>
-        <div class="callout">🔤 <strong>TEXT SIZE &amp; LANGUAGE</strong><br>The A+ / A- buttons (top-left of the screen) resize question text. "Toggle Hindi / English" switches the question language, any time.</div>
-      </div>
-
-      <div class="mock-split">
-        <div class="mock-question-col">
-          <div class="mock-question-box">
-            <p style="margin: 0 0 6px 0; font-weight: 700;">Question 1 of 60</p>
-            <p style="margin: 0 0 6px 0;">How much percentage of Rs.45 is Rs.6.75?</p>
-            <div class="mock-option">A. 12%</div>
-            <div class="mock-option">B. 18%</div>
-            <div class="mock-option">C. 20%</div>
-            <div class="mock-option">D. 15%</div>
-          </div>
-          <div class="callout" style="margin-bottom: 8px;">❓ <strong>QUESTION AREA</strong><br>One question is shown at a time, along with its options.</div>
-
-          <div class="mock-answer-pad">
-            <button class="mock-btn-mini" style="background: #ffc107; border-color: #ffc107; font-weight: 700;">Mark for Review</button>
-            <span class="mock-opt-btn">A</span><span class="mock-opt-btn">B</span><span class="mock-opt-btn">C</span><span class="mock-opt-btn selected">D</span>
-            <button class="mock-btn-green">Save &amp; Next</button>
-            <button class="mock-btn-red">Erase Answer</button>
-          </div>
-          <div class="mock-nav-row">
-            <span><button class="mock-btn-grey">Previous</button> <button class="mock-btn-blue">Next</button></span>
-            <button class="mock-btn-mini" style="background: #0284c7; color: #fff; border: none; padding: 5px 12px;">Submit Exam</button>
-          </div>
-
-          <div class="callout" style="margin-top: 10px;">✅ <strong>ANSWERING &amp; NAVIGATION</strong><br>Pick an option, then click <strong>Save &amp; Next</strong> to save it and move on. Use <strong>Mark for Review</strong> to flag a question and <strong>Erase Answer</strong> to clear your choice. <strong>Previous / Next</strong> move between questions, and <strong>Submit Exam</strong> ends your attempt whenever you're ready.</div>
-        </div>
-
-        <div class="mock-grid-col">
-          <p style="margin: 0 0 6px 0; font-weight: 700; font-size: 0.82em; color: #0284c7;">Question Palette</p>
-          <div class="mock-grid-summary">
-            <span class="dot" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;"></span>Question Answered<br>
-            <span class="dot dot-grey"></span>Not Answered<br>
-            <span class="dot dot-orange"></span>Review Answered<br>
-            <span class="dot dot-yellow"></span>Review Not Answered
-          </div>
-          <div class="mock-qgrid">
-            <span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">1</span><span class="qg grey">2</span><span class="qg orange">3</span><span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">4</span><span class="qg grey">5</span><span class="qg yellow">6</span>
-            <span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">7</span><span class="qg grey">8</span><span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">9</span><span class="qg grey">10</span><span class="qg orange">11</span><span class="qg grey">12</span>
-          </div>
-          <div class="callout">🧭 <strong>QUESTION PALETTE</strong><br>Click any number to jump straight to that question — this does <strong>not</strong> save your current answer, so use Save &amp; Next for that first.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="post-submit-row">
-      <div class="callout callout-mini">🔁 <strong>AUTO-SUBMIT</strong><br>When the timer hits 0:00, your quiz submits automatically — no action needed from you.</div>
-      <div class="callout callout-mini">🔍 <strong>REVIEW OPTION</strong><br>After submitting, see every question with the correct answer, filterable by Correct / Wrong / Unattempted.</div>
-      <div class="callout callout-mini">📄 <strong>SUMMARY PDF</strong><br>Download a PDF of your score, accuracy, and other details once the quiz ends.</div>
-    </div>
-
-    <div class="safety-note">🔒 <strong>Please Note:</strong> Minimizing this window or switching to another tab/application during the quiz is tracked. For the first 2 time(s) you do this, you will only get a WARNING and the exam continues. On attempt number 3 through attempt number 4, your exam will be LOCKED immediately and will require an Administrator password to resume. On attempt number 5, your exam will be submitted automatically. Please stay on this tab for the entire duration.</div>
-  </div>
-
-  <div id="setup-declaration">
-    <input type="checkbox" id="declaration-check">
-    <label for="declaration-check">I have read and understood all the instructions above.</label>
-  </div>
-
-  <div id="setup-footer-row">
-    <button id="start-btn" disabled>Start the Quiz</button>
-  </div>
+<div id="setup-topbar">
+<div>
+<div class="setup-org">ASTI Delhi</div>
+<div class="setup-exam-name">SCREENER X RAY PAPER 1</div>
+</div>
+<div class="setup-meta">
+<span>Questions: 60</span>
+<span>Duration: 35 Min</span>
 </div>
 </div>
-
+<div id="setup-name-row">
+<label for="user-name-input">Candidate Name:</label>
+<input type="text" id="user-name-input" placeholder="Enter Your Full Name" required>
+</div>
+<div id="setup-instructions">
+<p style="margin: 0 0 10px 0; font-weight: 600; color: #0284c7; font-size: 0.95em;">Here's how your exam screen works:</p>
+<div class="mock-exam-wrap">
+<div class="mock-row">
+<div class="mock-header-bar" style="justify-content: space-between;">
+<div>
+<div style="font-weight: 700; font-size: 0.95em;">SCREENER X RAY PAPER 1</div>
+<div style="font-size: 0.75em; opacity: 0.75;">ASTI Delhi</div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px;">
+<span style="font-weight: 600; font-size: 0.8em;">Candidate: Your Name</span>
+<span class="mock-timer">35:00</span>
+</div>
+</div>
+<div class="callout">⏱️ <strong>HEADER &amp; TIMER</strong><br>Your name, the exam title, and the remaining time are always visible at the top and count down automatically.</div>
+</div>
+<div class="mock-row">
+<div style="display: flex; gap: 8px; align-items: center;">
+<button class="mock-btn-mini" style="padding: 5px 10px;">A+</button>
+<button class="mock-btn-mini" style="padding: 5px 10px;">A-</button>
+<button class="mock-btn-mini" style="padding: 5px 10px;">Toggle Hindi / English</button>
+</div>
+<div class="callout">🔤 <strong>TEXT SIZE &amp; LANGUAGE</strong><br>The A+ / A- buttons (top-left of the screen) resize question text. "Toggle Hindi / English" switches the question language, any time.</div>
+</div>
+<div class="mock-split">
+<div class="mock-question-col">
+<div class="mock-question-box">
+<p style="margin: 0 0 6px 0; font-weight: 700;">Question 1 of 60</p>
+<p style="margin: 0 0 6px 0;">How much percentage of Rs.45 is Rs.6.75?</p>
+<div class="mock-option">A. 12%</div>
+<div class="mock-option">B. 18%</div>
+<div class="mock-option">C. 20%</div>
+<div class="mock-option">D. 15%</div>
+</div>
+<div class="callout" style="margin-bottom: 8px;">❓ <strong>QUESTION AREA</strong><br>One question is shown at a time, along with its options.</div>
+<div class="mock-answer-pad">
+<button class="mock-btn-mini" style="background: #ffc107; border-color: #ffc107; font-weight: 700;">Mark for Review</button>
+<span class="mock-opt-btn">A</span><span class="mock-opt-btn">B</span><span class="mock-opt-btn">C</span><span class="mock-opt-btn selected">D</span>
+<button class="mock-btn-green">Save &amp; Next</button>
+<button class="mock-btn-red">Erase Answer</button>
+</div>
+<div class="mock-nav-row">
+<span><button class="mock-btn-grey">Previous</button> <button class="mock-btn-blue">Next</button></span>
+<button class="mock-btn-mini" style="background: #0284c7; color: #fff; border: none; padding: 5px 12px;">Submit Exam</button>
+</div>
+<div class="callout" style="margin-top: 10px;">✅ <strong>ANSWERING &amp; NAVIGATION</strong><br>Pick an option, then click <strong>Save &amp; Next</strong> to save it and move on. Use <strong>Mark for Review</strong> to flag a question and <strong>Erase Answer</strong> to clear your choice. <strong>Previous / Next</strong> move between questions, and <strong>Submit Exam</strong> ends your attempt whenever you're ready.</div>
+</div>
+<div class="mock-grid-col">
+<p style="margin: 0 0 6px 0; font-weight: 700; font-size: 0.82em; color: #0284c7;">Question Palette</p>
+<div class="mock-grid-summary">
+<span class="dot" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;"></span>Question Answered<br>
+<span class="dot dot-grey"></span>Not Answered<br>
+<span class="dot dot-orange"></span>Review Answered<br>
+<span class="dot dot-yellow"></span>Review Not Answered
+</div>
+<div class="mock-qgrid">
+<span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">1</span><span class="qg grey">2</span><span class="qg orange">3</span><span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">4</span><span class="qg grey">5</span><span class="qg yellow">6</span>
+<span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">7</span><span class="qg grey">8</span><span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">9</span><span class="qg grey">10</span><span class="qg orange">11</span><span class="qg grey">12</span>
+</div>
+<div class="callout">🧭 <strong>QUESTION PALETTE</strong><br>Click any number to jump straight to that question — this does <strong>not</strong> save your current answer, so use Save &amp; Next for that first.</div>
+</div>
+</div>
+</div>
+<div class="post-submit-row">
+<div class="callout callout-mini">🔁 <strong>AUTO-SUBMIT</strong><br>When the timer hits 0:00, your quiz submits automatically — no action needed from you.</div>
+<div class="callout callout-mini">🔍 <strong>REVIEW OPTION</strong><br>After submitting, see every question with the correct answer, filterable by Correct / Wrong / Unattempted.</div>
+<div class="callout callout-mini">📄 <strong>SUMMARY PDF</strong><br>Download a PDF of your score, accuracy, and other details once the quiz ends.</div>
+</div>
+<div class="safety-note">🔒 <strong>Please Note:</strong> Minimizing this window or switching to another tab/application during the quiz is tracked. For the first 2 time(s) you do this, you will only get a WARNING and the exam continues. On attempt number 3 through attempt number 4, your exam will be LOCKED immediately and will require an Administrator password to resume. On attempt number 5, your exam will be submitted automatically. Please stay on this tab for the entire duration.</div>
+</div>
+<div id="setup-declaration">
+<input type="checkbox" id="declaration-check">
+<label for="declaration-check">I have read and understood all the instructions above.</label>
+</div>
+<div id="setup-footer-row">
+<button id="start-btn" disabled>Start the Quiz</button>
+</div>
+</div>
+</div>
 <div class="header" style="display: none;" id="main-header">
 <div class="test-title">
 <h3 style="font-size: 1.5em;">SCREENER X RAY PAPER 1</h3>
@@ -366,7 +125,6 @@ footer { background-color: #0284c7; color: white; text-align: center; padding: 1
 <span id="timer-display">35:00</span>
 </div>
 </div>
-
 <div class="main-content" style="display: none;" id="main-test-area">
 <div class="question-area">
 <div class="lang-toggle-container">
@@ -392,12 +150,11 @@ footer { background-color: #0284c7; color: white; text-align: center; padding: 1
 <button type="button" class="btn-control btn-prev" onclick="navigateQuestion(-1)">◀ Previous</button>
 <button type="button" class="btn-control btn-next" onclick="navigateQuestion(1)">Next ▶</button>
 </div>
-<button type="button" class="btn-control btn-submit-test" onclick="confirmSubmit()">Submit Exam</button>
+<button type="button" class="btn-control btn-submit-test" id="submitQuizBtn" onclick="confirmSubmit()">Submit Exam</button>
 </div>
 <div class="exam-note">Note : You must click on the <strong>Save &amp; Next</strong> button to save your answer. If not your answer will not be saved.</div>
 </div>
 </div>
-
 <div class="sidebar" id="question-sidebar">
 <button type="button" class="sidebar-close-btn" onclick="closePalette()">✕ Close</button>
 <div class="sidebar-scroll-body">
@@ -412,26 +169,22 @@ footer { background-color: #0284c7; color: white; text-align: center; padding: 1
 </div>
 </div>
 </div>
-
 <div id="result-display"></div>
-
 <div id="cheat-lock-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(20,20,20,0.96); z-index:99999; color:#fff; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box;">
-    <h2 id="cheat-lock-title" style="color:#ff6b6b; margin-bottom:10px;">⚠ Exam Locked</h2>
-    <p id="cheat-lock-message" style="max-width:500px; font-size:1.05em; line-height:1.5;"></p>
-    <div id="warning-box" style="margin-top:20px; display:none;">
-        <button type="button" id="warning-continue-btn" onclick="continueAfterWarning()" style="padding:12px 30px; background:#f59e0b; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Continue Exam</button>
-    </div>
-    <div id="unlock-form-box" style="margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:10px;">
-        <input type="password" id="admin-unlock-input" placeholder="Enter Administrator Password" style="padding:10px 14px; border-radius:6px; border:none; width:250px; max-width:80vw; font-size:1em;">
-        <button type="button" id="admin-unlock-btn" onclick="attemptUnlock()" style="padding:12px 30px; background:#0ea5e9; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Unlock Exam</button>
-        <p id="unlock-error-msg" style="color:#ff6b6b; font-size:0.9em; margin:0; display:none;">Incorrect password. Please contact your Administrator.</p>
-    </div>
+<h2 id="cheat-lock-title" style="color:#ff6b6b; margin-bottom:10px;">⚠ Exam Locked</h2>
+<p id="cheat-lock-message" style="max-width:500px; font-size:1.05em; line-height:1.5;"></p>
+<div id="warning-box" style="margin-top:20px; display:none;">
+<button type="button" id="warning-continue-btn" onclick="continueAfterWarning()" style="padding:12px 30px; background:#f59e0b; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Continue Exam</button>
 </div>
-
+<div id="unlock-form-box" style="margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+<input type="password" id="admin-unlock-input" placeholder="Enter Administrator Password" style="padding:10px 14px; border-radius:6px; border:none; width:250px; max-width:80vw; font-size:1em;">
+<button type="button" id="admin-unlock-btn" onclick="attemptUnlock()" style="padding:12px 30px; background:#0ea5e9; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Unlock Exam</button>
+<p id="unlock-error-msg" style="color:#ff6b6b; font-size:0.9em; margin:0; display:none;">Incorrect password. Please contact your Administrator.</p>
+</div>
+</div>
 <footer>
 ASTI Delhi Quiz Examination
 </footer>
-
 <script>
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyM0OSqbAQpuLJqVbQFPw6c-AgJtZdOWMR9wkrn5CY8uvfgt87O9kF-xt0fFu8AYO0w/exec";
 const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
@@ -439,7 +192,6 @@ const ADMIN_UNLOCK_PASSWORD = "igiasti123";
 const TOTAL_QUESTIONS = 60;
 const TOTAL_TIME_SECONDS = 35 * 60; 
 const questionData = [[1,3,"X-Ray cannot be___________ by means of lens or prism.","एक्स-रे को लेंस या प्रिज्म के माध्यम से ___________ नहीं किया जा सकता है।",["Deformed","विकृत"],["Degraded","निम्नीकृत"],["Deflected","विक्षेपित (Deflected)"],["Deflagrate","द्रुतदहन (Deflagrate)"]],[2,3,"_____________is not a test to check the efficiency of X-BIS.","_____________ एक्स-बीआईएस (X-BIS) की दक्षता की जांच करने के लिए एक परीक्षण नहीं है।",["Single wire resolution","सिंगल वायर रेजोल्यूशन"],["Multi energy","मल्टी एनर्जी"],["Thick metal imaging","थिक मेटल इमेजिंग"],["Simple penetration","सिंपल पेनिट्रेशन"]],[3,1,"'SEN’ key in X-BIS machine stands for:","एक्स-बीआईएस मशीन में 'SEN' कुंजी का अर्थ है:",["Super enhancement","सुपर एन्हांसमेंट (Super enhancement)"],["Specific enhancement","स्पेसिफिक एन्हांसमेंट"],["Superior enhancement","सुपीरियर एन्हांसमेंट"],["Sector enhancement","सेक्टर एन्हांसमेंट"]],[4,4,"An element with atomic number 80 will be seen in __________ colour on XBIS monitor.","परमाणु संख्या 80 वाला तत्व XBIS मॉनिटर पर __________ रंग में दिखाई देगा।",["Orange","नारंगी"],["Green","हरा"],["Blue","नीला"],["Opaque","अपारदर्शी (Opaque)"]],[5,4,"In civil aviation security X-BIS is not used for:","नागरिक उड्डयन सुरक्षा में X-BIS का उपयोग किसके लिए नहीं किया जाता है?",["Screening of hand baggage","हैंड बैग की स्क्रीनिंग"],["Screening of a registered baggage","पंजीकृत सामान की स्क्रीनिंग"],["Screening of tiffin carrier","टिफिन कैरियर की स्क्रीनिंग"],["Screening of pax","यात्री (Pax) की स्क्रीनिंग"]],[6,2,"Keeping in view the minimum technical specification for useful penetration prescribed by BCAS for future procurement is?","भविष्य की खरीद के लिए बीसीएएस (BCAS) द्वारा निर्धारित उपयोगी पैठ (useful penetration) के लिए न्यूनतम तकनीकी विशिष्टता क्या है?",["38 SWG","38 SWG"],["30 SWG","30 SWG"],["40 SWG","40 SWG"],["28 SWG","28 SWG"]],[7,2,"Load officer of the X-BIS is also known as __________","X-BIS के लोड अधिकारी को __________ भी कहा जाता है।",["Senior","सीनियर"],["Profiler","प्रोफाइलर (Profiler)"],["Pilot","पायलट"],["Loader","लोडर"]],[8,3,"When _____________ key is pressed all colour information from the image is removed and black and white image is displayed.","जब _____________ कुंजी दबाई जाती है तो छवि से सभी रंग की जानकारी हटा दी जाती है और ब्लैक एंड व्हाइट छवि प्रदर्शित होती है।",["Menu key","मेन्यू कुंजी"],["Inorganic material key","इनऑर्गेनिक मटीरियल कुंजी"],["Black and white key","ब्लैक एंड व्हाइट कुंजी (Black and white key)"],["Inverse key","इनवर्स कुंजी"]],[9,2,"In which one of the following colours will Zinc appear on the X-ray monitor?","एक्स-रे मॉनिटर पर जिंक निम्नलिखित में से किस रंग में दिखाई देगा?",["Orange","नारंगी"],["Blue","नीला (Blue)"],["Green","हरा"],["Opaque","अपारदर्शी"]],[10,3,"___________keys of X-BIS show different level of absorption.","X-BIS की ___________ कुंजियाँ अवशोषण का विभिन्न स्तर दिखाती हैं।",["NEG","NEG"],["OS","OS"],["VARI","VARI"],["HI","HI"]],[11,3,"A device worn by a person operating X-Ray equipment to warn them of potential over exposure to radiation leakage for x-ray equipment:","एक्स-रे उपकरण संचालित करने वाले व्यक्ति द्वारा एक्स-रे उपकरण से विकिरण रिसाव के संभावित अत्यधिक जोखिम के प्रति चेतावनी देने के लिए पहना जाने वाला उपकरण:",["Bullet proof jacket","बुलेट प्रूफ जैकेट"],["Fan beam geometry","फैन बीम जियोमेट्री"],["Dosimeter batch","डोसीमीटर बैज (Dosimeter batch)"],["Lead shielding","लेड शील्डिंग"]],[12,1,"A large item is stuck in the X-Ray tunnel. What happens next?","एक्स-रे टनल में कोई बड़ी वस्तु फंस गई है। आगे क्या होना चाहिए?",["Shut down the machine or disable the X-ray function before attempting to remove the bag.","बैग को निकालने का प्रयास करने से पहले मशीन को बंद करें या एक्स-रे फ़ंक्शन को अक्षम करें।"],["Climb on the tunnel and push the bag.","टनल पर चढ़ें और बैग को धक्का दें।"],["Keep running bags through the machine until they pile up.","मशीन से तब तक बैग चलाते रहें जब तक कि उनका ढेर न लग जाए।"],["Put your arm into the tunnel and pull out the bag.","अपना हाथ टनल में डालें और बैग बाहर निकालें।"]],[13,3,"An element with atomic number 74 will be seen in __________ colour on XBIS monitor?","परमाणु संख्या 74 वाला तत्व XBIS मॉनिटर पर किस रंग में दिखाई देगा?",["Orange","नारंगी"],["Green","हरा"],["Blue","नीला (Blue)"],["Black","काला"]],[14,3,"As per approved technical specifications, the approx weight of ETD should be:","अनुमोदित तकनीकी विशिष्टताओं के अनुसार, ETD का अनुमानित वजन होना चाहिए:",["30 kgs","30 किग्रा"],["25 kgs","25 किग्रा"],["Less than 40 kgs","40 किग्रा से कम (Less than 40 kgs)"],["50 kgs","50 किग्रा"]],[15,4,"At which level EDS is installed with in-line baggage screening system?","इन-लाइन लगेज स्क्रीनिंग सिस्टम के साथ EDS किस स्तर पर स्थापित किया जाता है?",["Level - 1","स्तर - 1"],["Level - 2","स्तर - 2"],["Level – 4","स्तर - 4"],["Level – 3","स्तर - 3 (Level - 3)"]],[16,2,"Back scatter X-ray produce image of body in how many dimensions?","बैक स्कैटर एक्स-रे शरीर की छवि कितने आयामों (dimensions) में उत्पन्न करता है?",["One","एक"],["Two","दो (Two)"],["Three","तीन"],["Four","चार"]],[17,2,"CTP is conducted to check that:","CTP यह जांचने के लिए आयोजित किया जाता है कि:",["X-BIS is working properly","X-BIS ठीक से काम कर रहा है"],["X-BIS is working as per BCAS specification","X-BIS बीसीएएस विनिर्देश (BCAS specification) के अनुसार काम कर रहा है"],["X-BIS will not work without CTP","CTP के बिना X-BIS काम नहीं करेगा"],["DFMD is working properly","DFMD ठीक से काम कर रहा है"]],[18,2,"CTP stands for ?","CTP का पूर्ण रूप क्या है?",["Combined test performance","कंबाइंड टेस्ट परफॉर्मेंस"],["Combined test piece","कंबाइंड टेस्ट पीस (Combined test piece)"],["Computed tomography projection","कंप्यूटेड टोमोग्राफी प्रोजेक्शन"],["Comprehensive testing procedure","कंप्रिहेंसिव टेस्टिंग प्रोसीजर"]],[19,3,"CTX stands for?","CTX का पूर्ण रूप क्या है?",["Complex topographic X-Ray","कॉम्प्लेक्स टोपोग्राफिक एक्स-रे"],["Crystal trace X-Ray","क्रिस्टल ट्रेस एक्स-रे"],["Computed tomography X-Ray","कंप्यूटेड टोमोग्राफी एक्स-रे (Computed tomography X-Ray)"],["Computerized telescopic X-ray","कंप्यूटरराइज्ड टेलिस्कोपिक एक्स-रे"]],[20,1,"Distance between two bags while screening on X-ray machine should not be less than:","एक्स-रे मशीन पर स्क्रीनिंग के दौरान दो बैगों के बीच की दूरी किससे कम नहीं होनी चाहिए:",["30 cms","30 सेमी (30 cms)"],["40 cms","40 सेमी"],["35 cms","35 सेमी"],["20 cms","20 सेमी"]],[21,3,"Feedback of aborted / cancelled TIP object appears in which colour?","रद्द / निरस्त किए गए TIP ऑब्जेक्ट का फीडबैक किस रंग में दिखाई देता है?",["Red colour","लाल रंग"],["Green colour","हरा रंग"],["Yellow colour","पीला रंग (Yellow colour)"],["Opaque colour","अपारदर्शी रंग"]],[22,2,"Feedback of detected TIP object appears in which colour?","पहचाने गए (detected) TIP ऑब्जेक्ट का फीडबैक किस रंग में दिखाई देता है?",["Red colour","लाल रंग"],["Green colour","हरा रंग (Green colour)"],["Yellow colour","पीला रंग"],["Orange colour","नारंगी रंग"]],[23,1,"Feedback of missed TIP object appears in which colour?","छूटे हुए (missed) TIP ऑब्जेक्ट का फीडबैक किस रंग में दिखाई देता है?",["Red colour","लाल रंग (Red colour)"],["Green colour","हरा रंग"],["Yellow colour","पीला रंग"],["Opaque colour","अपारदर्शी रंग"]],[24,2,"X-rays travel at the speed of:","एक्स-रे किसकी गति से यात्रा करती हैं?",["Sound","ध्वनि"],["Light","प्रकाश (Light)"],["Electricity","बिजली"],["Wind","हवा"]],[25,3,"In X-BIS, organic materials (such as explosives, food, and paper) appear in which colour?","X-BIS में, कार्बनिक पदार्थ (जैसे विस्फोटक, भोजन और कागज) किस रंग में दिखाई देते हैं?",["Blue","नीला"],["Green","हरा"],["Orange","नारंगी (Orange)"],["Black","काला"]],[26,3,"SWG in X-BIS CTP testing stands for:","X-BIS CTP परीक्षण में SWG का अर्थ है:",["Simple Wire Gauge","सिंपल वायर गेज"],["Single Wire Gauge","सिंगल वायर गेज"],["Standard Wire Gauge","स्टैंडर्ड वायर गेज (Standard Wire Gauge)"],["Steel Wire Gauge","स्टील वायर गेज"]],[27,1,"TIP in X-BIS system stands for:","X-BIS प्रणाली में TIP का अर्थ है:",["Threat Image Projection","थ्रेट इमेज प्रोजेक्शन (Threat Image Projection)"],["Threat Item Projection","थ्रेट आइटम प्रोजेक्शन"],["Threat Item Protection","थ्रेट आइटम प्रोटेक्शन"],["Three Image Projection","थ्री इमेज प्रोजेक्शन"]],[28,2,"A screener should not monitor the X-BIS screen continuously for more than:","एक स्क्रीनर को लगातार कितने समय से अधिक समय तक X-BIS स्क्रीन की निगरानी नहीं करनी चाहिए?",["18 minutes","18 मिनट"],["20 minutes","20 मिनट (20 minutes)"],["30 minutes","30 मिनट"],["45 minutes","45 मिनट"]],[29,3,"The ability of an X-BIS machine to image thin metal wires is tested by which CTP test?","पतले धातु के तारों की छवि बनाने की X-BIS मशीन की क्षमता का परीक्षण किस CTP परीक्षण द्वारा किया जाता है?",["Simple penetration test","सिंपल पेनिट्रेशन टेस्ट"],["Multi-energy test","मल्टी-एनर्जी टेस्ट"],["Single wire resolution test","सिंगल वायर रेजोल्यूशन टेस्ट (Single wire resolution test)"],["Spatial resolution test","स्थानिक संकल्प परीक्षण (Spatial resolution test)"]],[30,3,"In what colour do inorganic materials (such as metals and hard plastics) appear on an X-BIS monitor?","अकार्बनिक पदार्थ (जैसे धातु और कठोर प्लास्टिक) X-BIS मॉनिटर पर किस रंग में दिखाई देते हैं?",["Orange","नारंगी"],["Green","हरा"],["Blue","नीला (Blue)"],["Yellow","पीला"]],[31,3,"How many tests comprise a standard Combined Test Piece (CTP) evaluation?","एक मानक कंबाइंड टेस्ट पीस (CTP) मूल्यांकन में कितने परीक्षण शामिल हैं?",["4","4"],["5","5"],["6","6"],["8","8"]],[32,1,"Organic materials with atomic numbers (Z) between 1 and 10 generally display as which color on dual-energy X-BIS systems?","1 और 10 के बीच परमाणु संख्या (Z) वाले कार्बनिक पदार्थ आमतौर पर दोहरी ऊर्जा X-BIS प्रणालियों पर किस रंग के रूप में प्रदर्शित होते हैं?",["Orange","नारंगी (Orange)"],["Green","हरा"],["Blue","नीला"],["Gray","ग्रे"]],[33,3,"Inorganic/Metal materials with high atomic numbers (Z > 18) generally appear in which color?","उच्च परमाणु संख्या (Z > 18) वाले अकार्बनिक/धातु पदार्थ आमतौर पर किस रंग में दिखाई देते हैं?",["Orange","नारंगी"],["Green","हरा"],["Blue","नीला (Blue)"],["Brown","भूरा"]],[34,2,"Mixed materials (like aluminium, glass, and light alloys) with atomic numbers (Z) between 10 and 18 appear in which color?","10 और 18 के बीच परमाणु संख्या (Z) वाले मिश्रित पदार्थ (जैसे एल्यूमीनियम, कांच और हल्के मिश्र धातु) किस रंग में दिखाई देते हैं?",["Orange","नारंगी"],["Green","हरा (Green)"],["Blue","नीला"],["Opaque","अपारदर्शी"]],[35,3,"Which key on the X-BIS console toggles the image display between normal and negative/inverted spectrums?","X-BIS कंसोल पर कौन सी कुंजी सामान्य और नकारात्मक/उल्टे स्पेक्ट्रम के बीच छवि प्रदर्शन को स्विच (toggle) करती है?",["SEN","SEN"],["VARI","VARI"],["NEG / INVERT","NEG / INVERT"],["HIGH","HIGH"]],[36,2,"What does ETD stand for in aviation security screening?","उड्डयन सुरक्षा स्क्रीनिंग में ETD का अर्थ क्या है?",["Explosive Threat Detector","एक्सप्लोसिव थ्रेट डिटेक्टर"],["Explosive Trace Detector","एक्सप्लोसिव ट्रेस डिटेक्टर (Explosive Trace Detector)"],["Electronic Threat Device","इलेक्ट्रॉनिक थ्रेट डिवाइस"],["Electronic Trace Diagnostic","इलेक्ट्रॉनिक ट्रेस डायग्नोस्टिक"]],[37,2,"The function of Threat Image Projection (TIP) in X-BIS is primarily to:","X-BIS में थ्रेट इमेज प्रोजेक्शन (TIP) का कार्य मुख्य रूप से क्या है?",["Stop suspicious bags automatically","संदिग्ध बैगों को स्वचालित रूप से रोकना"],["Test and monitor screener alertness and performance","स्क्रीनर की सतर्कता और प्रदर्शन का परीक्षण और निगरानी करना"],["Increase X-ray beam penetration depth","एक्स-रे बीम प्रवेश गहराई बढ़ाएं"],["Clean the digital image output","डिजिटल छवि आउटपुट को साफ़ करना"]],[38,3,"When dense, impenetrable metal completely blocks X-rays on the monitor, the item appears as:","जब सघन, अभेद्य धातु मॉनिटर पर एक्स-रे को पूरी तरह से अवरुद्ध कर देती है, तो वस्तु किस रूप में दिखाई देती है?",["Bright Green","चमकीला हरा"],["Pure White","शुद्ध सफेद"],["Dark Black / Opaque","गहरा काला / अपारदर्शी (Dark Black / Opaque)"],["Orange","नारंगी"]],[39,2,"As per BCAS guidelines, when must a CTP test be performed on the X-BIS?","BCAS दिशानिर्देशों के अनुसार, X-BIS पर CTP परीक्षण कब किया जाना चाहिए?",["Once a week","सप्ताह में एक बार"],["Every time a new shift starts or machine is turned on daily","हर बार जब एक नई पाली शुरू होती है या मशीन प्रतिदिन चालू होती है"],["Only during monthly maintenance","केवल मासिक रखरखाव के दौरान"],["Once a year","साल में एक बार"]],[40,3,"What is the minimum thickness requirement for useful steel penetration in modern BCAS-spec X-BIS?","आधुनिक बीसीएएस-विशिष्ट X-BIS में उपयोगी स्टील पैठ (steel penetration) के लिए न्यूनतम मोटाई की आवश्यकता क्या है?",["10 mm","10 मिमी"],["20 mm","20 मिमी"],["30 mm or higher","30 मिमी या अधिक (30 mm or higher)"],["50 mm","50 मिमी"]],[41,2,"Which part of an Improvised Explosive Device (IED) provides the electrical energy to ignite the circuit?","आईईडी (IED) का कौन सा भाग सर्किट को प्रज्वलित करने के लिए विद्युत ऊर्जा प्रदान करता है?",["Detonator","डेटोनेटर"],["Power Source / Battery","पावर स्रोत / बैटरी (Power Source / Battery)"],["Explosive Charge","विस्फोटक आवेश"],["Switch","स्विच"]],[42,2,"What type of screening geometry uses two X-ray generators placed horizontally and vertically?","क्षैतिज (horizontally) और लंबवत (vertically) रूप से रखे गए दो एक्स-रे जनरेटर किस प्रकार की स्क्रीनिंग जियोमेट्री का उपयोग करते हैं?",["Single View System","सिंगल व्यू सिस्टम"],["Dual View / Dual Beam System","ड्यूल व्यू / ड्यूल बीम सिस्टम"],["Backscatter Geometry","बैकस्कैटर जियोमेट्री"],["Computed Tomography","कंप्यूटेड टोमोग्राफी"]],[43,2,"In an X-BIS machine, lead curtains at the entrance and exit of the tunnel serve to:","X-BIS मशीन में टनल के प्रवेश और निकास द्वार पर लगे लेड के पर्दे का कार्य क्या है?",["Dust off baggage items","सामान की वस्तुओं से धूल झाड़ना"],["Prevent scatter radiation leakage","प्रकीर्णन विकिरण रिसाव को रोकना (Prevent scatter radiation leakage)"],["Detect explosive vapor","विस्फोटक वाष्प का पता लगाना"],["Measure baggage weight","सामान का वजन मापना"]],[44,2,"Which key is used on the X-BIS console to zoom in on specific suspicious regions of an image?","छवि के विशिष्ट संदिग्ध क्षेत्रों को ज़ूम इन करने के लिए X-BIS कंसोल पर किस कुंजी का उपयोग किया जाता है?",["OS","OS"],["ZOOM / ENLARGE","ZOOM / ENLARGE"],["LOW","LOW"],["B/W","B/W"]],[45,2,"What is the maximum limit for liquid, aerosol, or gel (LAG) container capacity allowed in cabin baggage per standard rules?","मानक नियमों के अनुसार केबिन सामान में अनुमति प्राप्त तरल, एयरोसोल या जेल (LAG) कंटेनर क्षमता की अधिकतम सीमा क्या है?",["50 ml","50 मिली"],["100 ml","100 मिली (100 ml)"],["250 ml","250 मिली"],["500 ml","500 मिली"]],[46,2,"What does HHMD stand for in security checkpoint operations?","सुरक्षा जांच बिंदु संचालन में HHMD का पूर्ण रूप क्या है?",["Heavy Duty Metal Detector","हेवी ड्यूटी मेटल डिटेक्टर"],["Hand Held Metal Detector","हैंड हेल्ड मेटल डिटेक्टर (Hand Held Metal Detector)"],["High Hazard Material Detector","हाई हैज़र्ड मटीरियल डिटेक्टर"],["Hand Held Material Device","हैंड हेल्ड मटीरियल डिवाइस"]],[47,1,"What does DFMD stand for?","DFMD का पूर्ण रूप क्या है?",["Door Frame Metal Detector","डोर फ्रेम मेटल डिटेक्टर (Door Frame Metal Detector)"],["Dual Frame Material Detector","ड्यूल फ्रेम मटीरियल डिटेक्टर"],["Digital Frequency Metal Detector","डिजिटल फ्रीक्वेंसी मेटल डिटेक्टर"],["Direct Field Metal Device","डायरेक्ट फील्ड मेटल डिवाइस"]],[48,2,"Which component of an IED causes the initial high-velocity detonation wave to explode the main charge?","आईईडी का कौन सा घटक मुख्य आवेश को विस्फोटित करने के लिए प्रारंभिक उच्च-वेग विस्फोट तरंग का कारण बनता है?",["Battery","बैटरी"],["Detonator / Initiator","डेटोनेटर / इनिशिएटर (Detonator / Initiator)"],["Switch","स्विच"],["Container","कंटेनर"]],[49,3,"An organic material key (OM / ORG) on an X-BIS keyboard highlights items composed of:","X-BIS कीबोर्ड पर एक ऑर्गेनिक मटीरियल कुंजी (OM / ORG) किन तत्वों से बनी वस्तुओं को हाइलाइट करती है?",["Iron and Steel","लोहा और इस्पात"],["Copper and Brass","तांबा और पीतल"],["Carbon, Hydrogen, Oxygen, Nitrogen","कार्बन, हाइड्रोजन, ऑक्सीजन, नाइट्रोजन"],["Lead and Zinc","सीसा और जस्ता"]],[50,2,"High-density penetration (HI-PEN / HIGH) key is useful for inspecting:","उच्च-घनत्व प्रवेश (HI-PEN / HIGH) कुंजी का उपयोग किसके निरीक्षण के लिए उपयोगी है?",["Paper documents and letters","कागजी दस्तावेज और पत्र"],["Densely packed or thick metallic items","सघन रूप से पैक की गई या मोटी धातु की वस्तुएं"],["Liquids and water bottles","तरल पदार्थ और पानी की बोतलें"],["Clothing items","कपड़े की वस्तुएं"]],[51,2,"Low-density penetration (LOW) key enhances the contrast of:","कम-घनत्व प्रवेश (LOW) कुंजी किसके कंट्रास्ट को बढ़ाती है?",["Thick lead blocks","मोटे लेड ब्लॉक"],["Light organic objects and thin plastic","हल्की कार्बनिक वस्तुएं और पतला प्लास्टिक"],["Heavy firearms","भारी आग्नेयास्त्र"],["Steel tools","स्टील के औजार"]],[52,2,"What is the primary regulation authority for civil aviation security in India?","भारत में नागरिक उड्डयन सुरक्षा के लिए प्राथमिक नियामक प्राधिकरण कौन सा है?",["DGCA","DGCA"],["BCAS","BCAS"],["AAI","AAI"],["CISF","CISF"]],[53,2,"What does BCAS stand for?","BCAS का पूर्ण रूप क्या है?",["Board of Civil Aviation Security","बोर्ड ऑफ सिविल एविएशन सिक्योरिटी"],["Bureau of Civil Aviation Security","ब्यूरो ऑफ सिविल एविएशन सिक्योरिटी"],["Bureau of Central Aviation Safety","ब्यूरो ऑफ सेंट्रल एविएशन सेफ्टी"],["Board of Control for Aviation Security","बोर्ड ऑफ कंट्रोल फॉर एविएशन सिक्योरिटी"]],[54,2,"If an X-BIS operator identifies a clear, confirmed explosive device inside a bag, what should be done immediately?","यदि कोई X-BIS ऑपरेटर बैग के अंदर एक स्पष्ट, पुष्ट विस्फोटक उपकरण की पहचान करता है, तो तुरंत क्या किया जाना चाहिए?",["Open the bag and pull out the bomb","बैग खोलें और बम बाहर निकालें"],["Stop the belt, keep the bag inside the tunnel, isolate the area, and inform the supervisor / BDDS","बेल्ट को रोकें, बैग को टनल के अंदर रखें, क्षेत्र को अलग करें, और पर्यवेक्षक / BDDS को सूचित करें"],["Send the bag through the conveyor again","बैग को दोबारा कन्वेयर के माध्यम से भेजें"],["Hand the bag back to the passenger","बैग यात्री को वापस सौंप दें"]],[55,2,"In an in-line baggage system, if Level-1 and Level-2 screening are inconclusive, the baggage proceeds to:","इन-लाइन लगेज सिस्टम में, यदि स्तर-1 और स्तर-2 स्क्रीनिंग अनिर्णायक है, तो सामान आगे बढ़ता है:",["Passenger handover","यात्री हैंडओवर"],["Level-3 (EDS / CT System)","स्तर-3 (EDS / CT सिस्टम)"],["Disposal pit immediately","तुरंत निपटान गड्ढा (Disposal pit)"],["Direct aircraft loading","प्रत्यक्ष विमान लोडिंग"]],[56,2,"What does EDS stand for in airport baggage handling?","हवाई अड्डे के सामान प्रबंधन में EDS का पूर्ण रूप क्या है?",["Electronic Detection System","इलेक्ट्रॉनिक डिटेक्शन सिस्टम"],["Explosive Detection System","एक्सप्लोसिव डिटेक्शन सिस्टम (Explosive Detection System)"],["Emergency Diagnostic System","इमरजेंसी डायग्नोस्टिक सिस्टम"],["External Device Scanner","एक्सटर्नल डिवाइस स्कैनर"]],[57,2,"The acronym CTP in CTP Test set stands for:","CTP टेस्ट सेट में CTP संक्षिप्त नाम का अर्थ है:",["Computerized Test Panel","कंप्यूटराइज्ड टेस्ट पैनल"],["Combined Test Piece","कंबाइंड टेस्ट पीस (Combined Test Piece)"],["Central Testing Process","सेंट्रल टेस्टिंग प्रोसेस"],["Calibrated Test Phantom","कैलिब्रेटेड टेस्ट फैंटम"]],[58,2,"Spatial resolution test in CTP checks the ability of the X-BIS to distinguish:","CTP में स्थानिक संकल्प (Spatial resolution) परीक्षण X-BIS की किसे अलग करने की क्षमता की जांच करता है?",["Wire thickness","तार की मोटाई"],["Separate closely spaced copper/brass grids","पास-पास रखी गई तांबे/पीतल की ग्रिड को अलग करना"],["Organic item depth","कार्बनिक वस्तु की गहराई"],["Color saturation","रंग संतृप्ति (Color saturation)"]],[59,2,"Which safety feature stops the X-BIS conveyor belt immediately in an emergency?","आपात स्थिति में कौन सी सुरक्षा सुविधा X-BIS कन्वेयर बेल्ट को तुरंत रोक देती है?",["SEN Key","SEN कुंजी"],["Emergency Stop Button","इमरजेंसी स्टॉप बटन (Emergency Stop Button)"],["Power Switch","पावर स्विच"],["Reverse Key","रिवर्स कुंजी"]],[60,2,"X-rays are a form of:","एक्स-रे किसका एक रूप हैं?",["Mechanical sound waves","यांत्रिक ध्वनि तरंगें"],["Electromagnetic radiation","विद्युत चुंबकीय विकिरण (Electromagnetic radiation)"],["Particle stream","कण धारा (Particle stream)"],["Magnetic force field","चुंबकीय बल क्षेत्र"]]];
-
 let questionStatus = new Array(TOTAL_QUESTIONS).fill(1); 
 let currentQuestionIndex = 0; 
 let userName = 'Candidate'; 
@@ -456,795 +208,758 @@ let quizLocked = false;
 const MAX_WARNINGS = 2; // Switches 1..MAX_WARNINGS => warning only, exam continues
 const MAX_LOCKS = 4; // Switches (MAX_WARNINGS+1)..MAX_LOCKS => exam locked, needs Admin password
 // Any switch beyond MAX_LOCKS => exam is submitted automatically
-
 // Safe storage wrapper: some mobile browsers (notably iPhone Safari in Private
 // Browsing, or when the file is opened directly from Files/WhatsApp instead of
 // through the browser) throw a SecurityError on any localStorage access, which
 // otherwise stops the script and can make the exam page fail silently.
 const safeStorage = {
-    _mem: {},
-    get(key) {
-        try { return localStorage.getItem(key); }
-        catch (e) { return this._mem[key] || null; }
-    },
-    set(key, value) {
-        try { localStorage.setItem(key, value); }
-        catch (e) { this._mem[key] = value; }
-    }
+_mem: {},
+get(key) {
+try { return localStorage.getItem(key); }
+catch (e) { return this._mem[key] || null; }
+},
+set(key, value) {
+try { localStorage.setItem(key, value); }
+catch (e) { this._mem[key] = value; }
+}
 };
-
 const questionsContainer = document.getElementById('questions-container'); 
 const questionGrid = document.getElementById('question-grid');
 const optionButtonsContainer = document.getElementById('option-buttons'); 
 const timerDisplay = document.getElementById('timer-display'); 
 const resultDisplay = document.getElementById('result-display');
 const controlPanel = document.getElementById('exam-control-panel');
-
-function handleVisibilityChange() {
-    if (!quizInProgress || isExamSubmitted) return;
-    if (document.hidden) {
-        registerTabSwitch();
-    }
-}
-
-function registerTabSwitch() {
-    if (quizLocked || isExamSubmitted) return;
-    tabSwitchCount++;
-    if (tabSwitchCount <= MAX_WARNINGS) {
-        showWarning();
-    } else if (tabSwitchCount <= MAX_LOCKS) {
-        lockQuiz();
-    } else {
-        forceSubmitForCheating();
-    }
-}
-
-function showWarning() {
-    quizLocked = true; // overlay is open; guards against double-counting a single switch
-    const overlay = document.getElementById('cheat-lock-overlay');
-    const title = document.getElementById('cheat-lock-title');
-    const msg = document.getElementById('cheat-lock-message');
-    const unlockBox = document.getElementById('unlock-form-box');
-    const warnBox = document.getElementById('warning-box');
-    const errorMsg = document.getElementById('unlock-error-msg');
-
-    if (errorMsg) errorMsg.style.display = 'none';
-    if (title) title.textContent = '⚠ Warning';
-    if (msg) msg.textContent = `Warning ${tabSwitchCount} of ${MAX_WARNINGS}: you switched or minimized the screen. Doing this again beyond the warning limit will LOCK your exam and require an Administrator password. Repeated attempts will submit your exam automatically. Click Continue to resume your exam.`;
-    if (unlockBox) unlockBox.style.display = 'none';
-    if (warnBox) warnBox.style.display = 'flex';
-    if (overlay) overlay.style.display = 'flex';
-}
-
-function continueAfterWarning() {
-    if (isExamSubmitted) return;
-    quizLocked = false;
-    const overlay = document.getElementById('cheat-lock-overlay');
-    if (overlay) overlay.style.display = 'none';
-}
-
-function lockQuiz() {
-    quizLocked = true;
-    const overlay = document.getElementById('cheat-lock-overlay');
-    const title = document.getElementById('cheat-lock-title');
-    const msg = document.getElementById('cheat-lock-message');
-    const unlockBox = document.getElementById('unlock-form-box');
-    const warnBox = document.getElementById('warning-box');
-    const errorMsg = document.getElementById('unlock-error-msg');
-    const passInput = document.getElementById('admin-unlock-input');
-
-    if (errorMsg) errorMsg.style.display = 'none';
-    if (passInput) passInput.value = '';
-    if (title) title.textContent = '⚠ Exam Locked';
-    if (warnBox) warnBox.style.display = 'none';
-
-    if (msg) msg.textContent = `You switched or minimized the screen ${tabSwitchCount} time(s). Your exam is LOCKED, contact your Administrator to resume. Reaching ${MAX_LOCKS + 1} total switches will submit your exam automatically.`;
-    if (unlockBox) unlockBox.style.display = 'flex';
-    if (overlay) overlay.style.display = 'flex';
-    if (passInput) setTimeout(() => passInput.focus(), 100);
-}
-
-function forceSubmitForCheating() {
-    quizLocked = true;
-    const overlay = document.getElementById('cheat-lock-overlay');
-    const title = document.getElementById('cheat-lock-title');
-    const msg = document.getElementById('cheat-lock-message');
-    const unlockBox = document.getElementById('unlock-form-box');
-    const warnBox = document.getElementById('warning-box');
-
-    if (title) title.textContent = '⚠ Exam Locked';
-    if (warnBox) warnBox.style.display = 'none';
-    if (unlockBox) unlockBox.style.display = 'none';
-    if (msg) msg.textContent = `You switched or minimized the screen ${tabSwitchCount} time(s), which exceeds the allowed limit. Your exam is being submitted automatically.`;
-    if (overlay) overlay.style.display = 'flex';
-    setTimeout(() => { submitTest(); }, 2500);
-}
-
-function attemptUnlock() {
-    const passInput = document.getElementById('admin-unlock-input');
-    const errorMsg = document.getElementById('unlock-error-msg');
-    const enteredValue = passInput ? passInput.value : '';
-
-    if (enteredValue === ADMIN_UNLOCK_PASSWORD) {
-        resumeQuiz();
-    } else {
-        if (errorMsg) errorMsg.style.display = 'block';
-        if (passInput) { passInput.value = ''; passInput.focus(); }
-    }
-}
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && document.getElementById('admin-unlock-input') === document.activeElement) {
-        attemptUnlock();
-    }
+// 1. Safe retry submission function
+async function submitQuizResult(payload, attempt = 0) {
+const MAX_ATTEMPTS = 10;
+try {
+const response = await fetch(APPS_SCRIPT_URL, {
+method: "POST",
+body: JSON.stringify(payload)
 });
-
-function resumeQuiz() {
-    if (isExamSubmitted) return;
-    quizLocked = false;
-    const overlay = document.getElementById('cheat-lock-overlay');
-    const errorMsg = document.getElementById('unlock-error-msg');
-    if (overlay) overlay.style.display = 'none';
-    if (errorMsg) errorMsg.style.display = 'none';
+const result = await response.json();
+if (result.status === "success") {
+return result;
+} 
+// Server hit a lock timeout block
+if (result.status === "busy" && attempt < MAX_ATTEMPTS) {
+// Wait 3 seconds before trying again
+await new Promise(resolve => setTimeout(resolve, 3000));
+return submitQuizResult(payload, attempt + 1);
 }
-
+throw new Error(result.message || "Submission failed");
+} catch (error) {
+// Catches network glitches or 503/429 HTML error pages from Google
+if (attempt < MAX_ATTEMPTS) {
+const delay = Math.floor(Math.random() * 2000) + 3000; // Wait 3-5 seconds
+await new Promise(resolve => setTimeout(resolve, delay));
+return submitQuizResult(payload, attempt + 1);
+} else {
+throw error;
+}
+}
+}
+// 2. Attach it to your "Submit Exam" button click
+async function onFinishQuizClick() {
+const submitBtn = document.getElementById("submitQuizBtn");
+if (submitBtn) {
+submitBtn.disabled = true;
+submitBtn.innerText = "Submitting Score... Please wait";
+}
+// Retrieve student details (passed via URL query params or localStorage)
+const urlParams = new URLSearchParams(window.location.search);
+const payload = {
+action: "submitScore",
+spreadsheetId: SPREADSHEET_ID,
+username: urlParams.get('username') || safeStorage.get('currentUsername') || 'N/A',
+studentName: urlParams.get('studentName') || safeStorage.get('currentStudent') || userName || 'Trainee',
+designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || 'Trainee',
+section: urlParams.get('section') || safeStorage.get('studentSectionContext') || 'basic',
+quizName: "SCREENER X RAY PAPER 1", 
+score: `${savedAnswers.filter((ans, idx) => ans && ans.toString() === questionData[idx][1].toString()).length}/${TOTAL_QUESTIONS}`,
+timestamp: new Date().toLocaleString()
+};
+try {
+await submitQuizResult(payload);
+alert("Your quiz has been successfully saved!");
+// window.location.href = "student-dashboard.html"; // Uncomment if redirection is needed
+} catch (err) {
+alert("Server is extremely busy right now. Please click 'Submit' one more time.");
+if (submitBtn) {
+submitBtn.disabled = false;
+submitBtn.innerText = "Retry Submission";
+}
+}
+}
+function handleVisibilityChange() {
+if (!quizInProgress || isExamSubmitted) return;
+if (document.hidden) {
+registerTabSwitch();
+}
+}
+function registerTabSwitch() {
+if (quizLocked || isExamSubmitted) return;
+tabSwitchCount++;
+if (tabSwitchCount <= MAX_WARNINGS) {
+showWarning();
+} else if (tabSwitchCount <= MAX_LOCKS) {
+lockQuiz();
+} else {
+forceSubmitForCheating();
+}
+}
+function showWarning() {
+quizLocked = true; // overlay is open; guards against double-counting a single switch
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+const errorMsg = document.getElementById('unlock-error-msg');
+if (errorMsg) errorMsg.style.display = 'none';
+if (title) title.textContent = '⚠ Warning';
+if (msg) msg.textContent = `Warning ${tabSwitchCount} of ${MAX_WARNINGS}: you switched or minimized the screen. Doing this again beyond the warning limit will LOCK your exam and require an Administrator password. Repeated attempts will submit your exam automatically. Click Continue to resume your exam.`;
+if (unlockBox) unlockBox.style.display = 'none';
+if (warnBox) warnBox.style.display = 'flex';
+if (overlay) overlay.style.display = 'flex';
+}
+function continueAfterWarning() {
+if (isExamSubmitted) return;
+quizLocked = false;
+const overlay = document.getElementById('cheat-lock-overlay');
+if (overlay) overlay.style.display = 'none';
+}
+function lockQuiz() {
+quizLocked = true;
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+const errorMsg = document.getElementById('unlock-error-msg');
+const passInput = document.getElementById('admin-unlock-input');
+if (errorMsg) errorMsg.style.display = 'none';
+if (passInput) passInput.value = '';
+if (title) title.textContent = '⚠ Exam Locked';
+if (warnBox) warnBox.style.display = 'none';
+if (msg) msg.textContent = `You switched or minimized the screen ${tabSwitchCount} time(s). Your exam is LOCKED, contact your Administrator to resume. Reaching ${MAX_LOCKS + 1} total switches will submit your exam automatically.`;
+if (unlockBox) unlockBox.style.display = 'flex';
+if (overlay) overlay.style.display = 'flex';
+if (passInput) setTimeout(() => passInput.focus(), 100);
+}
+function forceSubmitForCheating() {
+quizLocked = true;
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+if (title) title.textContent = '⚠ Exam Locked';
+if (warnBox) warnBox.style.display = 'none';
+if (unlockBox) unlockBox.style.display = 'none';
+if (msg) msg.textContent = `You switched or minimized the screen ${tabSwitchCount} time(s), which exceeds the allowed limit. Your exam is being submitted automatically.`;
+if (overlay) overlay.style.display = 'flex';
+setTimeout(() => { submitTest(); }, 2500);
+}
+function attemptUnlock() {
+const passInput = document.getElementById('admin-unlock-input');
+const errorMsg = document.getElementById('unlock-error-msg');
+const enteredValue = passInput ? passInput.value : '';
+if (enteredValue === ADMIN_UNLOCK_PASSWORD) {
+resumeQuiz();
+} else {
+if (errorMsg) errorMsg.style.display = 'block';
+if (passInput) { passInput.value = ''; passInput.focus(); }
+}
+}
+document.addEventListener('keydown', function(e) {
+if (e.key === 'Enter' && document.getElementById('admin-unlock-input') === document.activeElement) {
+attemptUnlock();
+}
+});
+function resumeQuiz() {
+if (isExamSubmitted) return;
+quizLocked = false;
+const overlay = document.getElementById('cheat-lock-overlay');
+const errorMsg = document.getElementById('unlock-error-msg');
+if (overlay) overlay.style.display = 'none';
+if (errorMsg) errorMsg.style.display = 'none';
+}
 document.addEventListener('visibilitychange', handleVisibilityChange);
 window.addEventListener('pagehide', () => {
-    if (quizInProgress && !isExamSubmitted) registerTabSwitch();
+if (quizInProgress && !isExamSubmitted) registerTabSwitch();
 });
-
 // Keeps the fixed bottom control bar from ever overlapping the question text.
 // The bar's real height varies a lot by phone width (buttons wrap differently
 // on a small screen vs a large one), so instead of guessing a fixed padding
 // we measure it live and push the question area down by exactly that much.
 function adjustMobileLayout() {
-    if (window.innerWidth > 768) {
-        const questionArea = document.querySelector('.question-area');
-        const mainContent = document.querySelector('.main-content');
-        if (questionArea) questionArea.style.paddingBottom = '';
-        if (mainContent) mainContent.style.paddingBottom = '';
-        return;
-    }
-    const controlPanel = document.getElementById('exam-control-panel');
-    const footerEl = document.querySelector('footer');
-    const questionArea = document.querySelector('.question-area');
-    const mainContent = document.querySelector('.main-content');
-    if (!controlPanel || !footerEl || !questionArea || !mainContent) return;
-
-    const footerHeight = footerEl.offsetHeight;
-    const panelHeight = controlPanel.offsetHeight;
-
-    // Pin the control panel directly above the footer, whatever height the
-    // footer actually renders at on this device.
-    controlPanel.style.bottom = footerHeight + 'px';
-
-    // Reserve exactly enough space below the last question option so the
-    // fixed control panel + footer never covers it, plus a small buffer.
-    const totalReserved = panelHeight + footerHeight + 24;
-    mainContent.style.paddingBottom = totalReserved + 'px';
-    questionArea.style.paddingBottom = '20px';
+if (window.innerWidth > 768) {
+const questionArea = document.querySelector('.question-area');
+const mainContent = document.querySelector('.main-content');
+if (questionArea) questionArea.style.paddingBottom = '';
+if (mainContent) mainContent.style.paddingBottom = '';
+return;
 }
-
+const controlPanel = document.getElementById('exam-control-panel');
+const footerEl = document.querySelector('footer');
+const questionArea = document.querySelector('.question-area');
+const mainContent = document.querySelector('.main-content');
+if (!controlPanel || !footerEl || !questionArea || !mainContent) return;
+const footerHeight = footerEl.offsetHeight;
+const panelHeight = controlPanel.offsetHeight;
+// Pin the control panel directly above the footer, whatever height the
+// footer actually renders at on this device.
+controlPanel.style.bottom = footerHeight + 'px';
+// Reserve exactly enough space below the last question option so the
+// fixed control panel + footer never covers it, plus a small buffer.
+const totalReserved = panelHeight + footerHeight + 24;
+mainContent.style.paddingBottom = totalReserved + 'px';
+questionArea.style.paddingBottom = '20px';
+}
 window.addEventListener('load', () => {
-    adjustMobileLayout();
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlStudentName = urlParams.get('studentName');
-    const urlUsername = urlParams.get('username');
-    const urlDesignation = urlParams.get('designation');
-    const urlSection = urlParams.get('section');
-
-    if (urlStudentName) safeStorage.set('currentStudent', urlStudentName);
-    if (urlUsername) safeStorage.set('currentUsername', urlUsername);
-    if (urlDesignation) safeStorage.set('currentDesignation', urlDesignation);
-    if (urlSection) safeStorage.set('studentSectionContext', urlSection);
-
-    const activeUser = urlStudentName || safeStorage.get('currentStudent');
-    if (activeUser) {
-        document.getElementById('user-name-input').value = activeUser;
-    }
-    updateStartBtnState();
-});
-
-function updateStartBtnState() {
-    const nameFilled = document.getElementById('user-name-input').value.trim().length > 0;
-    const declared = document.getElementById('declaration-check').checked;
-    document.getElementById('start-btn').disabled = !(nameFilled && declared);
+adjustMobileLayout();
+const urlParams = new URLSearchParams(window.location.search);
+const urlStudentName = urlParams.get('studentName');
+const urlUsername = urlParams.get('username');
+const urlDesignation = urlParams.get('designation');
+const urlSection = urlParams.get('section');
+if (urlStudentName) safeStorage.set('currentStudent', urlStudentName);
+if (urlUsername) safeStorage.set('currentUsername', urlUsername);
+if (urlDesignation) safeStorage.set('currentDesignation', urlDesignation);
+if (urlSection) safeStorage.set('studentSectionContext', urlSection);
+const activeUser = urlStudentName || safeStorage.get('currentStudent');
+if (activeUser) {
+document.getElementById('user-name-input').value = activeUser;
 }
-
+updateStartBtnState();
+});
+function updateStartBtnState() {
+const nameFilled = document.getElementById('user-name-input').value.trim().length > 0;
+const declared = document.getElementById('declaration-check').checked;
+document.getElementById('start-btn').disabled = !(nameFilled && declared);
+}
 document.getElementById('user-name-input').addEventListener('input', updateStartBtnState);
 document.getElementById('declaration-check').addEventListener('change', updateStartBtnState);
-
 document.getElementById('start-btn').addEventListener('click', () => { 
-    const nameInput = document.getElementById('user-name-input').value.trim(); 
-    const declared = document.getElementById('declaration-check').checked;
-    if (nameInput && declared) { 
-        userName = nameInput; 
-        document.getElementById('header-user-name').textContent = `Candidate: ${userName}`; 
-        document.getElementById('initial-setup').style.display = 'none'; 
-        document.getElementById('main-header').style.display = 'flex'; 
-        document.getElementById('main-test-area').style.display = 'flex'; 
-        document.querySelector('.zoom-controls').style.display = 'flex'; 
-        
-        generateQuestions(); 
-        generateQuestionGrid(); 
-        displayQuestion(0); 
-        startTimer(); 
-        quizInProgress = true;
-        // Panel is hidden (display:none) until now, so its real height can
-        // only be measured once it's actually visible on screen.
-        setTimeout(adjustMobileLayout, 50);
-    }
+const nameInput = document.getElementById('user-name-input').value.trim(); 
+const declared = document.getElementById('declaration-check').checked;
+if (nameInput && declared) { 
+userName = nameInput; 
+document.getElementById('header-user-name').textContent = `Candidate: ${userName}`; 
+document.getElementById('initial-setup').style.display = 'none'; 
+document.getElementById('main-header').style.display = 'flex'; 
+document.getElementById('main-test-area').style.display = 'flex'; 
+document.querySelector('.zoom-controls').style.display = 'flex'; 
+generateQuestions(); 
+generateQuestionGrid(); 
+displayQuestion(0); 
+startTimer(); 
+quizInProgress = true;
+// Panel is hidden (display:none) until now, so its real height can
+// only be measured once it's actually visible on screen.
+setTimeout(adjustMobileLayout, 50);
+}
 });
-
 window.addEventListener('resize', adjustMobileLayout);
 window.addEventListener('orientationchange', () => setTimeout(adjustMobileLayout, 200));
-
 function generateQuestions() {
-    questionsContainer.innerHTML = ''; 
-    const optionLabels = ['A', 'B', 'C', 'D']; 
-    questionData.forEach((q, index) => { 
-        const qId = q[0]; 
-        const qEn = q[2]; 
-        const qHi = q[3]; 
-        const options = q.slice(4); 
-        let optionsHtml = '<div class="option-text-container">'; 
-        options.forEach((opt, optIndex) => { 
-            const optValue = optIndex + 1; 
-            const label = optionLabels[optIndex]; 
-            optionsHtml += `
-                <div class="option-label" data-option-id="${optValue}"> 
-                    <strong class="english-text">${label}.</strong> <span class="english-text">${opt[0]}</span><br class="english-text"> 
-                    <strong class="hindi-text">${label}.</strong> <span class="hindi-text">${opt[1]}</span> 
-                </div> 
-            `; 
-        }); 
-        optionsHtml += '</div>'; 
-        const qHtml = `
-            <div class="question-box" id="q${qId}" data-correct-answer="${q[1]}"> 
-                <p style="font-size: 1.5em; font-weight: 700;">Question ${index + 1} of ${TOTAL_QUESTIONS}</p> 
-                <div class="question-text"> 
-                    <span class="english-text">${qEn}</span> 
-                    <span class="hindi-text">${qHi}</span> 
-                </div> 
-                ${optionsHtml} 
-            </div> 
-        `; 
-        questionsContainer.innerHTML += qHtml; 
-    });
+questionsContainer.innerHTML = ''; 
+const optionLabels = ['A', 'B', 'C', 'D']; 
+questionData.forEach((q, index) => { 
+const qId = q[0]; 
+const qEn = q[2]; 
+const qHi = q[3]; 
+const options = q.slice(4); 
+let optionsHtml = '<div class="option-text-container">'; 
+options.forEach((opt, optIndex) => { 
+const optValue = optIndex + 1; 
+const label = optionLabels[optIndex]; 
+optionsHtml += `
+<div class="option-label" data-option-id="${optValue}"> 
+<strong class="english-text">${label}.</strong> <span class="english-text">${opt[0]}</span><br class="english-text"> 
+<strong class="hindi-text">${label}.</strong> <span class="hindi-text">${opt[1]}</span> 
+</div> 
+`; 
+}); 
+optionsHtml += '</div>'; 
+const qHtml = `
+<div class="question-box" id="q${qId}" data-correct-answer="${q[1]}"> 
+<p style="font-size: 1.5em; font-weight: 700;">Question ${index + 1} of ${TOTAL_QUESTIONS}</p> 
+<div class="question-text"> 
+<span class="english-text">${qEn}</span> 
+<span class="hindi-text">${qHi}</span> 
+</div> 
+${optionsHtml} 
+</div> 
+`; 
+questionsContainer.innerHTML += qHtml; 
+});
 }
-
 function displayQuestion(index) { 
-    if (isExamSubmitted || index < 0 || index >= TOTAL_QUESTIONS) return;
-
-    document.querySelectorAll('.question-box').forEach(qBox => qBox.classList.remove('active')); 
-    
-    const questionId = questionData[index][0]; 
-    const currentQBox = document.getElementById(`q${questionId}`); 
-    
-    if (currentQBox) { 
-        currentQBox.classList.add('active'); 
-        currentQuestionIndex = index; 
-
-        tempSelectedOption = savedAnswers[index];
-        updateOptionButtonVisual(); 
-        updateMarkButtonVisual(index);
-        updateLocalLanguage();
-        applyZoom();
-    }
+if (isExamSubmitted || index < 0 || index >= TOTAL_QUESTIONS) return;
+document.querySelectorAll('.question-box').forEach(qBox => qBox.classList.remove('active')); 
+const questionId = questionData[index][0]; 
+const currentQBox = document.getElementById(`q${questionId}`); 
+if (currentQBox) { 
+currentQBox.classList.add('active'); 
+currentQuestionIndex = index; 
+tempSelectedOption = savedAnswers[index];
+updateOptionButtonVisual(); 
+updateMarkButtonVisual(index);
+updateLocalLanguage();
+applyZoom();
 }
-
+}
 function setQuestionZoom(step) {
-    currentZoomLevel += step;
-    if (currentZoomLevel < 0.7) currentZoomLevel = 0.7;
-    if (currentZoomLevel > 2.0) currentZoomLevel = 2.0;
-    applyZoom();
+currentZoomLevel += step;
+if (currentZoomLevel < 0.7) currentZoomLevel = 0.7;
+if (currentZoomLevel > 2.0) currentZoomLevel = 2.0;
+applyZoom();
 }
-
 function applyZoom() {
-    document.querySelectorAll('.question-text, .option-label').forEach(el => {
-        el.style.fontSize = currentZoomLevel + 'em';
-    });
+document.querySelectorAll('.question-text, .option-label').forEach(el => {
+el.style.fontSize = currentZoomLevel + 'em';
+});
 }
-
 function updateOptionButtonVisual() {
-    document.querySelectorAll('.btn-option').forEach(btn => {
-        btn.classList.remove('selected');
-        if (tempSelectedOption !== null && parseInt(btn.dataset.value) === tempSelectedOption) {
-            btn.classList.add('selected');
-        }
-    });
+document.querySelectorAll('.btn-option').forEach(btn => {
+btn.classList.remove('selected');
+if (tempSelectedOption !== null && parseInt(btn.dataset.value) === tempSelectedOption) {
+btn.classList.add('selected');
 }
-
+});
+}
 function selectOption(value) {
-    if (isExamSubmitted) return;
-    tempSelectedOption = value;
-    updateOptionButtonVisual();
+if (isExamSubmitted) return;
+tempSelectedOption = value;
+updateOptionButtonVisual();
 }
-
 function eraseAnswer() {
-    if (isExamSubmitted) return;
-    tempSelectedOption = null;
-    savedAnswers[currentQuestionIndex] = null; 
-    questionStatus[currentQuestionIndex] = (questionStatus[currentQuestionIndex] === 4) ? 3 : 1; 
-    updateOptionButtonVisual();
-    updateQuestionGridButton(currentQuestionIndex); 
-    updateMarkButtonVisual(currentQuestionIndex);
+if (isExamSubmitted) return;
+tempSelectedOption = null;
+savedAnswers[currentQuestionIndex] = null; 
+questionStatus[currentQuestionIndex] = (questionStatus[currentQuestionIndex] === 4) ? 3 : 1; 
+updateOptionButtonVisual();
+updateQuestionGridButton(currentQuestionIndex); 
+updateMarkButtonVisual(currentQuestionIndex);
 }
-
 function markQuestion() {
-    if (isExamSubmitted) return;
-    const index = currentQuestionIndex;
-    const currentStatus = questionStatus[index];
-    const isAnswered = savedAnswers[index] !== null || tempSelectedOption !== null;
-
-    if (currentStatus === 3 || currentStatus === 4) {
-        questionStatus[index] = isAnswered ? 2 : 1; 
-    } else {
-        questionStatus[index] = isAnswered ? 4 : 3; 
-    }
-    updateQuestionGridButton(index);
-    updateMarkButtonVisual(index);
+if (isExamSubmitted) return;
+const index = currentQuestionIndex;
+const currentStatus = questionStatus[index];
+const isAnswered = savedAnswers[index] !== null || tempSelectedOption !== null;
+if (currentStatus === 3 || currentStatus === 4) {
+questionStatus[index] = isAnswered ? 2 : 1; 
+} else {
+questionStatus[index] = isAnswered ? 4 : 3; 
 }
-
+updateQuestionGridButton(index);
+updateMarkButtonVisual(index);
+}
 function togglePalette() {
-    const sidebar = document.getElementById('question-sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    if (!sidebar) return;
-    sidebar.classList.toggle('open');
-    if (backdrop) backdrop.classList.toggle('open', sidebar.classList.contains('open'));
+const sidebar = document.getElementById('question-sidebar');
+const backdrop = document.getElementById('sidebar-backdrop');
+if (!sidebar) return;
+sidebar.classList.toggle('open');
+if (backdrop) backdrop.classList.toggle('open', sidebar.classList.contains('open'));
 }
-
 function closePalette() {
-    const sidebar = document.getElementById('question-sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    if (sidebar) sidebar.classList.remove('open');
-    if (backdrop) backdrop.classList.remove('open');
+const sidebar = document.getElementById('question-sidebar');
+const backdrop = document.getElementById('sidebar-backdrop');
+if (sidebar) sidebar.classList.remove('open');
+if (backdrop) backdrop.classList.remove('open');
 }
-
 function updateMarkButtonVisual(index) {
-    const checkbox = document.getElementById('mark-checkbox');
-    if (!checkbox) return;
-    const status = questionStatus[index];
-    const isMarked = (status === 3 || status === 4);
-    checkbox.classList.toggle('checked', isMarked);
+const checkbox = document.getElementById('mark-checkbox');
+if (!checkbox) return;
+const status = questionStatus[index];
+const isMarked = (status === 3 || status === 4);
+checkbox.classList.toggle('checked', isMarked);
 }
-
 function saveAndNext() {
-    if (isExamSubmitted) return;
-    const index = currentQuestionIndex;
-    savedAnswers[index] = tempSelectedOption;
-
-    const isCurrentlyMarked = (questionStatus[index] === 3 || questionStatus[index] === 4);
-    const isAnswered = savedAnswers[index] !== null;
-
-    if (isAnswered) {
-        questionStatus[index] = isCurrentlyMarked ? 4 : 2; 
-    } else {
-        questionStatus[index] = isCurrentlyMarked ? 3 : 1; 
-    }
-    
-    updateQuestionGridButton(index);
-    updateMarkButtonVisual(index);
-    navigateQuestion(1);
+if (isExamSubmitted) return;
+const index = currentQuestionIndex;
+savedAnswers[index] = tempSelectedOption;
+const isCurrentlyMarked = (questionStatus[index] === 3 || questionStatus[index] === 4);
+const isAnswered = savedAnswers[index] !== null;
+if (isAnswered) {
+questionStatus[index] = isCurrentlyMarked ? 4 : 2; 
+} else {
+questionStatus[index] = isCurrentlyMarked ? 3 : 1; 
 }
-
+updateQuestionGridButton(index);
+updateMarkButtonVisual(index);
+navigateQuestion(1);
+}
 function navigateQuestion(step) {
-    if (isExamSubmitted) return;
-    const nextIndex = currentQuestionIndex + step;
-    displayQuestion(nextIndex);
+if (isExamSubmitted) return;
+const nextIndex = currentQuestionIndex + step;
+displayQuestion(nextIndex);
 }
-
 function generateQuestionGrid() {
-    questionGrid.innerHTML = '';
-    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
-        const button = document.createElement('button');
-        button.className = 'q-button status-1'; 
-        button.textContent = i + 1;
-        button.setAttribute('data-index', i);
-        button.onclick = () => {
-            if (isExamSubmitted || i === currentQuestionIndex) { closePalette(); return; }
-            if (tempSelectedOption !== null && savedAnswers[currentQuestionIndex] !== tempSelectedOption) {
-                 saveAndNext(); 
-                 displayQuestion(i);
-            } else {
-                displayQuestion(i);
-            }
-            closePalette();
-        };
-        questionGrid.appendChild(button);
-    }
+questionGrid.innerHTML = '';
+for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+const button = document.createElement('button');
+button.className = 'q-button status-1'; 
+button.textContent = i + 1;
+button.setAttribute('data-index', i);
+button.onclick = () => {
+if (isExamSubmitted || i === currentQuestionIndex) { closePalette(); return; }
+if (tempSelectedOption !== null && savedAnswers[currentQuestionIndex] !== tempSelectedOption) {
+saveAndNext(); 
+displayQuestion(i);
+} else {
+displayQuestion(i);
 }
-
+closePalette();
+};
+questionGrid.appendChild(button);
+}
+}
 function updateQuestionGridButton(index) {
-    const button = questionGrid.querySelector(`[data-index="${index}"]`);
-    if (button) {
-        button.className = 'q-button';
-        button.classList.add(`status-${questionStatus[index]}`);
-    }
+const button = questionGrid.querySelector(`[data-index="${index}"]`);
+if (button) {
+button.className = 'q-button';
+button.classList.add(`status-${questionStatus[index]}`);
 }
-
+}
 function updateLocalLanguage() {
-    if (isHindiLocal) {
-        document.body.classList.add('lang-hindi-global');
-    } else {
-        document.body.classList.remove('lang-hindi-global');
-    }
+if (isHindiLocal) {
+document.body.classList.add('lang-hindi-global');
+} else {
+document.body.classList.remove('lang-hindi-global');
 }
-
+}
 document.getElementById('lang-toggle-local').addEventListener('click', toggleLanguageHandler);
-
 function toggleLanguageHandler() {
-    isHindiLocal = !isHindiLocal;
-    updateLocalLanguage();
+isHindiLocal = !isHindiLocal;
+updateLocalLanguage();
 }
-
 function startTimer() {
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = formatTime(timeLeft);
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            alert("Time's up! The exam will now be submitted automatically.");
-            submitTest();
-        }
-        if (timeLeft <= 5 * 60) {
-            timerDisplay.style.backgroundColor = '#dc3545'; 
-            timerDisplay.style.color = 'white';
-        }
-    }, 1000);
+timerInterval = setInterval(() => {
+timeLeft--;
+timerDisplay.textContent = formatTime(timeLeft);
+if (timeLeft <= 0) {
+clearInterval(timerInterval);
+alert("Time's up! The exam will now be submitted automatically.");
+submitTest();
 }
-
+if (timeLeft <= 5 * 60) {
+timerDisplay.style.backgroundColor = '#dc3545'; 
+timerDisplay.style.color = 'white';
+}
+}, 1000);
+}
 function formatTime(seconds) {
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+const min = Math.floor(seconds / 60);
+const sec = seconds % 60;
+return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
 }
-
 function getSummary() {
-    let answered = 0; let notAnswered = 0; let reviewNotAnswered = 0; let reviewAnswered = 0; 
-    questionStatus.forEach(status => {
-        if (status === 2) answered++;
-        else if (status === 1) notAnswered++;
-        else if (status === 3) reviewNotAnswered++;
-        else if (status === 4) reviewAnswered++;
-    });
-    return { 
-        totalAnswered: answered + reviewAnswered, 
-        totalMarked: reviewNotAnswered + reviewAnswered, 
-        totalUnattempted: notAnswered + reviewNotAnswered 
-    };
+let answered = 0; let notAnswered = 0; let reviewNotAnswered = 0; let reviewAnswered = 0; 
+questionStatus.forEach(status => {
+if (status === 2) answered++;
+else if (status === 1) notAnswered++;
+else if (status === 3) reviewNotAnswered++;
+else if (status === 4) reviewAnswered++;
+});
+return { 
+totalAnswered: answered + reviewAnswered, 
+totalMarked: reviewNotAnswered + reviewAnswered, 
+totalUnattempted: notAnswered + reviewNotAnswered 
+};
 }
-
 function confirmSubmit() {
-    if (isExamSubmitted) return;
-    if (tempSelectedOption !== null && savedAnswers[currentQuestionIndex] !== tempSelectedOption) {
-        const saveConfirm = confirm("You have an unsaved option selected for the current question. Press OK to Save and then Submit, or Cancel to review the unsaved question.");
-        if (saveConfirm) {
-            saveAndNext(); 
-        } else {
-            return; 
-        }
-    }
-    const summary = getSummary();
-    const confirmationMessage = `Test Summary / परीक्षा सारांश:\n` + 
-        `Total Questions / कुल प्रश्न: ${TOTAL_QUESTIONS}\n` + 
-        `Answered / उत्तर दिया: ${summary.totalAnswered}\n` + 
-        `Marked for Review / समीक्षा के लिए चिह्नित: ${summary.totalMarked}\n` + 
-        `Not Answered / प्रयास नहीं किया: ${TOTAL_QUESTIONS - summary.totalAnswered}\n` + 
-        `Screen Switches / Minimizes Detected: ${tabSwitchCount}\n\n` + 
-        `Do you want to submit the test? / क्या आप परीक्षा जमा करना चाहते हैं?`;
-    
-    if (confirm(confirmationMessage)) {
-        submitTest();
-    }
+if (isExamSubmitted) return;
+if (tempSelectedOption !== null && savedAnswers[currentQuestionIndex] !== tempSelectedOption) {
+const saveConfirm = confirm("You have an unsaved option selected for the current question. Press OK to Save and then Submit, or Cancel to review the unsaved question.");
+if (saveConfirm) {
+saveAndNext(); 
+} else {
+return; 
 }
-
-function submitTest() {
-    if (isExamSubmitted) return;
-    isExamSubmitted = true;
-    quizInProgress = false;
-    quizLocked = false;
-    const cheatOverlay = document.getElementById('cheat-lock-overlay');
-    if (cheatOverlay) cheatOverlay.style.display = 'none';
-    
-    const mainHeader = document.getElementById('main-header');
-    if (mainHeader) mainHeader.style.setProperty('display', 'none', 'important');
-    if (controlPanel) controlPanel.style.setProperty('display', 'none', 'important');
-    
-    clearInterval(timerInterval);
-    document.querySelector('.zoom-controls').style.display = 'none';
-    let score = 0;
-    let wrongCount = 0;
-    let unattemptedCount = 0;
-    let detailedResultsHtml = '';
-    const optionLabels = ['A', 'B', 'C', 'D']; 
-
-    questionData.forEach((q, index) => {
-        const qId = q[0];
-        const qEn = q[2];
-        const qHi = q[3];
-        const options = q.slice(4); 
-
-        const selectedValue = savedAnswers[index] ? savedAnswers[index].toString() : null;
-        const correctAnswerValue = q[1].toString();
-
-        let resultClass = 'unattempted';
-        let statusText = 'Not Attempted / प्रयास नहीं किया';
-
-        if (selectedValue !== null) {
-            if (selectedValue === correctAnswerValue) {
-                score++;
-                resultClass = 'correct';
-                statusText = 'Correct / सही उत्तर';
-            } else {
-                wrongCount++;
-                resultClass = 'wrong';
-                statusText = 'Incorrect / गलत उत्तर';
-            }
-        } else {    
-            unattemptedCount++;
-        }
-
-        let optionsHtml = '';
-        options.forEach((opt, optIndex) => {
-            const optValue = (optIndex + 1).toString();
-            const label = optionLabels[optIndex];
-            let optionClass = '';
-
-            if (optValue === correctAnswerValue) optionClass = 'correct';
-            else if (optValue === selectedValue) optionClass = 'wrong';
-            
-            let remark = "";
-            if (optValue === selectedValue && selectedValue === correctAnswerValue) {
-                remark = `<span style="font-weight:bold;color:#ffffff;background:#006400;padding:3px 10px;border-radius:5px;">Your Answer - It is Correct ✓</span>`;
-            } else if (optValue === selectedValue && selectedValue !== correctAnswerValue) {
-                remark = `<span style="font-weight:bold;color:#ffffff;background:#8B0000;padding:3px 10px;border-radius:5px;">Your Answer - This is Wrong ✗</span>`;
-            } else if (optValue === correctAnswerValue) {
-                remark = `<span style="font-weight:bold;color:#ffffff;background:#006400;padding:3px 10px;border-radius:5px;">Correct Answer ✓</span>`;
-            }
-
-            optionsHtml += `
-            <div class="result-option ${optionClass}">
-                <div>
-                    ${label}. <span class="english-text">${opt[0]}</span>
-                    <span class="hindi-text">${opt[1]}</span>
-                </div>
-                ${remark}
-            </div>
-            `;
-        });
-
-        detailedResultsHtml += ` 
-            <div class="result-question review-item" data-status="${resultClass}">
-                <p style="font-weight:600; margin-top:0;">Q${index + 1}: <span class="english-text">${qEn}</span> <span class="hindi-text">${qHi}</span> </p>
-                <p style="font-weight: bold; margin-bottom:10px;">Status: ${statusText}</p>
-                ${optionsHtml}
-            </div>
-        `;
-    });
-
-    displayResults(score, wrongCount, unattemptedCount, detailedResultsHtml);
-    
-    const finalScoreString = `${score} / ${TOTAL_QUESTIONS}`;
-    
-    if (APPS_SCRIPT_URL) {
-        fetch(APPS_SCRIPT_URL, {
-            method: "POST",
-            mode: "cors",
-            redirect: "follow",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-                action: "submitScore",
-                spreadsheetId: SPREADSHEET_ID,
-                studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
-                username: safeStorage.get('currentUsername') || "trainee",
-                studentSection: safeStorage.get('studentSectionContext') || "SCREENER",
-                designation: safeStorage.get('currentDesignation') || "Trainee",
-                quizName: "SCREENER X RAY PAPER 1",
-                score: finalScoreString,
-                tabSwitchCount: tabSwitchCount,
-                timestamp: new Date().toLocaleString()
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === "success") {
-                alert("Your score (" + finalScoreString + ") has been saved successfully!");
-            }
-        })
-        .catch(err => console.error("Score logging error:", err));
-    }
 }
-
+const summary = getSummary();
+const confirmationMessage = `Test Summary / परीक्षा सारांश:\n` + 
+`Total Questions / कुल प्रश्न: ${TOTAL_QUESTIONS}\n` + 
+`Answered / उत्तर दिया: ${summary.totalAnswered}\n` + 
+`Marked for Review / समीक्षा के लिए चिह्नित: ${summary.totalMarked}\n` + 
+`Not Answered / प्रयास नहीं किया: ${TOTAL_QUESTIONS - summary.totalAnswered}\n` + 
+`Screen Switches / Minimizes Detected: ${tabSwitchCount}\n\n` + 
+`Do you want to submit the test? / क्या आप परीक्षा जमा करना चाहते हैं?`;
+if (confirm(confirmationMessage)) {
+submitTest();
+}
+}
+async function submitTest() {
+if (isExamSubmitted) return;
+isExamSubmitted = true;
+quizInProgress = false;
+quizLocked = false;
+const cheatOverlay = document.getElementById('cheat-lock-overlay');
+if (cheatOverlay) cheatOverlay.style.display = 'none';
+const mainHeader = document.getElementById('main-header');
+if (mainHeader) mainHeader.style.setProperty('display', 'none', 'important');
+if (controlPanel) controlPanel.style.setProperty('display', 'none', 'important');
+clearInterval(timerInterval);
+document.querySelector('.zoom-controls').style.display = 'none';
+let score = 0;
+let wrongCount = 0;
+let unattemptedCount = 0;
+let detailedResultsHtml = '';
+const optionLabels = ['A', 'B', 'C', 'D']; 
+questionData.forEach((q, index) => {
+const qId = q[0];
+const qEn = q[2];
+const qHi = q[3];
+const options = q.slice(4); 
+const selectedValue = savedAnswers[index] ? savedAnswers[index].toString() : null;
+const correctAnswerValue = q[1].toString();
+let resultClass = 'unattempted';
+let statusText = 'Not Attempted / प्रयास नहीं किया';
+if (selectedValue !== null) {
+if (selectedValue === correctAnswerValue) {
+score++;
+resultClass = 'correct';
+statusText = 'Correct / सही उत्तर';
+} else {
+wrongCount++;
+resultClass = 'wrong';
+statusText = 'Incorrect / गलत उत्तर';
+}
+} else {    
+unattemptedCount++;
+}
+let optionsHtml = '';
+options.forEach((opt, optIndex) => {
+const optValue = (optIndex + 1).toString();
+const label = optionLabels[optIndex];
+let optionClass = '';
+if (optValue === correctAnswerValue) optionClass = 'correct';
+else if (optValue === selectedValue) optionClass = 'wrong';
+let remark = "";
+if (optValue === selectedValue && selectedValue === correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#006400;padding:3px 10px;border-radius:5px;">Your Answer - It is Correct ✓</span>`;
+} else if (optValue === selectedValue && selectedValue !== correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#8B0000;padding:3px 10px;border-radius:5px;">Your Answer - This is Wrong ✗</span>`;
+} else if (optValue === correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#006400;padding:3px 10px;border-radius:5px;">Correct Answer ✓</span>`;
+}
+optionsHtml += `
+<div class="result-option ${optionClass}">
+<div>
+${label}. <span class="english-text">${opt[0]}</span>
+<span class="hindi-text">${opt[1]}</span>
+</div>
+${remark}
+</div>
+`;
+});
+detailedResultsHtml += ` 
+<div class="result-question review-item" data-status="${resultClass}">
+<p style="font-weight:600; margin-top:0;">Q${index + 1}: <span class="english-text">${qEn}</span> <span class="hindi-text">${qHi}</span> </p>
+<p style="font-weight: bold; margin-bottom:10px;">Status: ${statusText}</p>
+${optionsHtml}
+</div>
+`;
+});
+displayResults(score, wrongCount, unattemptedCount, detailedResultsHtml);
+const finalScoreString = `${score} / ${TOTAL_QUESTIONS}`;
+const urlParams = new URLSearchParams(window.location.search);
+const payload = {
+action: "submitScore",
+spreadsheetId: SPREADSHEET_ID,
+studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
+username: urlParams.get('username') || safeStorage.get('currentUsername') || "trainee",
+studentSection: urlParams.get('section') || safeStorage.get('studentSectionContext') || "SCREENER",
+designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || "Trainee",
+quizName: "SCREENER X RAY PAPER 1",
+score: finalScoreString,
+tabSwitchCount: tabSwitchCount,
+timestamp: new Date().toLocaleString()
+};
+if (APPS_SCRIPT_URL) {
+try {
+await submitQuizResult(payload);
+alert("Your score (" + finalScoreString + ") has been saved successfully!");
+} catch (err) {
+console.error("Score logging error:", err);
+alert("Server is extremely busy right now, but your results have been rendered locally.");
+}
+}
+}
 function displayResults(score, wrongCount, unattemptedCount, detailedHtml) {
-    let finalPercentage = (score / TOTAL_QUESTIONS) * 100;
-    let resultStatusHtml = (finalPercentage >= 80) ? 
-        `<p><strong>Result Status:</strong> <span style="font-size:1.3em; color:#16a34a; font-weight:bold;">PASS - Congratulations!</span></p>` :
-        `<p><strong>Result Status:</strong> <span style="font-size:1.3em; color:#dc3545; font-weight:bold;">FAIL</span></p>`;
-
-    resultDisplay.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-            <h2 style="margin: 0; font-size: 1.8em; color: #0284c7; flex: 1; min-width: 250px;">Exam Review & Performance Metrics</h2>
-            <div style="display: flex; gap: 10px;">
-                <button type="button" class="btn-download-pdf" onclick="downloadSummaryOnly(${score}, ${wrongCount}, ${unattemptedCount})">📄 Download Summary PDF</button>
-                <button type="button" class="lang-toggle-btn" id="lang-toggle-review" onclick="toggleLanguageHandler()">Toggle Hindi / English</button>
-            </div>
-        </div>
-        <hr style="border: 0; border-top: 1px solid #ccc; margin-bottom: 20px;">
-        <div id="summary-metrics-box" style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ccc;">
-            <p style="margin:5px 0;"><strong>Candidate Name:</strong> ${userName}</p>
-            <p style="margin:5px 0;"><strong>Final Score (Marks Earned):</strong> <span style="font-size:1.3em; color:#0284c7; font-weight:700;">${score} / ${TOTAL_QUESTIONS}</span></p>
-            ${resultStatusHtml}
-            <p style="margin:5px 0;"><strong>Accuracy / Percentage:</strong> ${finalPercentage.toFixed(1)}%</p>
-            <p style="margin:5px 0;"><strong>Screen Switch / Minimize Count:</strong> <span style="font-weight:700; color:${tabSwitchCount > 0 ? '#dc3545' : '#16a34a'};">${tabSwitchCount}</span></p>
-        </div>
-        
-        <div class="filter-container">
-            <button class="filter-btn active" onclick="filterReview('all', this)" style="background-color:#007bff;">All (${TOTAL_QUESTIONS})</button>
-            <button class="filter-btn" onclick="filterReview('correct', this)" style="background-color:#16a34a;">Correct (${score})</button>
-            <button class="filter-btn" onclick="filterReview('wrong', this)" style="background-color:#dc3545;">Wrong (${wrongCount})</button>
-            <button class="filter-btn" onclick="filterReview('unattempted', this)" style="background-color:#6c757d;">Unattempted (${unattemptedCount})</button>
-        </div>
-
-        <h3 style="color:#0284c7;">Detailed Question Analysis:</h3>
-        <div id="filtered-questions-box">${detailedHtml}</div>
-        <br>
-        <button onclick="window.close();" class="btn-control btn-submit-test" style="width:100%; text-align:center;">CLOSE & EXIT</button>
-    `;
-    
-    document.getElementById('main-test-area').style.display = 'none';
-    resultDisplay.style.display = 'block';
-    updateLocalLanguage();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+let finalPercentage = (score / TOTAL_QUESTIONS) * 100;
+let resultStatusHtml = (finalPercentage >= 80) ? 
+`<p><strong>Result Status:</strong> <span style="font-size:1.3em; color:#16a34a; font-weight:bold;">PASS - Congratulations!</span></p>` :
+`<p><strong>Result Status:</strong> <span style="font-size:1.3em; color:#dc3545; font-weight:bold;">FAIL</span></p>`;
+resultDisplay.innerHTML = `
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+<h2 style="margin: 0; font-size: 1.8em; color: #0284c7; flex: 1; min-width: 250px;">Exam Review & Performance Metrics</h2>
+<div style="display: flex; gap: 10px;">
+<button type="button" class="btn-download-pdf" onclick="downloadSummaryOnly(${score}, ${wrongCount}, ${unattemptedCount})">📄 Download Summary PDF</button>
+<button type="button" class="lang-toggle-btn" id="lang-toggle-review" onclick="toggleLanguageHandler()">Toggle Hindi / English</button>
+</div>
+</div>
+<hr style="border: 0; border-top: 1px solid #ccc; margin-bottom: 20px;">
+<div id="summary-metrics-box" style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ccc;">
+<p style="margin:5px 0;"><strong>Candidate Name:</strong> ${userName}</p>
+<p style="margin:5px 0;"><strong>Final Score (Marks Earned):</strong> <span style="font-size:1.3em; color:#0284c7; font-weight:700;">${score} / ${TOTAL_QUESTIONS}</span></p>
+${resultStatusHtml}
+<p style="margin:5px 0;"><strong>Accuracy / Percentage:</strong> ${finalPercentage.toFixed(1)}%</p>
+<p style="margin:5px 0;"><strong>Screen Switch / Minimize Count:</strong> <span style="font-weight:700; color:${tabSwitchCount > 0 ? '#dc3545' : '#16a34a'};">${tabSwitchCount}</span></p>
+</div>
+<div class="filter-container">
+<button class="filter-btn active" onclick="filterReview('all', this)" style="background-color:#007bff;">All (${TOTAL_QUESTIONS})</button>
+<button class="filter-btn" onclick="filterReview('correct', this)" style="background-color:#16a34a;">Correct (${score})</button>
+<button class="filter-btn" onclick="filterReview('wrong', this)" style="background-color:#dc3545;">Wrong (${wrongCount})</button>
+<button class="filter-btn" onclick="filterReview('unattempted', this)" style="background-color:#6c757d;">Unattempted (${unattemptedCount})</button>
+</div>
+<h3 style="color:#0284c7;">Detailed Question Analysis:</h3>
+<div id="filtered-questions-box">${detailedHtml}</div>
+<br>
+<button onclick="window.close();" class="btn-control btn-submit-test" style="width:100%; text-align:center;">CLOSE & EXIT</button>
+`;
+document.getElementById('main-test-area').style.display = 'none';
+resultDisplay.style.display = 'block';
+updateLocalLanguage();
+window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 function downloadSummaryOnly(score, wrongCount, unattemptedCount) {
-    let finalPercentage = (score / TOTAL_QUESTIONS) * 100;
-    let statusText = (finalPercentage >= 80) ? "PASS" : "FAIL";
-    let statusColor = (finalPercentage >= 80) ? "#16a34a" : "#dc3545";
-
-    const candidateDesignation = safeStorage.get('currentDesignation') || "N/A";
-    const candidateSection = safeStorage.get('studentSectionContext') || "N/A";
-    const submissionTime = new Date().toLocaleString();
-
-    // Create wrapper for rendering
-    const pdfContainer = document.createElement('div');
-    pdfContainer.id = "mobile-pdf-render-box";
-    pdfContainer.style.position = 'fixed';
-    pdfContainer.style.top = '0';
-    pdfContainer.style.left = '0';
-    pdfContainer.style.width = '100%';
-    pdfContainer.style.height = '100%';
-    pdfContainer.style.backgroundColor = 'rgba(0,0,0,0.8)';
-    pdfContainer.style.zIndex = '999999';
-    pdfContainer.style.display = 'flex';
-    pdfContainer.style.justifyContent = 'center';
-    pdfContainer.style.alignItems = 'center';
-
-    const innerBox = document.createElement('div');
-    innerBox.style.width = '750px';
-    innerBox.style.backgroundColor = '#ffffff';
-    innerBox.style.padding = '30px';
-    innerBox.style.fontFamily = 'Poppins, sans-serif';
-    innerBox.style.color = '#333';
-    innerBox.style.borderRadius = '8px';
-    innerBox.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)';
-
-    innerBox.innerHTML = `
-        <div style="border-bottom: 2px solid #38bdf8; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">
-            <h1 style="color: #0284c7; margin: 0; font-size: 24px;">ASTI DELHI</h1>
-            <h3 style="margin: 5px 0 0 0; color: #555; font-size: 16px;">Exam Performance Summary</h3>
-        </div>
-
-        <div style="background: #f8f9fa; border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>
-                    <td style="padding: 6px 0;">SCREENER X RAY PAPER 1</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>
-                    <td style="padding: 6px 0;">${userName}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Designation:</td>
-                    <td style="padding: 6px 0;">${candidateDesignation}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Section:</td>
-                    <td style="padding: 6px 0;">${candidateSection}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Time of Submission:</td>
-                    <td style="padding: 6px 0;">${submissionTime}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Final Score / Marks:</td>
-                    <td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: #0284c7;">${score} / ${TOTAL_QUESTIONS}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Percentage / Accuracy:</td>
-                    <td style="padding: 6px 0;">${finalPercentage.toFixed(1)}%</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Result Status:</td>
-                    <td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: ${statusColor};">${statusText}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; font-weight: bold;">Screen Switch / Minimize Count:</td>
-                    <td style="padding: 6px 0; font-weight: bold; color: ${tabSwitchCount > 0 ? '#dc3545' : '#16a34a'};">${tabSwitchCount}</td>
-                </tr>
-            </table>
-        </div>
-
-        <h3 style="color: #0284c7; margin-bottom: 10px; font-size: 16px;">Summary Breakdown Statistics</h3>
-        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
-            <thead>
-                <tr style="background-color: #0284c7; color: white;">
-                    <th style="padding: 10px; border: 1px solid #38bdf8;">Total Questions</th>
-                    <th style="padding: 10px; border: 1px solid #38bdf8;">Correct</th>
-                    <th style="padding: 10px; border: 1px solid #38bdf8;">Wrong</th>
-                    <th style="padding: 10px; border: 1px solid #38bdf8;">Unattempted</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">${TOTAL_QUESTIONS}</td>
-                    <td style="padding: 10px; border: 1px solid #ccc; color: #16a34a; font-weight: bold;">${score}</td>
-                    <td style="padding: 10px; border: 1px solid #ccc; color: #dc3545; font-weight: bold;">${wrongCount}</td>
-                    <td style="padding: 10px; border: 1px solid #ccc; color: #6c757d; font-weight: bold;">${unattemptedCount}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 10px;">
-            This is an official automated performance report generated by ASTI Delhi Exam Portal.
-        </div>
-    `;
-
-    pdfContainer.appendChild(innerBox);
-    document.body.appendChild(pdfContainer);
-
-    const opt = {
-        margin:       10,
-        filename:     `${userName.toLowerCase().replace(/\s+/g, '_')}_summary.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    // Wait 300ms for browser layout & fonts to resolve
-    setTimeout(() => {
-        html2pdf().set(opt).from(innerBox).save().then(() => {
-            if (pdfContainer.parentNode) {
-                pdfContainer.parentNode.removeChild(pdfContainer);
-            }
-        }).catch(err => {
-            console.error("PDF generation failed:", err);
-            if (pdfContainer.parentNode) {
-                pdfContainer.parentNode.removeChild(pdfContainer);
-            }
-        });
-    }, 300);
+let finalPercentage = (score / TOTAL_QUESTIONS) * 100;
+let statusText = (finalPercentage >= 80) ? "PASS" : "FAIL";
+let statusColor = (finalPercentage >= 80) ? "#16a34a" : "#dc3545";
+const candidateDesignation = safeStorage.get('currentDesignation') || "N/A";
+const candidateSection = safeStorage.get('studentSectionContext') || "N/A";
+const submissionTime = new Date().toLocaleString();
+// Create wrapper for rendering
+const pdfContainer = document.createElement('div');
+pdfContainer.id = "mobile-pdf-render-box";
+pdfContainer.style.position = 'fixed';
+pdfContainer.style.top = '0';
+pdfContainer.style.left = '0';
+pdfContainer.style.width = '100%';
+pdfContainer.style.height = '100%';
+pdfContainer.style.backgroundColor = 'rgba(0,0,0,0.8)';
+pdfContainer.style.zIndex = '999999';
+pdfContainer.style.display = 'flex';
+pdfContainer.style.justifyContent = 'center';
+pdfContainer.style.alignItems = 'center';
+const innerBox = document.createElement('div');
+innerBox.style.width = '750px';
+innerBox.style.backgroundColor = '#ffffff';
+innerBox.style.padding = '30px';
+innerBox.style.fontFamily = 'Poppins, sans-serif';
+innerBox.style.color = '#333';
+innerBox.style.borderRadius = '8px';
+innerBox.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)';
+innerBox.innerHTML = `
+<div style="border-bottom: 2px solid #38bdf8; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">
+<h1 style="color: #0284c7; margin: 0; font-size: 24px;">ASTI DELHI</h1>
+<h3 style="margin: 5px 0 0 0; color: #555; font-size: 16px;">Exam Performance Summary</h3>
+</div>
+<div style="background: #f8f9fa; border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+<table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+<tr>
+<td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>
+<td style="padding: 6px 0;">SCREENER X RAY PAPER 1</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>
+<td style="padding: 6px 0;">${userName}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Designation:</td>
+<td style="padding: 6px 0;">${candidateDesignation}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Section:</td>
+<td style="padding: 6px 0;">${candidateSection}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Time of Submission:</td>
+<td style="padding: 6px 0;">${submissionTime}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Final Score / Marks:</td>
+<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: #0284c7;">${score} / ${TOTAL_QUESTIONS}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Percentage / Accuracy:</td>
+<td style="padding: 6px 0;">${finalPercentage.toFixed(1)}%</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Result Status:</td>
+<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: ${statusColor};">${statusText}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Screen Switch / Minimize Count:</td>
+<td style="padding: 6px 0; font-weight: bold; color: ${tabSwitchCount > 0 ? '#dc3545' : '#16a34a'};">${tabSwitchCount}</td>
+</tr>
+</table>
+</div>
+<h3 style="color: #0284c7; margin-bottom: 10px; font-size: 16px;">Summary Breakdown Statistics</h3>
+<table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
+<thead>
+<tr style="background-color: #0284c7; color: white;">
+<th style="padding: 10px; border: 1px solid #38bdf8;">Total Questions</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Correct</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Wrong</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Unattempted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">${TOTAL_QUESTIONS}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a; font-weight: bold;">${score}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #dc3545; font-weight: bold;">${wrongCount}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #6c757d; font-weight: bold;">${unattemptedCount}</td>
+</tr>
+</tbody>
+</table>
+<div style="margin-top: 40px; text-align: center; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 10px;">
+This is an official automated performance report generated by ASTI Delhi Exam Portal.
+</div>
+`;
+pdfContainer.appendChild(innerBox);
+document.body.appendChild(pdfContainer);
+const opt = {
+margin:       10,
+filename:     `${userName.toLowerCase().replace(/\s+/g, '_')}_summary.pdf`,
+image:        { type: 'jpeg', quality: 0.98 },
+html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+};
+// Wait 300ms for browser layout & fonts to resolve
+setTimeout(() => {
+html2pdf().set(opt).from(innerBox).save().then(() => {
+if (pdfContainer.parentNode) {
+pdfContainer.parentNode.removeChild(pdfContainer);
 }
-
+}).catch(err => {
+console.error("PDF generation failed:", err);
+if (pdfContainer.parentNode) {
+pdfContainer.parentNode.removeChild(pdfContainer);
+}
+});
+}, 300);
+}
 function filterReview(filterType, btnElement) {
-    const reviewItems = document.querySelectorAll('.review-item');
-    reviewItems.forEach(item => {
-        const itemStatus = item.getAttribute('data-status');
-        if (filterType === 'all' || itemStatus === filterType) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-
-    const filterButtons = document.querySelectorAll('.filter-container .filter-btn');
-    filterButtons.forEach(btn => btn.classList.remove('active'));
-
-    if (btnElement) {
-        btnElement.classList.add('active');
-    }
+const reviewItems = document.querySelectorAll('.review-item');
+reviewItems.forEach(item => {
+const itemStatus = item.getAttribute('data-status');
+if (filterType === 'all' || itemStatus === filterType) {
+item.style.display = 'block';
+} else {
+item.style.display = 'none';
+}
+});
+const filterButtons = document.querySelectorAll('.filter-container .filter-btn');
+filterButtons.forEach(btn => btn.classList.remove('active'));
+if (btnElement) {
+btnElement.classList.add('active');
+}
 }
 </script>
 </body>
