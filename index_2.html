@@ -13,6 +13,7 @@
   <!-- HTML2Canvas & jsPDF for PDF Generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     :root {
@@ -187,7 +188,7 @@
     .btn-download {
       background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
       padding: 10px 17px;
-      font-size: 16px;
+      font-size: 15px;
       color: white;
       border-radius: 6px;
       border: none;
@@ -231,54 +232,54 @@
     .batch-select-container label {
       font-weight: bold;
       color: var(--primary-red);
-      font-size: 17px;
+      font-size: 15px;
     }
 
     .batch-select-container select {
-      padding: 10px 14px;
+      padding: 8px 12px;
       border-radius: 6px;
       border: 1.5px solid var(--border-color);
       font-weight: bold;
       color: var(--text-dark);
       outline: none;
       cursor: pointer;
-      font-size: 16px;
-      max-width: 250px;
+      font-size: 14px;
+      max-width: 230px;
     }
 
     .remarks-note-box {
       background: #fcf8e3;
       border: 1.5px solid #fbeed5;
       border-left: 5px solid var(--primary-red);
-      padding: 14px 19px;
+      padding: 12px 16px;
       border-radius: 6px;
       margin-bottom: 18px;
-      font-size: 14px;
+      font-size: 13px;
       color: #c09853;
     }
 
     .remarks-note-title {
       font-weight: bold;
       color: var(--primary-red);
-      font-size: 16px;
-      margin-bottom: 7px;
+      font-size: 15px;
+      margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .remarks-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
       color: #2c3e50;
     }
 
     .remarks-item {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .table-section {
@@ -290,21 +291,24 @@
       max-height: 520px;
       overflow: auto;
       position: relative;
+      width: 100%;
     }
 
     .detail-table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      font-size: 16px;
-      min-width: 800px;
+      font-size: 14px;
+      table-layout: auto;
     }
 
     .detail-table th, .detail-table td {
-      padding: 12px 14px;
+      padding: 8px 10px;
       text-align: center;
       border-right: 1px solid rgba(179, 27, 27, 0.15);
       border-bottom: 1px solid rgba(179, 27, 27, 0.15);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .detail-table thead th {
@@ -314,15 +318,17 @@
       background-color: #fadbd8;
       color: var(--primary-red);
       font-weight: bold;
-      white-space: nowrap;
+      white-space: normal;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      font-size: 16px;
+      font-size: 14px;
+      vertical-align: middle;
+      line-height: 1.2;
     }
 
     .detail-table td {
       color: var(--text-dark);
       font-weight: 600;
-      white-space: nowrap;
+      white-space: normal;
       vertical-align: middle;
     }
 
@@ -380,7 +386,7 @@
       width: 100vw;
       height: 100vh;
       background: #ffffff;
-      padding: 25px 35px;
+      padding: 20px 30px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -389,10 +395,7 @@
 
     .overall-split-container {
       display: flex;
-      flex: 1;
       gap: 20px;
-      min-height: 400px;
-      height: calc(100vh - 310px);
       width: 100%;
     }
 
@@ -400,18 +403,15 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      height: 100%;
       overflow: hidden;
     }
 
     .overall-table-wrapper .table-section {
-      flex: 1;
-      height: 100%;
-      max-height: 100%;
+      max-height: calc(100vh - 280px);
     }
 
     .overall-chart-wrapper {
-      width: 420px;
+      width: 320px;
       background: #ffffff;
       border: 1.5px solid var(--border-color);
       border-radius: 8px;
@@ -425,11 +425,11 @@
     }
 
     .chart-box-title {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: bold;
       color: var(--primary-red);
       text-transform: uppercase;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       text-align: center;
     }
 
@@ -580,10 +580,10 @@
   <div class="modal-overlay-fullpage" id="overallPerformanceModal">
     <div class="fullpage-content">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; margin-bottom: 18px;">
-        <h2 style="color: var(--primary-red); margin: 0; font-size: 28px; text-transform: uppercase;">
+        <h2 style="color: var(--primary-red); margin: 0; font-size: 26px; text-transform: uppercase;">
           OVERALL PERFORMANCE REPORT
         </h2>
-        <div style="font-weight: bold; font-size: 18px; color: var(--text-dark);" id="overallReportDateLabel">
+        <div style="font-weight: bold; font-size: 16px; color: var(--text-dark);" id="overallReportDateLabel">
           <!-- Date shown dynamically -->
         </div>
       </div>
@@ -617,7 +617,6 @@
           </select>
         </div>
 
-        <!-- NEW QUIZ PAPER FILTER DROPDOWN -->
         <div>
           <label for="overallQuizFilter">Select Quiz Paper: </label>
           <select id="overallQuizFilter" onchange="calculatePerformanceAndSort(); renderOverallPerformanceTable();">
@@ -625,7 +624,11 @@
           </select>
         </div>
 
-        <div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-download" style="background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);" onclick="downloadOverallPerformancePdf()">
+            📄 Download PDF Report (Portrait)
+          </button>
+          
           <button class="btn-download" onclick="downloadOverallPerformanceCsv()">
             📥 Download Performance Report (CSV)
           </button>
@@ -636,23 +639,23 @@
         Calculating performance marks...
       </div>
 
-      <!-- SPLIT LAYOUT: TABLE ON LEFT, PIE CHART ON RIGHT -->
+      <!-- Split Layout Container (Table Left, Pie Chart Right on webpage) -->
       <div class="overall-split-container" id="overallReportContainer">
         
-        <!-- Left Side: Data Table -->
-        <div class="overall-table-wrapper">
+        <!-- Table Section -->
+        <div class="overall-table-wrapper" id="overallTableWrapper">
           <div class="table-section">
             <table class="detail-table" id="overallReportTable">
               <thead>
                 <tr style="background-color: #fadbd8; color: var(--primary-red);">
-                  <th>RANK / S.NO</th>
-                  <th>USERNAME / ID</th>
-                  <th>DESIGNATION</th>
-                  <th>NAME</th>
-                  <th>COY</th>
-                  <th>BATCH</th>
-                  <th id="marksHeaderLabel">MARKS (%)</th>
-                  <th>REMARK</th>
+                  <th style="width: 55px;">S.NO</th>
+                  <th style="width: 100px;">USERNAME / ID</th>
+                  <th style="width: 100px;">DESIGNATION</th>
+                  <th style="width: 140px;">NAME</th>
+                  <th style="width: 65px;">COY</th>
+                  <th style="width: 75px;">BATCH</th>
+                  <th id="marksHeaderLabel" style="width: 85px;">MARKS (%)</th>
+                  <th style="width: 110px;">REMARK</th>
                 </tr>
               </thead>
               <tbody id="overallTableBody"></tbody>
@@ -660,10 +663,10 @@
           </div>
         </div>
 
-        <!-- Right Side: Performance Breakdown Pie Chart -->
-        <div class="overall-chart-wrapper">
-          <div class="chart-box-title" id="pieChartTitle">📊 Performance Breakdown</div>
-          <div style="width: 100%; height: 320px; position: relative;">
+        <!-- Pie Chart Box -->
+        <div class="overall-chart-wrapper" id="overallChartWrapper">
+          <div class="chart-box-title">📊 Performance Breakdown</div>
+          <div style="width: 260px; height: 260px; position: relative;">
             <canvas id="performancePieChartCanvas"></canvas>
           </div>
         </div>
@@ -716,6 +719,15 @@
     let overallPieChartInstance = null;
     let selectedStudentIndex = 0;
     let batchColumnIndex = -1;
+
+    function getJsPDF() {
+      if (window.jspdf && window.jspdf.jsPDF) {
+        return window.jspdf.jsPDF;
+      } else if (window.jsPDF) {
+        return window.jsPDF;
+      }
+      return null;
+    }
 
     function formatDateToDDMMYYYY(val) {
       if (val === undefined || val === null || val === '') return '';
@@ -793,8 +805,22 @@
       const targetUrl = selectedBatch === "2" ? WEB_APP_URL_BATCH_2 : WEB_APP_URL_BATCH_1;
 
       try {
-        const response = await fetch(`${targetUrl}?getBatchReport=true&_t=${new Date().getTime()}`);
-        const result = await response.json();
+        const response = await fetch(`${targetUrl}?getBatchReport=true&_t=${new Date().getTime()}`, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        }
+
+        const text = await response.text();
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (e) {
+          throw new Error("Invalid response format. Please verify Google Web App access permissions.");
+        }
 
         if (result.status === 'success') {
           if (result.title) {
@@ -805,8 +831,8 @@
 
           loader.style.display = 'none';
           container.style.display = 'block';
-          globalReportHeaders = result.headers;
-          globalReportRows = result.rows;
+          globalReportHeaders = result.headers || [];
+          globalReportRows = result.rows || [];
           
           batchColumnIndex = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'batch');
           
@@ -817,7 +843,7 @@
         }
       } catch (error) {
         console.error('Error fetching batch progress data:', error);
-        loader.innerText = `Unable to fetch Batch ${selectedBatch} report from database.`;
+        loader.innerText = `Unable to fetch Batch ${selectedBatch} report from database: ${error.message}`;
       }
     }
 
@@ -908,7 +934,7 @@
       return formattedLines.join('<br>');
     }
 
-    /* --- OVERALL PERFORMANCE / WEAK PERFORMERS FEATURE WITH QUIZ PAPER FILTER --- */
+    /* --- OVERALL PERFORMANCE / WEAK PERFORMERS FEATURE --- */
 
     function openOverallPerformanceModal() {
       document.getElementById('overallPerformanceModal').style.display = 'block';
@@ -928,12 +954,21 @@
       loader.style.display = 'block';
 
       try {
-        const response = await fetch(`${targetUrl}?getBatchReport=true&_t=${new Date().getTime()}`);
-        const result = await response.json();
+        const response = await fetch(`${targetUrl}?getBatchReport=true&_t=${new Date().getTime()}`, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const text = await response.text();
+        const result = JSON.parse(text);
 
         if (result.status === 'success') {
-          globalReportHeaders = result.headers;
-          globalReportRows = result.rows;
+          globalReportHeaders = result.headers || [];
+          globalReportRows = result.rows || [];
           batchColumnIndex = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'batch');
 
           populateOverallBatchDropdown();
@@ -941,11 +976,11 @@
           calculatePerformanceAndSort();
           renderOverallPerformanceTable();
         } else {
-          alert('Failed to retrieve quiz results.');
+          alert('Failed to retrieve quiz results: ' + (result.message || 'Unknown error'));
         }
       } catch (e) {
         console.error("Overall Performance fetch error:", e);
-        alert('Error fetching section details for overall report.');
+        alert(`Error fetching section details for overall report: ${e.message}`);
       } finally {
         loader.style.display = 'none';
       }
@@ -973,7 +1008,6 @@
       });
     }
 
-    /* POPULATES QUIZ PAPER DROPDOWN FILTER */
     function populateQuizPaperDropdown() {
       const quizSelect = document.getElementById('overallQuizFilter');
       quizSelect.innerHTML = '<option value="ALL">All Quiz Papers (Average)</option>';
@@ -1002,17 +1036,10 @@
 
     function calculatePerformanceAndSort() {
       const selectedQuizCol = document.getElementById('overallQuizFilter').value;
-      // Find Username/ID column
-const usernameIdx = globalReportHeaders.findIndex(h => h && (h.toLowerCase().includes('user') || h.toLowerCase().includes('id')));
-
-// Find Designation column
-const desigIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('desig'));
-
-// Find Name column specifically (excluding 'username')
-const nameIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'name' || (h.toLowerCase().includes('name') && !h.toLowerCase().includes('user')));
-
-// Find Coy column
-const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('coy'));
+      const usernameIdx = globalReportHeaders.findIndex(h => h && (h.toLowerCase().includes('user') || h.toLowerCase().includes('id')));
+      const desigIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('desig'));
+      const nameIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'name' || (h.toLowerCase().includes('name') && !h.toLowerCase().includes('user')));
+      const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('coy'));
 
       const quizStartColIndex = 14;
 
@@ -1105,13 +1132,13 @@ const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes(
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${idx + 1}</td>
+          <td style="font-weight: bold;">${idx + 1}</td>
           <td>${item.username}</td>
           <td>${item.designation}</td>
-          <td>${item.name}</td>
+          <td style="word-break: break-word; text-align: left; padding-left: 10px;">${item.name}</td>
           <td>${item.coy}</td>
           <td>${item.batch}</td>
-          <td style="font-size:17px; font-weight:bold;">${item.avgMarks}%</td>
+          <td style="font-size:15px; font-weight:bold;">${item.avgMarks}%</td>
           <td class="${item.remarkCss}">${item.remark}</td>
         `;
         tbody.appendChild(tr);
@@ -1136,7 +1163,7 @@ const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes(
         "Very Poor (1-50%)",
         "Poor (51-60%)",
         "Average (61-70%)",
-        "Improvement Needed (71-80%)",
+        "Need Impr. (71-80%)",
         "Very Good (81-90%)",
         "Excellent (91-100%)"
       ];
@@ -1189,24 +1216,176 @@ const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes(
             legend: {
               position: 'bottom',
               labels: {
-                font: { size: 12, weight: 'bold' },
-                boxWidth: 14,
-                padding: 10
+                boxWidth: 12,
+                padding: 8,
+                font: { size: 10, weight: 'bold' }
               }
             },
             datalabels: {
-              color: '#000',
-              font: { weight: 'bold', size: 12 },
+              color: '#1c2833',
+              font: { weight: 'bold', size: 11 },
               formatter: (value) => {
                 if (value === 0 || totalCount === 0) return '';
-                const pct = Math.round((value / totalCount) * 100);
-                return `${value}\n(${pct}%)`;
-              },
-              textAlign: 'center'
+                const percentage = Math.round((value / totalCount) * 100);
+                return `${value}\n(${percentage}%)`;
+              }
             }
           }
         }
       });
+    }
+
+    /* REVISED & FIXED OVERALL PERFORMANCE PDF EXPORT
+       Root cause of the old bug: the previous version rasterized the whole
+       table + chart into ONE tall screenshot, then cut that image into
+       fixed-height page-sized strips. Because the cut points had no idea
+       where a table row actually ended, rows sitting on a page boundary
+       got sliced and their content appeared twice (once cut off at the
+       bottom of one page, again at the top of the next). The pie chart,
+       being part of the same single image, could get sliced the same way.
+
+       Fix: draw the table as a real vector table (jsPDF-AutoTable), which
+       always keeps whole rows together and repeats the header row on new
+       pages, and place the pie chart as its own image with an explicit
+       page-break check so it always lands whole on a single page. */
+    async function downloadOverallPerformancePdf() {
+      const JsPDF = getJsPDF();
+      if (!JsPDF) {
+        alert("PDF library is loading. Please try again in a moment.");
+        return;
+      }
+
+      const origTable = document.getElementById('overallReportTable');
+      if (!origTable || !origTable.querySelector('tbody tr')) {
+        alert("No report data available to export.");
+        return;
+      }
+
+      // Pull headers + rows straight from the live (currently filtered) table
+      const headerCells = Array.from(origTable.querySelectorAll('thead th')).map(th => th.innerText.trim());
+      headerCells.push('SIGN');
+
+      const bodyRows = Array.from(origTable.querySelectorAll('tbody tr'))
+        .map(tr => Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim()))
+        .filter(r => r.length === headerCells.length - 1); // drop the "no data" placeholder row
+
+      if (bodyRows.length === 0) {
+        alert("No report data available to export.");
+        return;
+      }
+
+      bodyRows.forEach(r => r.push('')); // blank SIGN cell to be signed by hand
+
+      const pdf = new JsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const reportDate = getTodayFormattedDate();
+      const nameColIndex = headerCells.findIndex(h => h.toLowerCase() === 'name');
+
+      function drawReportHeader() {
+        pdf.setFont(undefined, 'bold');
+        pdf.setFontSize(16);
+        pdf.setTextColor(179, 27, 27);
+        pdf.text('OVERALL PERFORMANCE REPORT', pdfWidth / 2, margin + 4, { align: 'center' });
+
+        pdf.setFont(undefined, 'bold');
+        pdf.setFontSize(10);
+        pdf.setTextColor(85, 85, 85);
+        pdf.text(`Report Date: ${reportDate}`, pdfWidth / 2, margin + 10, { align: 'center' });
+
+        pdf.setFont(undefined, 'normal');
+        pdf.setFontSize(8);
+        pdf.setTextColor(51, 51, 51);
+        pdf.text(
+          'GRADING CRITERIA: 1-50%: Very Poor | 51-60%: Poor | 61-70%: Average | 71-80%: Need Improvement | 81-90%: Very Good | 91-100%: Excellent',
+          pdfWidth / 2, margin + 16, { align: 'center', maxWidth: pdfWidth - margin * 2 }
+        );
+      }
+
+      try {
+        drawReportHeader();
+
+        const signColIndex = headerCells.length - 1;
+        // Base auto-sized width for a short "SIGN" column is ~20mm; widen it by 0.5cm (5mm)
+        const signColWidth = 25;
+
+        const columnStyles = nameColIndex !== -1 ? { [nameColIndex]: { halign: 'left' } } : {};
+        columnStyles[signColIndex] = { cellWidth: signColWidth };
+
+        pdf.autoTable({
+          head: [headerCells],
+          body: bodyRows,
+          startY: margin + 20,
+          margin: { left: margin, right: margin, top: margin + 20, bottom: margin + 8 },
+          theme: 'grid',
+          styles: {
+            fontSize: 7,
+            cellPadding: { top: 0.8, bottom: 0.8, left: 1.5, right: 1.5 },
+            minCellHeight: 4,
+            halign: 'center',
+            valign: 'middle',
+            lineColor: [179, 27, 27],
+            lineWidth: 0.15,
+            textColor: [30, 30, 30]
+          },
+          headStyles: {
+            fontSize: 7.5,
+            cellPadding: { top: 1.5, bottom: 1.5, left: 1.5, right: 1.5 },
+            fillColor: [250, 219, 216],
+            textColor: [179, 27, 27],
+            fontStyle: 'bold',
+            lineColor: [179, 27, 27],
+            lineWidth: 0.15
+          },
+          columnStyles: columnStyles,
+          // Keeps every row intact — a row that doesn't fit moves whole to the next page
+          rowPageBreak: 'avoid',
+          showHead: 'everyPage',
+          didDrawPage: function(data) {
+            if (data.pageNumber > 1) drawReportHeader();
+          }
+        });
+
+        // Pie chart — always placed whole on one page, never sliced
+        const origCanvas = document.getElementById('performancePieChartCanvas');
+        if (origCanvas && origCanvas.width > 0) {
+          const chartAspect = origCanvas.height / origCanvas.width;
+          const chartWidth = 110; // mm
+          const chartHeight = chartWidth * chartAspect;
+          const titleSpace = 10;
+
+          let chartY = pdf.lastAutoTable.finalY + 15;
+
+          if (chartY + titleSpace + chartHeight > pdfHeight - margin) {
+            pdf.addPage();
+            chartY = margin + 10;
+          }
+
+          pdf.setFont(undefined, 'bold');
+          pdf.setFontSize(13);
+          pdf.setTextColor(179, 27, 27);
+          pdf.text('PERFORMANCE BREAKDOWN CHART', pdfWidth / 2, chartY, { align: 'center' });
+
+          const chartImgData = origCanvas.toDataURL('image/png');
+          const chartX = (pdfWidth - chartWidth) / 2;
+          pdf.addImage(chartImgData, 'PNG', chartX, chartY + 6, chartWidth, chartHeight);
+        }
+
+        const totalPages = pdf.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPages; p++) {
+          pdf.setPage(p);
+          pdf.setFont(undefined, 'normal');
+          pdf.setFontSize(8);
+          pdf.setTextColor(120, 120, 120);
+          pdf.text(`Page ${p} of ${totalPages}`, pdfWidth / 2, pdfHeight - 5, { align: 'center' });
+        }
+
+        pdf.save(`Overall_Performance_Report_${reportDate}.pdf`);
+      } catch (error) {
+        console.error("PDF Export Detailed Error:", error);
+        alert(`Failed to export PDF: ${error.message || error}`);
+      }
     }
 
     function downloadOverallPerformanceCsv() {
@@ -1233,10 +1412,10 @@ const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes(
       csvContent += `"OVERALL PERFORMANCE REPORT - ${quizNameText.toUpperCase()}"\n`;
       csvContent += `"REPORT DATE: ${todayDate}"\n`;
       csvContent += `"GRADING CRITERIA: 1-50%: Very Poor | 51-60%: Poor | 61-70%: Average | 71-80%: Need Improvement | 81-90%: Very Good | 91-100%: Excellent"\n\n`;
-      csvContent += `"Rank/S.No","Username","Designation","Name","Coy","Batch","Marks (%)","Remark"\n`;
+      csvContent += `"S.NO","Username","Designation","Name","Coy","Batch","Marks (%)","Remark","Sign"\n`;
 
       filteredData.forEach((item, idx) => {
-        csvContent += `"${idx + 1}","${item.username}","${item.designation}","${item.name}","${item.coy}","${item.batch}","${item.avgMarks}%","${item.remark}"\n`;
+        csvContent += `"${idx + 1}","${item.username}","${item.designation}","${item.name}","${item.coy}","${item.batch}","${item.avgMarks}%","${item.remark}",""\n`;
       });
 
       const encodedUri = encodeURI(csvContent);
@@ -1505,29 +1684,21 @@ const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes(
       });
     }
 
+    /* INDIVIDUAL CANDIDATE PDF EXPORT */
     async function downloadIndividualStudentPdf() {
-      const { jsPDF } = window.jspdf;
+      const JsPDF = getJsPDF();
+      if (!JsPDF) {
+        alert("PDF library is loading. Please try again.");
+        return;
+      }
+
       const reportElement = document.getElementById('printableReportCard');
-      const modalOverlay = document.getElementById('barChartModal');
       const actionButtons = reportElement.querySelectorAll('.no-print');
 
       actionButtons.forEach(btn => btn.style.display = 'none');
 
-      const originalReportStyle = reportElement.getAttribute('style') || '';
-      const originalOverlayStyle = modalOverlay.getAttribute('style') || '';
-
       try {
-        modalOverlay.style.overflow = 'visible';
-        modalOverlay.style.height = 'auto';
-        modalOverlay.style.position = 'absolute';
-
-        reportElement.style.maxHeight = 'none';
-        reportElement.style.height = 'auto';
-        reportElement.style.overflow = 'visible';
-
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdf = new JsPDF('p', 'mm', 'a4');
         const pdfWidth = 210;
         const pdfHeight = 297;
         const margin = 10;
@@ -1546,17 +1717,20 @@ const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes(
           return { imgData: canvas.toDataURL('image/jpeg', 1.0), height: imgHeight };
         }
 
-        const headerWrapper = document.createElement('div');
-        headerWrapper.style.background = '#ffffff';
-        headerWrapper.style.padding = '10px';
-        
-        headerWrapper.appendChild(document.getElementById('barChartTitle').cloneNode(true));
-        headerWrapper.appendChild(document.getElementById('barChartSubtitle').cloneNode(true));
-        headerWrapper.appendChild(document.getElementById('studentDetailsGrid').cloneNode(true));
-        
-        reportElement.appendChild(headerWrapper);
-        const headerData = await getElementImage(headerWrapper);
-        reportElement.removeChild(headerWrapper);
+        const headerTitle = document.getElementById('barChartTitle');
+        const headerSub = document.getElementById('barChartSubtitle');
+        const gridElem = document.getElementById('studentDetailsGrid');
+
+        const tempHeader = document.createElement('div');
+        tempHeader.style.background = '#ffffff';
+        tempHeader.style.padding = '10px';
+        tempHeader.appendChild(headerTitle.cloneNode(true));
+        tempHeader.appendChild(headerSub.cloneNode(true));
+        tempHeader.appendChild(gridElem.cloneNode(true));
+
+        document.body.appendChild(tempHeader);
+        const headerData = await getElementImage(tempHeader);
+        document.body.removeChild(tempHeader);
 
         pdf.addImage(headerData.imgData, 'JPEG', margin, currentY, usableWidth, headerData.height);
         currentY += headerData.height + 5;
@@ -1595,10 +1769,8 @@ const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes(
 
       } catch (error) {
         console.error("PDF Download Error:", error);
-        alert("Failed to generate PDF document.");
+        alert(`Failed to generate PDF document: ${error.message || error}`);
       } finally {
-        reportElement.setAttribute('style', originalReportStyle);
-        modalOverlay.setAttribute('style', originalOverlayStyle);
         actionButtons.forEach(btn => btn.style.display = 'flex');
       }
     }
