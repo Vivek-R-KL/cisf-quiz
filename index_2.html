@@ -1006,7 +1006,7 @@
     async function renderOffscreenBarChart(labels, dataValues, width, height) {
       const logicalWidth = width || 640;
       const logicalHeight = height || 260;
-      const dpr = 3; // renders at 3x resolution internally for a crisp PDF image, WITHOUT shrinking font-to-chart ratio
+      const dpr = 3; 
 
       const canvas = document.createElement('canvas');
       canvas.width = logicalWidth;
@@ -1036,7 +1036,7 @@
           animation: false,
           devicePixelRatio: dpr,
           layout: {
-            padding: { top: 26, bottom: 2, left: 10, right: 10 }
+            padding: { top: 26, bottom: 20, left: 10, right: 10 }
           },
           plugins: {
             legend: { display: false },
@@ -1051,11 +1051,11 @@
           scales: {
             x: {
               ticks: {
-                font: { size: 17, weight: 'bold' },
+                font: { size: 14, weight: 'bold' },
                 color: '#1c2833',
                 autoSkip: false,
-                maxRotation: 25,
-                minRotation: 15
+                maxRotation: 75,
+                minRotation: 65
               },
               grid: { display: false }
             },
@@ -1117,7 +1117,7 @@
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const margin = 6;
       const usableWidth = pdfWidth - (margin * 2);
-      const footerReserve = 7; // room reserved at bottom for the "Page X of Y" footer
+      const footerReserve = 7; 
 
       const quizStartColIndex = 14;
       const quizNames = [];
@@ -1127,8 +1127,6 @@
         }
       }
 
-      // Hard cap: never more than 6 candidates per page, and a candidate block
-      // is always measured in advance so it is never split across a page break.
       const maxCandidatesPerPage = 6;
       let candidatesOnCurrentPage = 0;
       let currentY = margin + 10;
@@ -1137,7 +1135,7 @@
         pdf.setFont(undefined, 'bold');
         pdf.setFontSize(11);
         pdf.setTextColor(179, 27, 27);
-        pdf.text("CUSTOMIZED CANDIDATES BAR CHART REPORT", pdfWidth / 2, margin + 2, { align: 'center' });
+        pdf.text("BAR CHART REPORT", pdfWidth / 2, margin + 2, { align: 'center' });
         
         pdf.setFontSize(7);
         pdf.setTextColor(100, 100, 100);
@@ -1148,13 +1146,11 @@
         pdf.line(margin, margin + 7.2, pdfWidth - margin, margin + 7.2);
       }
 
-      // Estimates the vertical space (mm) a candidate's whole block will need,
-      // so we can decide BEFORE drawing whether it fits on the current page.
       function estimateCandidateBlockHeight(basicDetailsList, maxRows, chartHeight) {
-        const detailsHeight = 3 + (basicDetailsList.length * 2.4) + 1; // label + each detail line + buffer
-        const tableHeight = 6.5 + (maxRows * 3.6); // 2 header rows + body rows
+        const detailsHeight = 3 + (basicDetailsList.length * 2.4) + 1; 
+        const tableHeight = 6.5 + (maxRows * 3.6); 
         const leftColumnHeight = detailsHeight + tableHeight;
-        return Math.max(leftColumnHeight, chartHeight) + 3; // + separator line spacing
+        return Math.max(leftColumnHeight, chartHeight) + 3; 
       }
 
       const selectedBatchForTitle = document.getElementById('batchSelector').value;
@@ -1200,7 +1196,6 @@
         const rightX = margin + leftWidth + 2;
         const chartHeight = 44;
 
-        // Average score badge (new feature) - computed from this candidate's test scores
         const avgScoreVal = testScores.length > 0
           ? (testScores.reduce((a, b) => a + b, 0) / testScores.length).toFixed(1) + '%'
           : 'N/A';
@@ -1237,9 +1232,6 @@
           ]);
         }
 
-        // Space-aware page break: the whole candidate block (details + table + chart)
-        // is measured up front, so a candidate is NEVER split across two pages,
-        // and no more than 6 candidates ever land on one page.
         const estimatedBlockHeight = estimateCandidateBlockHeight(basicDetailsList, maxRows, chartHeight);
         if (candidatesOnCurrentPage >= maxCandidatesPerPage ||
             (currentY + estimatedBlockHeight) > (pdfHeight - margin - footerReserve)) {
@@ -1249,7 +1241,6 @@
           candidatesOnCurrentPage = 0;
         }
 
-        // Candidate Label
         let detailsY = currentY;
         pdf.setFont(undefined, 'bold');
         pdf.setFontSize(8);
@@ -1257,7 +1248,6 @@
         pdf.text(`Candidate ${k + 1}`, margin, detailsY);
         detailsY += 3.4;
 
-        // Details Breakdown
         pdf.setFontSize(6);
         pdf.setTextColor(44, 62, 80);
 
@@ -1271,7 +1261,7 @@
           startY: detailsY + 1,
           margin: { left: margin },
           tableWidth: leftWidth,
-          pageBreak: 'avoid', // block was already measured to fit - never let autoTable split it
+          pageBreak: 'avoid',
           head: [
             [{ content: tableHeaderTitle, colSpan: 5, styles: { fillColor: [179, 27, 27], textColor: [255, 255, 255], halign: 'center', fontStyle: 'bold', fontSize: 5.5 } }],
             ['FROM', 'TO', 'VENUE', 'MARKS', 'RESULT']
@@ -1300,7 +1290,6 @@
             3: { fontStyle: 'bold' },
             4: { fontStyle: 'bold' }
           },
-          // New feature: colour-code the RESULT cell so PASS/FAIL is readable at a glance
           didParseCell: function(data) {
             if (data.section === 'body' && data.column.index === 4) {
               const val = (data.cell.raw || '').toString().trim().toUpperCase();
@@ -1317,7 +1306,6 @@
 
         detailsY = pdf.lastAutoTable.finalY + 2;
 
-        // Right Side: Bar Chart
         if (testLabels.length > 0) {
           const chartImg = await renderOffscreenBarChart(testLabels, testScores, 640, 260);
           pdf.addImage(chartImg, 'PNG', rightX, currentY - 1, rightWidth, chartHeight);
@@ -2133,7 +2121,7 @@
         Chart.register(ChartDataLabels);
       }
 
-      const chunkSize = 20;
+      const chunkSize = 15;
       const totalChunks = Math.ceil(labels.length / chunkSize);
 
       for (let c = 0; c < totalChunks; c++) {
@@ -2142,7 +2130,7 @@
 
         const chartDiv = document.createElement('div');
         chartDiv.style.width = '100%';
-        chartDiv.style.height = '310px';
+        chartDiv.style.height = '360px';
         chartDiv.style.position = 'relative';
 
         const canvas = document.createElement('canvas');
@@ -2170,7 +2158,7 @@
             responsive: true,
             maintainAspectRatio: false,
             animation: false,
-            layout: { padding: { top: 25, bottom: 10 } },
+            layout: { padding: { top: 25, bottom: 25 } },
             plugins: {
               datalabels: {
                 anchor: 'end',
@@ -2185,11 +2173,17 @@
               x: { 
                 title: { 
                   display: true, 
-                  text: totalChunks > 1 ? `Test Papers (Batch ${c + 1})` : 'Test Papers', 
+                  text: totalChunks > 1 ? `Test Papers (Set ${c + 1} of ${totalChunks})` : 'Test Papers', 
                   color: '#b31b1b', 
                   font: { weight: 'bold', size: 13 }
                 },
-                ticks: { autoSkip: false, maxRotation: 45, minRotation: 0, font: { size: 11 } }
+                ticks: { 
+                  autoSkip: false, 
+                  minRotation: 65, 
+                  maxRotation: 75, 
+                  font: { size: 11, weight: 'bold' },
+                  color: '#1c2833'
+                }
               },
               y: { 
                 min: 0, 
@@ -2327,7 +2321,7 @@
           const chartBox = chartBoxes[i];
           const chartData = await getElementImage(chartBox);
 
-          if (currentY + chartData.height > maxUsableHeight) {
+          if (currentY + chartData.height > maxUsableHeight || i > 0) {
             pdf.addPage();
             currentY = margin;
           }
