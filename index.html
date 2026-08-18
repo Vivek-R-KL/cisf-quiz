@@ -14,6 +14,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CISF ASTI DELHI EXAM PORTAL</title>
+    
+    <!-- PWA Requirements -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CISF Quiz">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+
     <link rel="stylesheet" href="style.css">
     <style>
         body, html { min-height: 100%; margin: 0; font-family: sans-serif; }
@@ -215,14 +224,7 @@ async function loginStudent() {
     loginBtn.innerText = "Access Dashboard";
 }
 
-// Warm up Google Apps Script Cache upon opening index.html — but throttled.
-// Previously this fired on EVERY page load with no throttle. When many
-// students opened the login page in the same window (e.g. right before an
-// exam), dozens of "warmup" requests hit Apps Script at once and competed
-// with the real "verifyUser" login requests for execution slots — this was
-// a major reason logins felt slow. The server-side time trigger already
-// keeps the cache warm every 1-2 hours, so the client only needs to nudge it
-// occasionally as a fallback, not on every single visit.
+// Warm up Google Apps Script Cache upon opening index.html
 (function warmUpBackendCache() {
     const WARM_THROTTLE_MS = 20 * 60 * 1000; // once every 20 minutes per browser
     const lastWarm = parseInt(localStorage.getItem('lastWarmupPing') || '0', 10);
@@ -241,6 +243,19 @@ async function loginStudent() {
         }).catch(() => {});
     }
 })();
+
+// Register Service Worker for PWA capabilities
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((registration) => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      })
+      .catch((err) => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
+}
     </script>
 </body>
 </html>
