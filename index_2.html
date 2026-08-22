@@ -332,6 +332,11 @@
       vertical-align: middle;
     }
 
+    #batchReportTable th, #batchReportTable td {
+      padding: 5px 6px;
+      font-size: 12px;
+    }
+
     .remark-very-poor { background-color: #f8d7da; color: #721c24; font-weight: bold; }
     .remark-poor { background-color: #f8d7da; color: #856404; font-weight: bold; }
     .remark-avg { background-color: #fff3cd; color: #856404; font-weight: bold; }
@@ -520,8 +525,8 @@
   </div>
 
   <!-- BATCH PROGRESS REPORT MODAL -->
-  <div class="modal-overlay" id="batchProgressModal">
-    <div class="modal-content" style="max-width: 95%; width: 1350px;">
+  <div class="modal-overlay" id="batchProgressModal" style="padding: 10px;">
+    <div class="modal-content" style="max-width: 1800px; width: 96vw; padding: 16px 20px;">
       <h2 id="batchModalTitle" style="color: var(--primary-red); text-align: center; margin-top: 0; margin-bottom: 18px; font-size: 26px;">BATCH PROGRESS REPORT</h2>
       
       <div class="batch-select-container">
@@ -560,8 +565,8 @@
       </div>
 
       <div id="batchReportContainer" style="display: none;">
-        <div class="table-section">
-          <table class="detail-table" id="batchReportTable">
+        <div class="table-section" style="max-height: 68vh;">
+          <table class="detail-table" id="batchReportTable" style="font-size: 12px;">
             <thead id="batchTableHead"></thead>
             <tbody id="batchTableBody"></tbody>
           </table>
@@ -1074,6 +1079,82 @@
       return imgUri;
     }
 
+    // Renders a grading-distribution pie chart off-screen (not attached to the DOM)
+    // and returns a PNG data URI, for embedding directly into a jsPDF document.
+    async function renderOffscreenGradePieChart(counts, width, height) {
+      const logicalWidth = width || 800;
+      const logicalHeight = height || 560;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = logicalWidth;
+      canvas.height = logicalHeight;
+      const ctx = canvas.getContext('2d');
+
+      if (typeof ChartDataLabels !== 'undefined') {
+        Chart.register(ChartDataLabels);
+      }
+
+      const labels = [
+        "Very Poor (1-50%)",
+        "Poor (51-60%)",
+        "Average (61-70%)",
+        "Need Impr. (71-80%)",
+        "Very Good (81-90%)",
+        "Excellent (91-100%)"
+      ];
+
+      const dataValues = [
+        counts["Very Poor Performance"] || 0,
+        counts["Poor Performance"] || 0,
+        counts["Average Performance"] || 0,
+        counts["Need Improvement"] || 0,
+        counts["Very Good"] || 0,
+        counts["Excellent"] || 0
+      ];
+
+      const bgColors = ["#f8d7da", "#f5c6cb", "#fff3cd", "#d1ecf1", "#d4edda", "#28a745"];
+      const borderColors = ["#721c24", "#856404", "#856404", "#0c5460", "#155724", "#1e7e34"];
+      const totalCount = dataValues.reduce((a, b) => a + b, 0);
+
+      const chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: dataValues,
+            backgroundColor: bgColors,
+            borderColor: borderColors,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: false,
+          animation: false,
+          devicePixelRatio: 3,
+          layout: { padding: 12 },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 18, padding: 14, font: { size: 20, weight: 'bold' } }
+            },
+            datalabels: {
+              color: '#1c2833',
+              font: { weight: 'bold', size: 20 },
+              formatter: (value) => {
+                if (value === 0 || totalCount === 0) return '';
+                const percentage = Math.round((value / totalCount) * 100);
+                return `${value}\n(${percentage}%)`;
+              }
+            }
+          }
+        }
+      });
+
+      const imgUri = canvas.toDataURL('image/png', 1.0);
+      chart.destroy();
+      return imgUri;
+    }
+
     function getFieldValueStrict(row, headers, primaryKeys, fallbackKeys = []) {
       for (const key of primaryKeys) {
         const idx = headers.findIndex(h => h && h.toLowerCase().trim() === key.toLowerCase().trim());
@@ -1380,11 +1461,38 @@
       const sectionText = selectedBatch === "2" ? "Screener Certification" : "Basic Avsec";
       const selectedSubBatch = document.getElementById('subBatchFilter').value;
 
-      const chunkSize = 10;
+      // Overall AVERAGE % and GRADE for every candidate, computed across ALL quiz papers
+      // (not just the ones shown in a given chunk/page) so the figure is meaningful
+      // no matter which set of quiz papers is currently visible on a page.
+      const rowStatsRaw = filteredReportRows.map(row => {
+        let sum = 0, count = 0;
+        quizCols.forEach(q => {
+          const pct = parseScoreToPercentage(row[q.index]);
+          if (pct !== null) { sum += pct; count++; }
+        });
+        const avg = count > 0 ? (sum / count) : null;
+        const grade = avg !== null ? getRemarkForAverage(avg).text : 'N/A';
+        return { avg, grade };
+      });
+
+      // Sort candidates by performance: lowest average first, best average last.
+      // Candidates with no gradable scores (N/A) are placed at the very end.
+      const sortOrder = filteredReportRows.map((_, idx) => idx);
+      sortOrder.sort((a, b) => {
+        const av = rowStatsRaw[a].avg === null ? Infinity : rowStatsRaw[a].avg;
+        const bv = rowStatsRaw[b].avg === null ? Infinity : rowStatsRaw[b].avg;
+        return av - bv;
+      });
+      const sortedRows = sortOrder.map(idx => filteredReportRows[idx]);
+      const rowStats = sortOrder.map(idx => rowStatsRaw[idx]);
+
+      const chunkSize = 15;
       const quizChunks = [];
       for (let i = 0; i < quizCols.length; i += chunkSize) {
         quizChunks.push(quizCols.slice(i, i + chunkSize));
       }
+
+      const GRADING_TEXT = 'GRADING CRITERIA:  1% to 50%: Very Poor Performance   |   51% to 60%: Poor Performance   |   61% to 70%: Average Performance   |   71% to 80%: Need Improvement   |   81% to 90%: Very Good   |   91% to 100%: Excellent';
 
       let isFirstPageGlobal = true;
 
@@ -1409,13 +1517,21 @@
 
       quizChunks.forEach((chunk, chunkIdx) => {
         const headers = ['S.N', 'BATCH', 'USERNAME', 'DESIGNATION', 'NAME', 'COY'];
-        chunk.forEach(q => headers.push(q.name));
-        headers.push('SIGN');
+        const chunkLabels = [];
+        chunk.forEach((q) => {
+          const globalPos = quizCols.indexOf(q) + 1;
+          const label = 'P' + globalPos;
+          headers.push(label);
+          chunkLabels.push({ label, name: q.name });
+        });
+        headers.push('AVG %', 'GRADE', 'SIGN');
 
-        const fixedCount = 6; 
+        const fixedCount = 6;
+        const avgColIdx = headers.length - 3;
+        const gradeColIdx = headers.length - 2;
         const signColIdx = headers.length - 1;
 
-        const bodyRows = filteredReportRows.map((row, rIdx) => {
+        const bodyRows = sortedRows.map((row, rIdx) => {
           const sn = rIdx + 1;
           const batchVal = batchColumnIndex !== -1 ? (row[batchColumnIndex] || 'N/A') : 'N/A';
           const usernameVal = usernameIdx !== -1 ? (row[usernameIdx] || 'N/A') : 'N/A';
@@ -1431,6 +1547,9 @@
             rowData.push(pct !== null ? `${Math.round(pct * 100) / 100}%` : 'N/A');
           });
 
+          const stats = rowStats[rIdx];
+          rowData.push(stats.avg !== null ? `${Math.round(stats.avg * 100) / 100}%` : 'N/A');
+          rowData.push(stats.grade);
           rowData.push('');
           return rowData;
         });
@@ -1442,28 +1561,67 @@
 
         drawHeaderBanner(chunkIdx, quizChunks.length);
 
-        const remainingWidth = 125;
-        const equalQuizColWidth = Math.floor((remainingWidth / chunk.length) * 100) / 100;
+        const fixedBudget = { sn: 8, batch: 13, username: 15, desig: 18, name: 36, coy: 13, avg: 14, grade: 19, sign: 15 };
+        const fixedTotal = Object.values(fixedBudget).reduce((a, b) => a + b, 0);
+        const usableWidth = pdfWidth - margin * 2;
+        const quizBudget = Math.max(usableWidth - fixedTotal, chunk.length * 6);
+        const equalQuizColWidth = Math.floor((quizBudget / chunk.length) * 100) / 100;
 
         const columnStyles = {
-          0: { cellWidth: 10, halign: 'center' },  
-          1: { cellWidth: 18, halign: 'center' },  
-          2: { cellWidth: 22, halign: 'center' },  
-          3: { cellWidth: 22, halign: 'center' },  
-          4: { cellWidth: 42, halign: 'left' },    
-          5: { cellWidth: 20, halign: 'center' },  
-          [signColIdx]: { cellWidth: 22, halign: 'center' } 
+          0: { cellWidth: fixedBudget.sn, halign: 'center' },
+          1: { cellWidth: fixedBudget.batch, halign: 'center' },
+          2: { cellWidth: fixedBudget.username, halign: 'center', cellPadding: { top: 1, bottom: 1, left: 0.4, right: 0.4 } },
+          3: { cellWidth: fixedBudget.desig, halign: 'center' },
+          4: { cellWidth: fixedBudget.name, halign: 'left' },
+          5: { cellWidth: fixedBudget.coy, halign: 'center' },
+          [avgColIdx]: { cellWidth: fixedBudget.avg, halign: 'center', fontStyle: 'bold' },
+          [gradeColIdx]: { cellWidth: fixedBudget.grade, halign: 'center', fontStyle: 'bold', fontSize: 5.6 },
+          [signColIdx]: { cellWidth: fixedBudget.sign, halign: 'center' }
         };
 
         chunk.forEach((_, qIdx) => {
           columnStyles[fixedCount + qIdx] = { cellWidth: equalQuizColWidth, halign: 'center' };
         });
 
+        // Pre-compute the footer legend text/height for this chunk so it can be
+        // reserved as bottom margin and redrawn on EVERY physical page of the chunk.
+        const legendLineHeight = 3.3;
+        pdf.setFontSize(6.6);
+        const keyText = 'QUIZ PAPER KEY:   ' + chunkLabels.map(c => `${c.label} = ${c.name}`).join('    |    ');
+        const keyLines = pdf.splitTextToSize(keyText, usableWidth);
+        const gradingLines = pdf.splitTextToSize(GRADING_TEXT, usableWidth);
+        const legendHeight = (keyLines.length * legendLineHeight) + 1.8 + (gradingLines.length * legendLineHeight);
+        const footerReserve = legendHeight + 12;
+
+        function drawFooterLegend() {
+          let y = pdfHeight - footerReserve + 4;
+          pdf.setDrawColor(179, 27, 27);
+          pdf.setLineWidth(0.2);
+          pdf.line(margin, y - 3, pdfWidth - margin, y - 3);
+
+          pdf.setFont(undefined, 'bold');
+          pdf.setFontSize(6.6);
+          pdf.setTextColor(179, 27, 27);
+          keyLines.forEach(line => {
+            pdf.text(line, margin, y);
+            y += legendLineHeight;
+          });
+
+          y += 1.2;
+          pdf.setFont(undefined, 'bold');
+          pdf.setFontSize(6.6);
+          pdf.setTextColor(85, 85, 85);
+          gradingLines.forEach(line => {
+            pdf.text(line, margin, y);
+            y += legendLineHeight;
+          });
+        }
+
         pdf.autoTable({
           head: [headers],
           body: bodyRows,
           startY: margin + 16,
-          margin: { left: margin, right: margin, top: margin + 16, bottom: margin + 6 },
+          margin: { left: margin, right: margin, top: margin + 16, bottom: footerReserve },
           theme: 'grid',
           headStyles: {
             fillColor: [250, 219, 216],
@@ -1477,8 +1635,8 @@
             overflow: 'linebreak'
           },
           styles: {
-            fontSize: 7,
-            cellPadding: { top: 1, bottom: 1, left: 1, right: 1 },
+            fontSize: 6.6,
+            cellPadding: { top: 1, bottom: 1, left: 0.8, right: 0.8 },
             minCellHeight: 5,
             halign: 'center',
             valign: 'middle',
@@ -1494,9 +1652,65 @@
             if (data.pageNumber > 1) {
               drawHeaderBanner(chunkIdx, quizChunks.length);
             }
+            drawFooterLegend();
           }
         });
       });
+
+      // --- Final page: Grading Distribution Pie Chart ---
+      const gradeCounts = {
+        "Very Poor Performance": 0,
+        "Poor Performance": 0,
+        "Average Performance": 0,
+        "Need Improvement": 0,
+        "Very Good": 0,
+        "Excellent": 0
+      };
+      rowStatsRaw.forEach(s => {
+        if (s.grade && gradeCounts.hasOwnProperty(s.grade)) {
+          gradeCounts[s.grade]++;
+        }
+      });
+      const gradedCount = Object.values(gradeCounts).reduce((a, b) => a + b, 0);
+      const ungradedCount = filteredReportRows.length - gradedCount;
+
+      pdf.addPage('a4', 'l');
+
+      pdf.setFont(undefined, 'bold');
+      pdf.setFontSize(16);
+      pdf.setTextColor(179, 27, 27);
+      pdf.text('GRADING DISTRIBUTION SUMMARY', pdfWidth / 2, margin + 8, { align: 'center' });
+
+      pdf.setFont(undefined, 'bold');
+      pdf.setFontSize(9);
+      pdf.setTextColor(85, 85, 85);
+      let subtitle = `Report Date: ${reportDate} | Course Section: ${sectionText} | Batch Filter: ${selectedSubBatch} | Total Candidates: ${filteredReportRows.length}`;
+      if (ungradedCount > 0) subtitle += ` (${ungradedCount} not gradable)`;
+      pdf.text(subtitle, pdfWidth / 2, margin + 15, { align: 'center' });
+
+      if (gradedCount > 0) {
+        const pieImg = await renderOffscreenGradePieChart(gradeCounts, 800, 560);
+        const pieHeight = pdfHeight - 70;
+        const pieWidth = pieHeight * (800 / 560);
+        const pieX = (pdfWidth - pieWidth) / 2;
+        const pieY = margin + 22;
+        pdf.addImage(pieImg, 'PNG', pieX, pieY, pieWidth, pieHeight);
+
+        pdf.setFont(undefined, 'bold');
+        pdf.setFontSize(8);
+        pdf.setTextColor(85, 85, 85);
+        const critLines = pdf.splitTextToSize(GRADING_TEXT, pdfWidth - margin * 2);
+        let cy = pieY + pieHeight + 8;
+        critLines.forEach(line => {
+          pdf.text(line, pdfWidth / 2, cy, { align: 'center' });
+          cy += 4.2;
+        });
+      } else {
+        pdf.setFont(undefined, 'normal');
+        pdf.setFontSize(11);
+        pdf.setTextColor(120, 120, 120);
+        pdf.text('No gradable quiz scores were found for this batch.', pdfWidth / 2, pdfHeight / 2, { align: 'center' });
+      }
 
       const totalPages = pdf.internal.getNumberOfPages();
       for (let p = 1; p <= totalPages; p++) {
