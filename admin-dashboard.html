@@ -297,6 +297,7 @@
                 <input type="password" id="uPassword" placeholder="Password">
                 <input type="text" id="uName" placeholder="Full Name">
                 <input type="text" id="uDesignation" placeholder="Designation (e.g., Inspector)">
+                <input type="text" id="uBatch" placeholder="Batch (e.g., Batch-1)">
                 <button class="btn-primary" onclick="addSingleUser()">Add User</button>
             </div>
 
@@ -304,7 +305,7 @@
             <div style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <h4 style="margin: 0 0 10px 0; color: var(--text-muted);">Bulk CSV Upload</h4>
-                    <small style="color: var(--text-muted);">Format: username, password, name, designation, section</small>
+                    <small style="color: var(--text-muted);">Format: username, password, name, designation, section, batch</small>
                     <input type="file" id="csvFileInput" accept=".csv" style="margin-top: 10px;">
                     <button class="btn-primary" onclick="uploadCSVUsers()">Upload CSV Data</button>
                 </div>
@@ -374,7 +375,7 @@
 </div>
 
 <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyslNg2HZQBl2wVuzuhNBZU6AYyeFElzimMJ0Yt9myAwZD2usF4uaW1Yem-3nFBd8Eh/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPwPhD5WTBPut3gC0LYF_wq1gXZ14O5z78yukoKs1-RQTy4N9YwvSF0axQLHzcUjon/exec";
     let SPREADSHEET_ID = localStorage.getItem('globalSpreadsheetId') || "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
     let activeSection = 'basic';
 
@@ -486,7 +487,7 @@
                     <input type="checkbox" class="user-select-cb" value="${u.username}" style="width: auto; margin: 0; cursor: pointer;">
                     <div>
                         <strong>${u.name || u.username}</strong> 
-                        <small style="color: var(--text-muted);">(${u.username}${u.designation ? ' - ' + u.designation : ''})</small>
+                        <small style="color: var(--text-muted);">(${u.username}${u.designation ? ' - ' + u.designation : ''}${u.batch ? ' - Batch: ' + u.batch : ''})</small>
                     </div>
                 </div>
                 <button class="btn-danger" style="width: auto; margin: 0; padding: 4px 10px; font-size: 11px;" onclick="deleteSingleUser('${u.username}')">
@@ -578,6 +579,7 @@
         let password = document.getElementById('uPassword').value.trim();
         let name = document.getElementById('uName').value.trim();
         let designation = document.getElementById('uDesignation').value.trim();
+        let batch = document.getElementById('uBatch').value.trim();
 
         if (!username || !password) return alert("Username and Password are required.");
 
@@ -589,7 +591,8 @@
             password: password,
             name: name,
             designation: designation,
-            section: activeSection
+            section: activeSection,
+            batch: batch
         });
 
         await apiCall({ action: "saveData", key: "Users", data: existingUsers });
@@ -599,6 +602,7 @@
         document.getElementById('uPassword').value = "";
         document.getElementById('uName').value = "";
         document.getElementById('uDesignation').value = "";
+        document.getElementById('uBatch').value = "";
         loadAllData();
     }
 
@@ -670,7 +674,8 @@
                         password: cols[1],
                         name: cols[2] || "Trainee",
                         designation: cols[3] || "N/A",
-                        section: cols[4] || activeSection
+                        section: cols[4] || activeSection,
+                        batch: cols[5] || ""
                     });
                 }
             });
