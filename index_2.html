@@ -75,54 +75,6 @@
       font-weight: 600;
     }
 
-    .notice-board {
-      background: #fffdf0;
-      border: 2px solid var(--accent-yellow);
-      border-left: 6px solid var(--primary-red);
-      border-radius: 8px;
-      padding: 18px;
-      margin-bottom: 30px;
-      box-shadow: 0 4px 12px rgba(241, 196, 15, 0.15);
-    }
-
-    .notice-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--primary-red);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .notice-content {
-      font-size: 17px;
-      font-weight: 700;
-      color: #1c2833;
-      line-height: 1.4;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .highlight-badge {
-      background-color: var(--accent-yellow);
-      color: #000;
-      padding: 3px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-      animation: flash 1.5s infinite;
-    }
-
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
     .form-group { margin-bottom: 24px; }
 
     .form-group label {
@@ -247,6 +199,7 @@
       max-width: 230px;
     }
 
+    /* REMARKS / GRADING CRITERIA FILTER BOX */
     .remarks-note-box {
       background: #fcf8e3;
       border: 1.5px solid #fbeed5;
@@ -255,32 +208,59 @@
       border-radius: 6px;
       margin-bottom: 18px;
       font-size: 13px;
-      color: #c09853;
     }
 
     .remarks-note-title {
       font-weight: bold;
       color: var(--primary-red);
       font-size: 15px;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .remarks-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 8px;
-      color: #2c3e50;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
     }
 
-    .remarks-item {
+    .filter-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-weight: 600;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1.5px solid #d0d7de;
+      background: #ffffff;
+      color: #2c3e50;
+      font-weight: 700;
       font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      user-select: none;
     }
+
+    .filter-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .filter-btn.active {
+      border-color: var(--primary-red);
+      box-shadow: 0 0 0 3px rgba(179, 27, 27, 0.2);
+    }
+
+    .filter-btn-all { background-color: #ffffff; color: #2c3e50; }
+    .filter-btn-very-poor { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+    .filter-btn-poor { background-color: #f8d7da; color: #856404; border-color: #f5c6cb; }
+    .filter-btn-avg { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+    .filter-btn-improvement { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+    .filter-btn-vgood { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+    .filter-btn-excellent { background-color: #28a745; color: #ffffff; border-color: #1e7e34; }
+
+    .filter-btn.active.filter-btn-all { background-color: #2c3e50; color: #ffffff; }
 
     .table-section {
       background: #ffffff;
@@ -412,7 +392,7 @@
     }
 
     .overall-table-wrapper .table-section {
-      max-height: calc(100vh - 280px);
+      max-height: calc(100vh - 310px);
     }
 
     .overall-chart-wrapper {
@@ -615,16 +595,31 @@
         </div>
       </div>
 
-      <!-- PERFORMANCE REMARKS NOTE BOX -->
+      <!-- PERFORMANCE REMARKS FILTER BUTTONS NOTE BOX -->
       <div class="remarks-note-box">
-        <div class="remarks-note-title">📌 Performance Grading Criteria Note</div>
+        <div class="remarks-note-title">📌 Performance Grading Criteria Filter</div>
         <div class="remarks-grid">
-          <div class="remarks-item">🔴 <span><strong>1% to 50%:</strong> Very poor performance</span></div>
-          <div class="remarks-item">🟠 <span><strong>51% to 60%:</strong> Poor performance</span></div>
-          <div class="remarks-item">🟡 <span><strong>61% to 70%:</strong> Average performance</span></div>
-          <div class="remarks-item">🔵 <span><strong>71% to 80%:</strong> Need improvement</span></div>
-          <div class="remarks-item">🟢 <span><strong>81% to 90%:</strong> Very good</span></div>
-          <div class="remarks-item">⭐ <span><strong>91% to 100%:</strong> Excellent</span></div>
+          <button class="filter-btn filter-btn-all active" onclick="setGradeFilter('ALL', this)">
+            ⚪ <span><strong>Show All Users</strong></span>
+          </button>
+          <button class="filter-btn filter-btn-very-poor" onclick="setGradeFilter('Very Poor Performance', this)">
+            🔴 <span><strong>1% to 50%:</strong> Very Poor</span>
+          </button>
+          <button class="filter-btn filter-btn-poor" onclick="setGradeFilter('Poor Performance', this)">
+            🟠 <span><strong>51% to 60%:</strong> Poor</span>
+          </button>
+          <button class="filter-btn filter-btn-avg" onclick="setGradeFilter('Average Performance', this)">
+            🟡 <span><strong>61% to 70%:</strong> Average</span>
+          </button>
+          <button class="filter-btn filter-btn-improvement" onclick="setGradeFilter('Need Improvement', this)">
+            🔵 <span><strong>71% to 80%:</strong> Need Impr.</span>
+          </button>
+          <button class="filter-btn filter-btn-vgood" onclick="setGradeFilter('Very Good', this)">
+            🟢 <span><strong>81% to 90%:</strong> Very Good</span>
+          </button>
+          <button class="filter-btn filter-btn-excellent" onclick="setGradeFilter('Excellent', this)">
+            ⭐ <span><strong>91% to 100%:</strong> Excellent</span>
+          </button>
         </div>
       </div>
 
@@ -736,6 +731,7 @@
     let globalReportRows = [];
     let filteredReportRows = [];
     let processedOverallData = []; 
+    let selectedGradeFilter = 'ALL';
     let barChartInstances = [];
     let overallPieChartInstance = null;
     let selectedStudentIndex = 0;
@@ -797,7 +793,7 @@
       const passVal = document.getElementById('password').value;
       const authError = document.getElementById('authError');
 
-      if (idVal === "admin" && passVal === "admin123") {
+      if (idVal === "caso" && passVal === "casoigi") {
         authError.style.display = 'none';
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('mainDashboard').style.display = 'block';
@@ -1079,8 +1075,6 @@
       return imgUri;
     }
 
-    // Renders a grading-distribution pie chart off-screen (not attached to the DOM)
-    // and returns a PNG data URI, for embedding directly into a jsPDF document.
     async function renderOffscreenGradePieChart(counts, width, height) {
       const logicalWidth = width || 800;
       const logicalHeight = height || 560;
@@ -1461,9 +1455,6 @@
       const sectionText = selectedBatch === "2" ? "Screener Certification" : "Basic Avsec";
       const selectedSubBatch = document.getElementById('subBatchFilter').value;
 
-      // Overall AVERAGE % and GRADE for every candidate, computed across ALL quiz papers
-      // (not just the ones shown in a given chunk/page) so the figure is meaningful
-      // no matter which set of quiz papers is currently visible on a page.
       const rowStatsRaw = filteredReportRows.map(row => {
         let sum = 0, count = 0;
         quizCols.forEach(q => {
@@ -1475,8 +1466,6 @@
         return { avg, grade };
       });
 
-      // Sort candidates by performance: lowest average first, best average last.
-      // Candidates with no gradable scores (N/A) are placed at the very end.
       const sortOrder = filteredReportRows.map((_, idx) => idx);
       sortOrder.sort((a, b) => {
         const av = rowStatsRaw[a].avg === null ? Infinity : rowStatsRaw[a].avg;
@@ -1583,8 +1572,6 @@
           columnStyles[fixedCount + qIdx] = { cellWidth: equalQuizColWidth, halign: 'center' };
         });
 
-        // Pre-compute the footer legend text/height for this chunk so it can be
-        // reserved as bottom margin and redrawn on EVERY physical page of the chunk.
         const legendLineHeight = 3.3;
         pdf.setFontSize(6.6);
         const keyText = 'QUIZ PAPER KEY:   ' + chunkLabels.map(c => `${c.label} = ${c.name}`).join('    |    ');
@@ -1657,7 +1644,6 @@
         });
       });
 
-      // --- Final page: Grading Distribution Pie Chart ---
       const gradeCounts = {
         "Very Poor Performance": 0,
         "Poor Performance": 0,
@@ -1729,6 +1715,13 @@
     function openOverallPerformanceModal() {
       document.getElementById('overallPerformanceModal').style.display = 'block';
       document.getElementById('overallReportDateLabel').innerText = `Date of Report: ${getTodayFormattedDate()}`;
+      
+      // Reset filter button states to "Show All Users"
+      selectedGradeFilter = 'ALL';
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      const allBtn = document.querySelector('.filter-btn-all');
+      if (allBtn) allBtn.classList.add('active');
+
       fetchOverallPerformanceData();
     }
 
@@ -1880,6 +1873,19 @@
       processedOverallData.sort((a, b) => a.avgMarks - b.avgMarks);
     }
 
+    function setGradeFilter(grade, btnElement) {
+      selectedGradeFilter = grade;
+      
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      filterBtns.forEach(btn => btn.classList.remove('active'));
+      
+      if (btnElement) {
+        btnElement.classList.add('active');
+      }
+
+      renderOverallPerformanceTable();
+    }
+
     function renderOverallPerformanceTable() {
       const tbody = document.getElementById('overallTableBody');
       const selectedSubBatch = document.getElementById('overallBatchFilter').value;
@@ -1896,12 +1902,19 @@
       tbody.innerHTML = '';
 
       let filteredData = processedOverallData;
+
+      // Filter by Batch
       if (selectedSubBatch !== 'ALL') {
-        filteredData = processedOverallData.filter(item => item.batch === selectedSubBatch);
+        filteredData = filteredData.filter(item => item.batch === selectedSubBatch);
+      }
+
+      // Filter by Performance Grade
+      if (selectedGradeFilter !== 'ALL') {
+        filteredData = filteredData.filter(item => item.remark === selectedGradeFilter);
       }
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px;">No performance data available.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px;">No performance data available for this criteria.</td></tr>';
         renderOverallPieChart({ "Very Poor Performance": 0, "Poor Performance": 0, "Average Performance": 0, "Need Improvement": 0, "Very Good": 0, "Excellent": 0 });
         return;
       }
@@ -2045,8 +2058,8 @@
         .map(tr => Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim()))
         .filter(r => r.length === headerCells.length - 1);
 
-      if (bodyRows.length === 0) {
-        alert("No report data available to export.");
+      if (bodyRows.length === 0 || (bodyRows.length === 1 && bodyRows[0][0].includes("No performance data"))) {
+        alert("No performance data available for current filter selection to export.");
         return;
       }
 
@@ -2074,7 +2087,11 @@
         pdf.setFont(undefined, 'bold');
         pdf.setFontSize(8.5);
         pdf.setTextColor(85, 85, 85);
-        pdf.text(`Report Date: ${reportDate}`, margin, margin + 9.5);
+        let filterSubtitle = `Report Date: ${reportDate}`;
+        if (selectedGradeFilter !== 'ALL') {
+          filterSubtitle += ` | Filter: ${selectedGradeFilter}`;
+        }
+        pdf.text(filterSubtitle, margin, margin + 9.5);
 
         pdf.setFont(undefined, 'bold');
         pdf.setFontSize(10.5);
@@ -2187,12 +2204,17 @@
       }
 
       let filteredData = processedOverallData;
+      
       if (selectedSubBatch !== 'ALL') {
-        filteredData = processedOverallData.filter(item => item.batch === selectedSubBatch);
+        filteredData = filteredData.filter(item => item.batch === selectedSubBatch);
+      }
+
+      if (selectedGradeFilter !== 'ALL') {
+        filteredData = filteredData.filter(item => item.remark === selectedGradeFilter);
       }
 
       if (!filteredData.length) {
-        alert("No performance records found to export.");
+        alert("No performance records found to export for current filter selection.");
         return;
       }
 
@@ -2200,6 +2222,9 @@
       let csvContent = `data:text/csv;charset=utf-8,`;
       csvContent += `"OVERALL PERFORMANCE REPORT - ${quizNameText.toUpperCase()}"\n`;
       csvContent += `"REPORT DATE: ${todayDate}"\n`;
+      if (selectedGradeFilter !== 'ALL') {
+        csvContent += `"FILTER APPLIED: ${selectedGradeFilter.toUpperCase()}"\n`;
+      }
       csvContent += `"GRADING CRITERIA: 1-50%: Very Poor | 51-60%: Poor | 61-70%: Average | 71-80%: Need Improvement | 81-90%: Very Good | 91-100%: Excellent"\n\n`;
       csvContent += `"S.NO","Username","Designation","Name","Coy","Batch","Marks (%)","Remark","Sign"\n`;
 
