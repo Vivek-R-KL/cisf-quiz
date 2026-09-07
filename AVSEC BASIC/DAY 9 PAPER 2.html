@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>ASTI Delhi – DAY 9 PAPER 2 (100 Questions | 50 Min)</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
+document.addEventListener('keydown', function(e) {
+if (e.key === 'F12' || (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'i' || e.key === 'j'))) {
+e.preventDefault();
+}
+});
+</script>
+<style>*{box-sizing:border-box}body{font-family:'Poppins',sans-serif;margin:0;padding:0;background:linear-gradient(160deg,#f0faff 0%,#f0fdf4 100%);color:#333;overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}.header{background:linear-gradient(90deg,#aedcf6 0%,#d9f0fc 55%,#eef9ff 100%);color:#123b66;padding:10px 22px;display:flex;justify-content:space-between;align-items:center;position:fixed;top:0;left:0;width:100%;box-shadow:0 2px 6px rgba(20,90,140,0.25);z-index:100;height:60px;border-bottom:3px solid #7ec4ea}.header .test-title h3{margin:0;font-size:1.4em;font-weight:700;color:#0c3b66}.header .institute-logo{font-size:0.95em;font-weight:600;opacity:0.85;margin-top:3px;color:#14527f}.main-content{display:flex;padding-top:60px;flex:1}.question-area{flex:1;padding:20px 20px 150px 20px;min-height:calc(100vh - 60px);margin-right:420px}.sidebar{width:400px;background-color:#dbeefc;padding:16px;box-shadow:-2px 0 5px rgba(0,0,0,0.1);position:fixed;right:0;top:60px;bottom:0;overflow-y:auto;z-index:50;border-left:4px solid #7ec4ea}.sidebar h3{color:#0c3b66;font-size:1.05em;margin-top:0}#timer-display{font-size:1.15em;font-weight:700;background-color:#fff3cd;color:#b02a2a;padding:5px 12px;border-radius:5px;border:1px solid #f0c96b}.user-info span{font-weight:600;margin-right:15px;color:#123b66}.question-box{background-color:#ffffff;border:1px solid #cfe6f7;border-left:5px solid #38bdf8;padding:15px 20px;margin-bottom:25px;border-radius:8px;min-height:250px;display:none}.question-box.active{display:block}.question-text{font-size:1.2em;font-weight:600;margin-bottom:15px;line-height:1.5;color:#1a1a1a}.option-text-container{margin-top:20px;border-top:1px solid #ccc;padding-top:10px}.option-label{display:block;margin:5px 0;padding:5px;font-size:1em}.hindi-text{display:none}.english-text{display:inline}body.lang-hindi-global .english-text{display:none !important}body.lang-hindi-global .hindi-text{display:inline !important}.lang-toggle-container{display:flex;justify-content:flex-end;margin-bottom:15px}.lang-toggle-btn{padding:8px 30px 8px 16px;background-color:#ffffff;border:1px solid #7ec4ea;border-radius:6px;font-weight:600;color:#14527f;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.08);position:relative;appearance:none}.lang-toggle-btn::after{content:"\25BE";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#14527f}.status-legend{padding:10px;border:1px solid #a9d3ef;border-radius:8px;margin-bottom:15px;background-color:#eef8ff}.status-legend div{margin-bottom:8px;font-size:0.85em;display:flex;align-items:center;color:#123b66}.legend-box{display:inline-block;width:15px;height:15px;margin-right:8px;border-radius:3px;border:1px solid #666}.legend-box.status-1{background-color:#b9c9ea !important;color:#333;border-radius:3px;border-color:#93a8d6}.legend-box.status-2{clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background-color:#16a34a !important;border-color:#16a34a}.legend-box.status-3{border-radius:50%;background-color:#ffc107 !important;border-color:#ffc107}.legend-box.status-4{border-radius:50%;background-color:#fd7e14 !important;border-color:#fd7e14}#question-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:15px}.q-button{height:32px;width:100%;line-height:32px;padding:0;border:1px solid #93a8d6;border-radius:5px;cursor:pointer;text-align:center;font-weight:600;font-size:0.85em;transition:background-color 0.2s}.status-1,.status-0{background-color:#b9c9ea;color:#1a2c56;border-radius:5px;border-color:#93a8d6}.status-2{background-color:#16a34a;color:white;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);border-radius:0;border-color:#16a34a}.status-3{background-color:#ffc107;color:#333;border-radius:50%;border-color:#ffc107}.status-4{background-color:#fd7e14;color:white;border-radius:50%;border-color:#fd7e14}.control-panel{display:flex;flex-direction:column;padding:0;background-color:#ffffff;border-top:2px solid #cfe6f7;position:fixed;bottom:0;left:0;width:calc(100% - 420px);z-index:90;box-shadow:0 -2px 5px rgba(0,0,0,0.1)}.control-row{display:flex;align-items:center;justify-content:space-between;padding:10px 15px}.option-action-row{display:flex;align-items:center;padding:10px 15px;border-bottom:1px solid #ddd;margin-bottom:0;justify-content:space-between}.option-buttons-container{display:flex;gap:12px;margin:0 20px}.btn-option{width:38px;height:38px;padding:0;font-size:1em;font-weight:700;border:2px solid #007bff;border-radius:50%;cursor:pointer;background-color:#ffffff;color:#007bff;transition:background-color 0.2s}.btn-option.selected{background-color:#007bff;color:white}.btn-control{padding:10px 15px;font-size:0.95em;font-weight:600;border:none;border-radius:6px;cursor:pointer;transition:filter 0.2s;margin:0 5px;min-width:100px}.btn-mark{background-color:#eaa93e;color:#402a00;margin-left:0;border-radius:20px;display:inline-flex;align-items:center;gap:6px}.mark-checkbox{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:2px solid #402a00;border-radius:3px;background-color:#fff9ee;flex-shrink:0}.mark-checkbox::after{content:''}.mark-checkbox.checked{background-color:#402a00}.mark-checkbox.checked::after{content:'✔';color:#ffffff;font-size:11px;line-height:1;font-weight:900}.btn-save-next{background-color:#1e8449;color:white}.btn-erase{background-color:#8256c4;color:white;margin-right:0}.btn-prev,.btn-next{background-color:#ffffff;color:#0a6fb0;border:2px solid #7ec4ea;border-radius:20px;font-weight:700}.btn-prev:hover,.btn-next:hover{background-color:#eaf7ff}.btn-submit-test{background-color:#0c3b66;color:white;padding:10px 25px;font-size:1em;font-weight:700;border-radius:6px}.btn-control:hover{filter:brightness(1.08)}.navigation-row{display:flex;justify-content:space-between;background-color:#f3f6f9;padding:10px 15px}.exam-note{background-color:#f6e9c2;border-top:1px solid #e6d097;color:#4a3a10;font-size:0.85em;padding:8px 15px}.exam-note strong{color:#4a3a10}#result-display{width:95%;max-width:1100px;margin:30px auto 100px auto;padding:25px;background-color:#ffffff;border:2px solid #38bdf8;border-radius:10px;display:none;box-shadow:0 4px 15px rgba(0,0,0,0.08)}.result-question{padding:15px 20px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:15px;background-color:#f9fbfd;width:100%}.result-option{padding:10px 14px;margin-top:8px;border-radius:5px;font-size:0.95em;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border:1px solid #e2e8f0}.result-option.correct{background-color:#d4edda;color:#155724;border-color:#c3e6cb}.result-option.wrong{background-color:#f8d7da;color:#721c24;border-color:#f5c6cb}.filter-container{display:flex;justify-content:center;gap:12px;margin:25px 0;flex-wrap:wrap}.filter-btn{padding:10px 20px;font-size:0.95em;font-weight:600;border:2px solid transparent;border-radius:6px;cursor:pointer;transition:all 0.2s ease;color:white;min-width:110px;text-align:center}.filter-btn:hover{opacity:0.9}.filter-btn.active{border-color:#000;transform:scale(1.03);box-shadow:0 4px 8px rgba(0,0,0,0.2)}.btn-download-pdf{background-color:#17a2b8;color:white;padding:10px 20px;font-size:1em;font-weight:600;border:none;border-radius:5px;cursor:pointer;transition:background-color 0.2s;box-shadow:0 2px 5px rgba(0,0,0,0.1)}.btn-download-pdf:hover{background-color:#138496}#initial-setup{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#f0faff;z-index:200;display:flex;justify-content:center;align-items:stretch}#setup-box{background-color:white;border-radius:0;text-align:left;box-shadow:none;font-family:'Poppins',sans-serif;width:100%;max-width:100%;height:100%;max-height:100%;display:flex;flex-direction:column;overflow:hidden}@media (min-width:1300px){#setup-box{max-width:1200px}}.mock-exam-wrap{border:1px solid #d7ecec;border-radius:8px;padding:14px;background:#f8fdff;margin-bottom:14px}.mock-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}.mock-header-bar{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 14px;flex:1;min-width:260px}.mock-logo-box{border:1px solid #999;border-radius:4px;padding:4px 8px;font-size:0.65em;font-weight:700;text-align:center;color:#555;line-height:1.2}.mock-timer{background:#ffc107;color:#333;font-weight:700;padding:4px 10px;border-radius:5px;font-size:0.85em}.mock-candidate{font-size:0.78em;color:#333}.mock-qno-bar{flex:1;min-width:260px;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:0.85em}.mock-btn-mini{border:1px solid #999;background:#eee;border-radius:4px;padding:2px 6px;font-size:0.72em;margin-left:4px;font-weight:700}.mock-lang-mini{font-size:0.72em;margin-left:8px}.callout{background:#ffe4c4;border:2px solid #7a2e0e;border-radius:6px;padding:8px 10px;font-size:0.76em;color:#3a2410;line-height:1.4;flex:1;min-width:200px}.callout strong{color:#7a2e0e}.mock-split{display:flex;gap:14px;flex-wrap:wrap}.mock-question-col{flex:1.4;min-width:260px}.mock-grid-col{flex:1;min-width:220px}.mock-question-box{background:#fff;border:1px solid #cfe8f5;border-left:4px solid #38bdf8;border-radius:6px;padding:10px 14px;font-size:0.85em;margin-bottom:8px}.mock-option{padding:2px 0;font-size:0.85em}.mock-answer-pad{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:0.8em}.mock-check{display:flex;align-items:center;gap:4px;font-weight:600}.mock-opt-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid #007bff;border-radius:4px;color:#007bff;font-weight:700;font-size:0.75em}.mock-opt-btn.selected{background:#007bff;color:#fff}.mock-btn-green,.mock-btn-red,.mock-btn-grey,.mock-btn-blue{color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:0.75em;font-weight:700}.mock-btn-green{background:#16a34a}.mock-btn-red{background:#dc3545}.mock-btn-grey{background:#6c757d}.mock-btn-blue{background:#007bff}.mock-nav-row{display:flex;justify-content:space-between;margin-top:6px}.mock-grid-summary{font-size:0.7em;margin-bottom:6px;line-height:1.6}.dot{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle}.dot-green{background:#16a34a}.dot-grey{background:#f0f0f0;border:1px solid #ccc}.dot-orange{background:#fd7e14;border-radius:50%}.dot-yellow{background:#ffc107;border-radius:50%}.mock-qgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:8px}.qg{display:flex;align-items:center;justify-content:center;height:20px;font-size:0.65em;font-weight:700;border-radius:3px;color:#fff}.qg.green{background:#16a34a}.qg.grey{background:#f0f0f0;color:#333;border:1px solid #ccc}.qg.orange{background:#fd7e14;border-radius:50%}.qg.yellow{background:#ffc107;color:#333;border-radius:50%}.post-submit-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}.callout-mini{flex:1;min-width:200px}.safety-note{background:#fff3e0;border:1px solid #f0b37e;border-left:4px solid #dc3545;border-radius:6px;padding:10px 14px;font-size:0.85em;color:#333}#setup-topbar{background:linear-gradient(135deg,#0ea5e9 0%,#22c55e 100%);color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 20px;flex-shrink:0}#setup-topbar .setup-org{font-size:0.95em;font-weight:700;opacity:0.95}#setup-topbar .setup-exam-name{font-size:1.15em;font-weight:700}#setup-topbar .setup-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:0.9em;font-weight:600}#setup-topbar .setup-meta span{background:rgba(255,255,255,0.18);padding:4px 10px;border-radius:5px}#setup-name-row{display:flex;align-items:center;gap:10px;padding:14px 22px;border-bottom:1px solid #eee;flex-shrink:0;flex-wrap:wrap}#setup-name-row label{font-weight:600;color:#333}#setup-box input#user-name-input{padding:9px 12px;border:1px solid #ccc;border-radius:5px;font-size:1em;flex:1;min-width:180px;font-family:'Poppins',sans-serif}#setup-instructions{padding:16px 22px;overflow-y:auto;flex:1;min-height:0}#setup-instructions h3{color:#0284c7;margin:14px 0 8px 0;font-size:1em}#setup-instructions h3:first-child{margin-top:0}#setup-instructions ul{margin:0 0 4px 0;padding-left:20px}#setup-instructions li{margin-bottom:6px;font-size:0.92em;line-height:1.5;color:#333}#setup-declaration{display:flex;align-items:flex-start;gap:10px;padding:14px 22px;border-top:1px solid #eee;background:#f8fafc;flex-shrink:0}#setup-declaration input[type="checkbox"]{margin-top:3px;width:17px;height:17px;flex-shrink:0;cursor:pointer}#setup-declaration label{font-size:0.92em;font-weight:600;color:#333;cursor:pointer}#setup-footer-row{padding:14px 22px;flex-shrink:0;text-align:center}#start-btn{background-color:#16a34a;color:white;padding:10px 20px;border:none;border-radius:5px;font-weight:600;cursor:pointer;width:100%;font-size:1.05em;transition:background-color 0.2s,opacity 0.2s}#start-btn:disabled{background-color:#9ca3af;cursor:not-allowed;opacity:0.8}@media (max-width:600px){#setup-topbar{flex-direction:column;align-items:flex-start}}.zoom-controls{position:fixed;top:70px;left:10px;z-index:9999;display:none;flex-direction:row;gap:8px}.zoom-controls button{padding:6px 12px;background:#0ea5e9;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer}footer{background-color:#0284c7;color:white;text-align:center;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));font-size:0.85em;font-weight:500;position:fixed;bottom:0;left:0;width:100%;z-index:80;box-sizing:border-box}.palette-toggle-btn{display:none}.sidebar-close-btn{display:none}.sidebar-backdrop{display:none}@media (max-width:768px){.header{flex-wrap:wrap;height:auto;padding:8px 10px;position:relative}.main-content{display:block!important;padding-top:10px;padding-bottom:260px}.question-area{margin-right:0!important;padding:10px 10px 20px 10px!important;min-height:auto;width:100%}.sidebar{position:fixed!important;top:0!important;right:0!important;left:auto!important;width:85%!important;max-width:340px;height:100%!important;border-left:none!important;box-shadow:-3px 0 12px rgba(0,0,0,0.3)!important;padding:16px;padding-top:55px!important;margin-bottom:0px !important;z-index:998!important;transform:translateX(100%);transition:transform 0.25s ease;overflow-y:auto!important}.sidebar.open{transform:translateX(0)}.control-panel{width:100%!important;left:0!important;position:fixed;bottom:40px}.option-action-row,.control-row,.navigation-row{flex-wrap:wrap;gap:8px;justify-content:center}.option-buttons-container{flex-wrap:wrap;justify-content:center;margin:0}.btn-control{min-width:120px}.zoom-controls{position:static;margin:10px;display:flex}.question-text,.option-label{word-break:break-word}.q-button{height:26px;font-size:0.7em}.exam-note{position:relative}#question-grid{grid-template-columns:repeat(10,1fr);gap:4px}#result-display{width:98%;padding:15px;margin-top:15px}.palette-toggle-btn{display:flex;position:fixed;right:14px;bottom:90px;z-index:96;background:#0ea5e9;color:#fff;border:none;border-radius:24px;padding:10px 16px;align-items:center;gap:6px;font-weight:700;font-size:0.85em;box-shadow:0 3px 10px rgba(0,0,0,0.3);cursor:pointer}.sidebar-close-btn{display:block;position:fixed;top:10px;right:10px;background:#dc3545;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:700;font-size:0.8em;cursor:pointer;z-index:999}.sidebar{display:flex;flex-direction:column;overflow:hidden !important}.sidebar-scroll-body{flex:1;min-height:0;overflow-y:auto}.sidebar-backdrop{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:997}.sidebar-backdrop.open{display:block}}</style>
+</head>
+<body>
+<div class='zoom-controls'><button onclick='setQuestionZoom(0.1)'>A+</button><button onclick='setQuestionZoom(-0.1)'>A-</button></div>
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closePalette()"></div>
+<button type="button" class="palette-toggle-btn" id="palette-toggle-btn" onclick="togglePalette()">📋 Palette</button>
+<div id="initial-setup">
+<div id="setup-box">
+<div id="setup-topbar">
+<div>
+<div class="setup-org">ASTI Delhi</div>
+<div class="setup-exam-name">DAY 9 PAPER 2</div>
+</div>
+<div class="setup-meta">
+<span>Questions: 100</span>
+<span>Duration: 50 Min</span>
+</div>
+</div>
+<div id="setup-name-row">
+<label for="user-name-input">Candidate Name:</label>
+<input type="text" id="user-name-input" placeholder="Enter Your Full Name" required>
+</div>
+<div id="setup-instructions">
+<p style="margin: 0 0 10px 0; font-weight: 600; color: #0284c7; font-size: 0.95em;">Here's how your exam screen works:</p>
+<div class="mock-exam-wrap">
+<div class="mock-row">
+<div class="mock-header-bar" style="justify-content: space-between;">
+<div>
+<div style="font-weight: 700; font-size: 0.95em;">DAY 9 PAPER 2</div>
+<div style="font-size: 0.75em; opacity: 0.75;">ASTI Delhi</div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px;">
+<span style="font-weight: 600; font-size: 0.8em;">Candidate: Your Name</span>
+<span class="mock-timer">50:00</span>
+</div>
+</div>
+<div class="callout">⏱️ <strong>HEADER &amp; TIMER</strong><br>Your name, the exam title, and the remaining time are always visible at the top and count down automatically.</div>
+</div>
+<div class="mock-row">
+<div style="display: flex; gap: 8px; align-items: center;">
+<button class="mock-btn-mini" style="padding: 5px 10px;">A+</button>
+<button class="mock-btn-mini" style="padding: 5px 10px;">A-</button>
+<button class="mock-btn-mini" style="padding: 5px 10px;">Toggle Hindi / English</button>
+</div>
+<div class="callout">🔤 <strong>TEXT SIZE &amp; LANGUAGE</strong><br>The A+ / A- buttons (top-left of the screen) resize question text. "Toggle Hindi / English" switches the question language, any time.</div>
+</div>
+<div class="mock-split">
+<div class="mock-question-col">
+<div class="mock-question-box">
+<p style="margin: 0 0 6px 0; font-weight: 700;">Question 1 of 100</p>
+<p style="margin: 0 0 6px 0;">How much percentage of Rs.45 is Rs.6.75?</p>
+<div class="mock-option">A. 12%</div>
+<div class="mock-option">B. 18%</div>
+<div class="mock-option">C. 20%</div>
+<div class="mock-option">D. 15%</div>
+</div>
+<div class="callout" style="margin-bottom: 8px;">❓ <strong>QUESTION AREA</strong><br>One question is shown at a time, along with its options.</div>
+<div class="mock-answer-pad">
+<button class="mock-btn-mini" style="background: #ffc107; border-color: #ffc107; font-weight: 700;">Mark for Review</button>
+<span class="mock-opt-btn">A</span><span class="mock-opt-btn">B</span><span class="mock-opt-btn">C</span><span class="mock-opt-btn selected">D</span>
+<button class="mock-btn-green">Save &amp; Next</button>
+<button class="mock-btn-red">Erase Answer</button>
+</div>
+<div class="mock-nav-row">
+<span><button class="mock-btn-grey">Previous</button> <button class="mock-btn-blue">Next</button></span>
+<button class="mock-btn-mini" style="background: #0284c7; color: #fff; border: none; padding: 5px 12px;">Submit Exam</button>
+</div>
+<div class="callout" style="margin-top: 10px;">✅ <strong>ANSWERING &amp; NAVIGATION</strong><br>Pick an option, then click <strong>Save &amp; Next</strong> to save it and move on. Use <strong>Mark for Review</strong> to flag a question and <strong>Erase Answer</strong> to clear your choice. <strong>Previous / Next</strong> move between questions, and <strong>Submit Exam</strong> ends your attempt whenever you're ready.</div>
+</div>
+<div class="mock-grid-col">
+<p style="margin: 0 0 6px 0; font-weight: 700; font-size: 0.82em; color: #0284c7;">Question Palette</p>
+<div class="mock-grid-summary">
+<span class="dot" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;"></span>Question Answered<br>
+<span class="dot dot-grey"></span>Not Answered<br>
+<span class="dot dot-orange"></span>Review Answered<br>
+<span class="dot dot-yellow"></span>Review Not Answered
+</div>
+<div class="mock-qgrid">
+<span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">1</span><span class="qg grey">2</span><span class="qg orange">3</span><span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">4</span><span class="qg grey">5</span><span class="qg yellow">6</span>
+<span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">7</span><span class="qg grey">8</span><span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">9</span><span class="qg grey">10</span><span class="qg orange">11</span><span class="qg grey">12</span>
+</div>
+<div class="callout">🧭 <strong>QUESTION PALETTE</strong><br>Click any number to jump straight to that question — this does <strong>not</strong> save your current answer, so use Save &amp; Next for that first.</div>
+</div>
+</div>
+</div>
+<div class="post-submit-row">
+<div class="callout callout-mini">🔁 <strong>AUTO-SUBMIT</strong><br>When the timer hits 0:00, your quiz submits automatically — no action needed from you.</div>
+<div class="callout callout-mini">🔍 <strong>REVIEW OPTION</strong><br>After submitting, see every question with the correct answer, filterable by Correct / Wrong / Unattempted.</div>
+<div class="callout callout-mini">📄 <strong>SUMMARY PDF</strong><br>Download a PDF of your score, accuracy, and other details once the quiz ends.</div>
+</div>
+<div class="safety-note">🔒 <strong>Please Note:</strong> Minimizing this window or switching to another tab/application during the quiz is tracked. For the first 2 time(s) you do this, you will only get a WARNING and the exam continues. On attempt number 3 through attempt number 4, your exam will be LOCKED immediately and will require an Administrator password to resume. On attempt number 5, your exam will be submitted automatically. Please stay on this tab for the entire duration.</div>
+</div>
+<div id="setup-declaration">
+<input type="checkbox" id="declaration-check">
+<label for="declaration-check">I have read and understood all the instructions above.</label>
+</div>
+<div id="setup-footer-row">
+<button id="start-btn" disabled>Start the Quiz</button>
+</div>
+</div>
+</div>
+<div class="header" style="display: none;" id="main-header">
+<div class="test-title">
+<h3 style="font-size: 1.5em;">DAY 9 PAPER 2</h3>
+<div class="institute-logo">ASTI Delhi</div>
+</div>
+<div class="user-info">
+<span id="header-user-name">Candidate: N/A</span>
+<span id="timer-display">50:00</span>
+</div>
+</div>
+<div class="main-content" style="display: none;" id="main-test-area">
+<div class="question-area">
+<div class="lang-toggle-container">
+<button type="button" class="lang-toggle-btn" id="lang-toggle-local">Toggle Hindi / English</button>
+</div>
+<div id="questions-container"></div>
+<div class="control-panel" id="exam-control-panel">
+<div class="option-action-row">
+<button type="button" class="btn-control btn-mark" id="mark-review-btn" onclick="markQuestion()"><span class="mark-checkbox" id="mark-checkbox"></span> Mark for Review</button>
+<div class="option-buttons-container" id="option-buttons">
+<button type="button" class="btn-option" data-value="1" onclick="selectOption(1)">A</button>
+<button type="button" class="btn-option" data-value="2" onclick="selectOption(2)">B</button>
+<button type="button" class="btn-option" data-value="3" onclick="selectOption(3)">C</button>
+<button type="button" class="btn-option" data-value="4" onclick="selectOption(4)">D</button>
+</div>
+<div style="display: flex; gap: 5px;">
+<button type="button" class="btn-control btn-save-next" onclick="saveAndNext()">Save & Next</button>
+<button type="button" class="btn-control btn-erase" onclick="eraseAnswer()">Erase Answer</button>
+</div>
+</div>
+<div class="control-row navigation-row">
+<div style="display: flex; gap: 5px;">
+<button type="button" class="btn-control btn-prev" onclick="navigateQuestion(-1)">◀ Previous</button>
+<button type="button" class="btn-control btn-next" onclick="navigateQuestion(1)">Next ▶</button>
+</div>
+<button type="button" class="btn-control btn-submit-test" id="submitQuizBtn" onclick="confirmSubmit()">Submit Exam</button>
+</div>
+<div class="exam-note">Note : You must click on the <strong>Save &amp; Next</strong> button to save your answer. If not your answer will not be saved.</div>
+</div>
+</div>
+<div class="sidebar" id="question-sidebar">
+<button type="button" class="sidebar-close-btn" onclick="closePalette()">✕ Close</button>
+<div class="sidebar-scroll-body">
+<h3>Question Palette / प्रश्न पैलेट</h3>
+<div class="status-legend">
+<div><span class="legend-box status-2"></span> Question Answered (उत्तर दिया - Pentagon)</div>
+<div><span class="legend-box status-1"></span> Not Answered (उत्तर नहीं दिया - Square)</div>
+<div><span class="legend-box status-4"></span> Review Answered (समीक्षा + उत्तर दिया - Circle)</div>
+<div><span class="legend-box status-3"></span> Review Not Answered (समीक्षा + उत्तर नहीं दिया - Circle)</div>
+</div>
+<div id="question-grid"></div>
+</div>
+</div>
+</div>
+<div id="result-display"></div>
+<div id="cheat-lock-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(20,20,20,0.96); z-index:99999; color:#fff; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box;">
+<h2 id="cheat-lock-title" style="color:#ff6b6b; margin-bottom:10px;">⚠ Exam Locked</h2>
+<p id="cheat-lock-message" style="max-width:500px; font-size:1.05em; line-height:1.5;"></p>
+<div id="warning-box" style="margin-top:20px; display:none;">
+<button type="button" id="warning-continue-btn" onclick="continueAfterWarning()" style="padding:12px 30px; background:#f59e0b; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Continue Exam</button>
+</div>
+<div id="unlock-form-box" style="margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+<input type="password" id="admin-unlock-input" placeholder="Enter Administrator Password" style="padding:10px 14px; border-radius:6px; border:none; width:250px; max-width:80vw; font-size:1em;">
+<button type="button" id="admin-unlock-btn" onclick="attemptUnlock()" style="padding:12px 30px; background:#0ea5e9; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Unlock Exam</button>
+<p id="unlock-error-msg" style="color:#ff6b6b; font-size:0.9em; margin:0; display:none;">Incorrect password. Please contact your Administrator.</p>
+</div>
+</div>
+<footer>
+ASTI Delhi Quiz Examination
+</footer>
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPwPhD5WTBPut3gC0LYF_wq1gXZ14O5z78yukoKs1-RQTy4N9YwvSF0axQLHzcUjon/exec";
+const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
+const ADMIN_UNLOCK_PASSWORD = "igiasti123";
+const TOTAL_QUESTIONS = 100;
+const TOTAL_TIME_SECONDS = 50 * 60; 
+const questionData = [[1,1,"Aircraft security check and search is the outcome of which incident?","Aircraft security check और search किस घटना का परिणाम है?",["IC 814/IC 814","IC 814/IC 814"],["Kanishka Tragedy / कनिष्का त्रासदी","Kanishka Tragedy / कनिष्का त्रासदी"],["Bombing of TWA 840 / TWA 840 बम विस्फोट","Bombing of TWA 840 / TWA 840 बम विस्फोट"],["All of the above / उपरोक्त सभी","All of the above / उपरोक्त सभी"]],[2,1,"Access for relatives of stretcher will be allowed through","स्ट्रेचर के रिश्तेदारों के लिए प्रवेश के माध्यम से अनुमति दी जाएगी",["Vehicle Gate","वाहन गेट"],["SHA","SHA"],["Staff Gate","Staff Gate"],["VIP Gate","VIP Gate"]],[3,3,"checked in passenger no reported to board would be/","चेक-इन किए गए यात्री को बोर्ड को सूचित नहीं किया जाएगा /",["A. Cancelled passenger A. रद्द यात्री","A. Cancelled passenger A. रद्द यात्री"],["B. Deportee बी निर्वासित","B. Deportee बी निर्वासित"],["C. Gate No Show passenger C. गेट पर न पहुँचने वाला यात्री","C. Gate No Show passenger C. गेट पर न पहुँचने वाला यात्री"],["D. Tranfer passenger D. यात्री का स्थानांतरण","D. Tranfer passenger D. यात्री का स्थानांतरण"]],[4,4,"In admissible person is a person who is or will be refused admission to a state by its authorities. Which of the following is not true in this regard:-","स्वीकार्य व्यक्ति में वह व्यक्ति होता है जिसे इसके द्वारा किसी राज्य में प्रवेश देने से मना कर दिया जाता है अधिकारियों। इस संबंध में निम्नलिखित में से कौन-सा सही नहीं है:-",["A. Such persons normally have to transported back to their state of depar ए। ऐसे व्यक्तियों को सामान्य रूप से उनके प्रस्थान की स्थिति में वापस ले जाना पड़ता है","A. Such persons normally have to transported back to their state of depar ए। ऐसे व्यक्तियों को सामान्य रूप से उनके प्रस्थान की स्थिति में वापस ले जाना पड़ता है"],["B. Such persons normally have to be transported back to any other state where the","B. Such persons normally have to be transported back to any other state where the"],["C. They are to be sent back by the aircraft operator on which they arrive C. उन्हें उस विमान परिचालक द्वारा वापस भेजा जाना है जिस पर वे पहुँचते हैं","C. They are to be sent back by the aircraft operator on which they arrive C. उन्हें उस विमान परिचालक द्वारा वापस भेजा जाना है जिस पर वे पहुँचते हैं"],["D. They can be granted permission to stay back on humanitarian grounds. D. उन्हें मानवीय आधार पर वापस रहने की अनुमति दी जा सकती है।","D. They can be granted permission to stay back on humanitarian grounds. D. उन्हें मानवीय आधार पर वापस रहने की अनुमति दी जा सकती है।"]],[5,1,"On ground of protocol whose vehicle is authorized access up to the tarmac area along with escort","प्रोटोकॉल के आधार पर, जिनके वाहन को एस्कॉर्ट के साथ टैरमैक क्षेत्र तक जाने की अनुमति है, उन्हें एस्कॉर्ट के साथ प्रवेश दिया जाएगा।",["A.Vice president A. उपाध्यक्ष","A.Vice president A. उपाध्यक्ष"],["B. Chief justice of India B. भारत के मुख्य न्यायाधीश","B. Chief justice of India B. भारत के मुख्य न्यायाधीश"],["C.Speaker of lok sabha C. लोकसभा अध्यक्ष","C.Speaker of lok sabha C. लोकसभा अध्यक्ष"],["D. Former president of India D. भारत के पूर्व राष्ट्रपति","D. Former president of India D. भारत के पूर्व राष्ट्रपति"]],[6,2,"on ground of protocol whose vehicle is authorized access up to the tarmac area without escort within their states/ union territories of jurisdiction","प्रोटोकॉल के आधार पर जिसका वाहन बिना टरमैक क्षेत्र तक जाने के लिए अधिकृत है अपने राज्यों/केंद्र शासित प्रदेशों के अधिकार क्षेत्र में अनुरक्षण/",["A.Speaker of lok sabha A. लोकसभा के अध्यक्ष","A.Speaker of lok sabha A. लोकसभा के अध्यक्ष"],["B.Governors B. राज्यपाल","B.Governors B. राज्यपाल"],["C.Chief justice of India C. भारत के मुख्य न्यायाधीश","C.Chief justice of India C. भारत के मुख्य न्यायाधीश"],["D.Former prime minister of India D. भारत के पूर्व प्रधान मंत्री","D.Former prime minister of India D. भारत के पूर्व प्रधान मंत्री"]],[7,3,"One of the document which sky marshal should have while on duty is","स्काई मार्शल के पास ड्यूटी के दौरान कौन सा दस्तावेज होना चाहिए उनमें से एक है",["A.WTC","A.WTC"],["B.WHK","B.WHK"],["C.WAC","C.WAC"],["D.WHP","D.WHP"]],[8,1,"SPG Personal Can Carry one Pistol with cartridges and one Sub Machine Gun/AssaultRifle with cartridges.","एसपीजी कर्मचारी एक साइट को कार्टेज और एक सब शीट के साथ ले जा सकते हैं काट्रिज गन/असॉल्ट राइफल ।",["A.60 & 150","A.60 & 150"],["B.70 & 100","B.70 & 100"],["C.50 & 100","C.50 & 100"],["D.100 & 150","D.100 & 150"]],[9,1,"The pilot in command (PIC) is required to be notified of passengers subject to judicial/ police custody and their seat allocation along with their escorts on board the aircraft by:","पायलट इन कमांड (पीआईसी) को यात्रियों के बारे में सूचित करना आवश्यक है जो न्यायिक / पुलिस हिरासत और विमान में उनके एस्कॉर्ट्स के साथ उनकी सीट का आवंटनः",["A. Airline Station Manger/Airport Manger A. एयरलाइन स्टेशन प्रबंधक / हवाई अड्डा प्रबंधक","A. Airline Station Manger/Airport Manger A. एयरलाइन स्टेशन प्रबंधक / हवाई अड्डा प्रबंधक"],["B.BCAS","B.BCAS"],["C. Airline Crew एयरलाइन क्रू","C. Airline Crew एयरलाइन क्रू"],["D.Agency Carrying prisoner D. कैदी को ले जाने वाली एजेंसी","D.Agency Carrying prisoner D. कैदी को ले जाने वाली एजेंसी"]],[10,4,"To facilitate the stretcher passenger is the responsibility of","स्ट्रेचर यात्री की सुविधा की जिम्मेदारी है",["A.ASG/APSU ए.एएसजी/एपीएसयू","A.ASG/APSU ए.एएसजी/एपीएसयू"],["B.Airline बी. एयरलाइन","B.Airline बी. एयरलाइन"],["C. Airport Operator सी. हवाई अड्डा संचालक","C. Airport Operator सी. हवाई अड्डा संचालक"],["D.Airline & airport operator डी. एयरलाइन और हवाई अड्डा संचालक","D.Airline & airport operator डी. एयरलाइन और हवाई अड्डा संचालक"]],[11,1,"Which of the following cannot carry arms and ammunition in cabin baggage","इनमें से कौन केबिन बैगेज में हथियार और गोला-बारूद नहीं ले जा सकता है",["A.Escort offices of prisoners ए. कैदियों के एस्कॉर्ट कार्यालय","A.Escort offices of prisoners ए. कैदियों के एस्कॉर्ट कार्यालय"],["B.SPG personnel with their protectee बी. एसपीजी के जवान अपनी सुरक्षा के साथ","B.SPG personnel with their protectee बी. एसपीजी के जवान अपनी सुरक्षा के साथ"],["C.PSOs of VVIPS","C.PSOs of VVIPS"],["D.Both a and c. ए और सी दोनों","D.Both a and c. ए और सी दोनों"]],[12,2,"which statement is true for carriage of person who is mentally retarted","मानसिक रूप से विक्षिप्त व्यक्ति की ढुलाई के लिए कौन सा कथन सत्य है",["A. Should be considered as a threat to the safety of flight 3. इसे उड़ान की सुरक्षा के लिए खतरा माना जाना चाहिए","A. Should be considered as a threat to the safety of flight 3. इसे उड़ान की सुरक्षा के लिए खतरा माना जाना चाहिए"],["B. Is not threat to the safety of a flight/क्या यह उड़ान की सुरक्षा के लिए खतरा नहीं है?","B. Is not threat to the safety of a flight/क्या यह उड़ान की सुरक्षा के लिए खतरा नहीं है?"],["C. Should not be accompanied C. साथ नहीं होना चाहिए","C. Should not be accompanied C. साथ नहीं होना चाहिए"],["D. Should be seated on emergency exit घ. आपातकालीन निकास द्वार पर बैठना चाहिए","D. Should be seated on emergency exit घ. आपातकालीन निकास द्वार पर बैठना चाहिए"]],[13,2,"Who can carry loaded gun in flight ?","उड़ान में भरी हुई बंदूक कौन ले जा सकता है ?",["A. PSO of VVIP ए. वीवीआईपी के पीएसओ","A. PSO of VVIP ए. वीवीआईपी के पीएसओ"],["B. Sky marshal बी स्काई मार्शल","B. Sky marshal बी स्काई मार्शल"],["C. SPG personnel when accompany SPG protectee C. SPG कर्मी जब SPG सुरक्षा प्राप्त व्यक्ति के साथ हों","C. SPG personnel when accompany SPG protectee C. SPG कर्मी जब SPG सुरक्षा प्राप्त व्यक्ति के साथ हों"],["D. Bonafide passenger holding valid licence डी. वैध लाइसेंस धारक बोनाफाइड यात्री","D. Bonafide passenger holding valid licence डी. वैध लाइसेंस धारक बोनाफाइड यात्री"]],[14,4,"What should not be served to escort or prisoner on board an aircraft?","विमान में एस्कॉर्ट या कैदी को क्या नहीं परोसा जाना चाहिए?",["A. food खाना","A. food खाना"],["B. tea/coffee बी चाय / कॉफी","B. tea/coffee बी चाय / कॉफी"],["C. water. पानी","C. water. पानी"],["D. intoxicating beverage मादक पेय","D. intoxicating beverage मादक पेय"]],[15,4,"What should not be served to prisoner on board an aircraft ?","वायुयान में कैदी को क्या नहीं देना चाहिए ?",["A. Food. खाना","A. Food. खाना"],["B. Metal utensils धातु के बर्तन","B. Metal utensils धातु के बर्तन"],["C. Knife चाकू","C. Knife चाकू"],["D.Both B and C. बी और सी दोनों","D.Both B and C. बी और सी दोनों"]],[16,3,"The escort officer of prisoner are allowed to carry their arms and ammunition in?","- कैदी के एस्कॉर्ट अधिकारी को अपने हथियार और गोला-बारूद अंदर ले जाने की अनुमति है?",["A-In hand baggage in unloaded condition ए-हैंड बैगेज में अनलोड स्थिति में","A-In hand baggage in unloaded condition ए-हैंड बैगेज में अनलोड स्थिति में"],["B-On person in unloaded condition बी-अनलोड स्थिति में व्यक्ति पर","B-On person in unloaded condition बी-अनलोड स्थिति में व्यक्ति पर"],["C-In registered baggage सी-इन पंजीकृत सामान","C-In registered baggage सी-इन पंजीकृत सामान"],["D-In cargo डी-इन कार्गो","D-In cargo डी-इन कार्गो"]],[17,4,"In INDIA the .are specially selected and trained taking into account the safety and security aspects on board an aircraft and they are deployed according to the threat assessment of the competent authority.","भारत में . को विशेष रूप से ध्यान में रखते हुए चुना और प्रशिक्षित किया जाता है एक विमान में सवार सुरक्षा और सुरक्षा पहलुओं और उन्हें के अनुसार तैनात किया जाता है सक्षम प्राधिकारी के खतरे का आकलन ।",["A-Indian army","A-Indian army"],["B-SPG","B-SPG"],["C-CISF","C-CISF"],["D-NSG","D-NSG"]],[18,3,"IFSO travels as per the flight schedule given by ...","आईएफएसओ द्वारा दिए गए फ्लाइट शेड्यूल के अनुसार यात्रा करता है।",["A-Airline operator","A-Airline operator"],["B-Airport operator","B-Airport operator"],["C-BCAS","C-BCAS"],["D-DGCA","D-DGCA"]],[19,3,"Which agency is primarily responsible for the movement of deportee passenger?","निर्वासित यात्रियों की आवाजाही के लिए मुख्य रूप से कौन सी एजेंसी ज़िम्मेदार है?",["A-Local police A- स्थानीय पुलिस","A-Local police A- स्थानीय पुलिस"],["B-ASG बी-एएसजी","B-ASG बी-एएसजी"],["C-Airline operator सी-एयरलाइन ऑपरेटर","C-Airline operator सी-एयरलाइन ऑपरेटर"],["D-Immigration डी-आव्रजन","D-Immigration डी-आव्रजन"]],[20,1,"Which agency is responsible for the movement of stretcher passenger?","स्ट्रेचर यात्री के आवागमन के लिए कौन सी एजेंसी जिम्मेदार है",["A.Airline operator ए. एयरलाइन संचालक","A.Airline operator ए. एयरलाइन संचालक"],["B.Airport operator बी. हवाई अड्डा संचालक","B.Airport operator बी. हवाई अड्डा संचालक"],["C.Airport doctor सी. हवाई अड्डे का डॉक्टर","C.Airport doctor सी. हवाई अड्डे का डॉक्टर"],["D. Ground handling agency डी. ग्राउंड हैंडलिंग एजेंसी","D. Ground handling agency डी. ग्राउंड हैंडलिंग एजेंसी"]],[21,2,"Who among the following is responsible for the movement of valuable consignment,?","निम्नलिखित में से कौन मूल्यवान खेप की आवाजाही के लिए जिम्मेदार है,?",["A- Airport security personnel - हवाई अड्डा सुरक्षा कर्मी","A- Airport security personnel - हवाई अड्डा सुरक्षा कर्मी"],["B.Airline security personnel and agency involved एयरलाइन सुरक्षाकर्मी और एजेंसी शामिल","B.Airline security personnel and agency involved एयरलाइन सुरक्षाकर्मी और एजेंसी शामिल"],["C. NSG सी. एनएसजी","C. NSG सी. एनएसजी"],["D.Apron control एप्रन नियंत्रण","D.Apron control एप्रन नियंत्रण"]],[22,4,"Which of the following is not permitted to be carried by escort of prisoner on board an aircraft?","निम्न में से किसे बोर्ड पर कैदी के एस्कॉर्ट द्वारा ले जाने की अनुमति नहीं है हवाई जहाज ?",["A-Restraining devices ए-निरोधक उपकरण","A-Restraining devices ए-निरोधक उपकरण"],["B-Movement order बी-आंदोलन आदेश","B-Movement order बी-आंदोलन आदेश"],["C-BCAS circular authorising the carriage of the prisoner कैदी के वहन को अधिकृत करने वाला सी-बीसीएएस सर्कुलर","C-BCAS circular authorising the carriage of the prisoner कैदी के वहन को अधिकृत करने वाला सी-बीसीएएस सर्कुलर"],["D- Incapacitating gas generating devices and prohibited items/अक्षम करने वाली गैस बनाने वाले उपकरण और प्रतिबंधित वस्तुएं","D- Incapacitating gas generating devices and prohibited items/अक्षम करने वाली गैस बनाने वाले उपकरण और प्रतिबंधित वस्तुएं"]],[23,1,"Who is responsible for the administrative and financial arrangements for removal of deportee?","हटाने की प्रशासनिक और वित्तीय व्यवस्था के लिए कौन जिम्मेदार है निर्वासित",["A. airline operator ए एयरलाइन ऑपरेटर","A. airline operator ए एयरलाइन ऑपरेटर"],["B.Local police ए एयरलाइन ऑपरेटर","B.Local police ए एयरलाइन ऑपरेटर"],["C.Government ordering the deportation C. सरकार निर्वासन का आदेश दे रही है","C.Government ordering the deportation C. सरकार निर्वासन का आदेश दे रही है"],["D.Concerned embassy D. संबंधित दूतावास","D.Concerned embassy D. संबंधित दूतावास"]],[24,4,"The person who need not be escorted?","वह व्यक्ति जिसे अनुरक्षण की आवश्यकता नहीं है?",["A.VIP","A.VIP"],["B-Person in custody बी-व्यक्ति हिरासत में","B-Person in custody बी-व्यक्ति हिरासत में"],["C-Authorised visitor सी-अधिकृत आगंतुक","C-Authorised visitor सी-अधिकृत आगंतुक"],["D-Passenger डी-यात्री","D-Passenger डी-यात्री"]],[25,3,"What does IFSO stands for?","IFSO का क्या अर्थ है?",["A-International flight safety organizations ए-अंतर्राष्ट्रीय उड़ान सुरक्षा संगठन","A-International flight safety organizations ए-अंतर्राष्ट्रीय उड़ान सुरक्षा संगठन"],["B-International flight security organisation बी-अंतर्राष्ट्रीय उड़ान सुरक्षा संगठन","B-International flight security organisation बी-अंतर्राष्ट्रीय उड़ान सुरक्षा संगठन"],["C-Inflight security officer सी-इनफ्लाइट सुरक्षा अधिकारी","C-Inflight security officer सी-इनफ्लाइट सुरक्षा अधिकारी"],["D-Inflight safety officer डी-इनफ्लाइट सुरक्षा अधिकारी","D-Inflight safety officer डी-इनफ्लाइट सुरक्षा अधिकारी"]],[26,3,"Who carries out briefing of crew prior to departure of flight?","उड़ान के प्रस्थान से पहले चालक दल की ब्रीफिंग कौन करता है?",["A-Airport manager of concerned airline A- संबंधित एयरलाइन का एयरपोर्ट मैनेजर","A-Airport manager of concerned airline A- संबंधित एयरलाइन का एयरपोर्ट मैनेजर"],["B-IFSO बी-आईएफएसओ","B-IFSO बी-आईएफएसओ"],["C-Airline security सी-एयरलाइन सुरक्षा","C-Airline security सी-एयरलाइन सुरक्षा"],["D-Airline Engineer. डी-एयरलाइन इंजीनियर।","D-Airline Engineer. डी-एयरलाइन इंजीनियर।"]],[27,4,"Who are also known as \"REFUSALS\"?","किसे \"रिफ्यूजल्स” के नाम से भी जाना जाता है?",["A-Disruptive passenger - विघटनकारी यात्री","A-Disruptive passenger - विघटनकारी यात्री"],["B-Unruly passenger बी-अनियंत्रित यात्री","B-Unruly passenger बी-अनियंत्रित यात्री"],["C-Last minute passenger-आखिरी मिनट यात्री","C-Last minute passenger-आखिरी मिनट यात्री"],["D-Inadmissible passenger-अस्वीकार्य यात्री","D-Inadmissible passenger-अस्वीकार्य यात्री"]],[28,2,"The. .responsible for carriage of prisoner by air shall indicate classification of such prisoner as dangerous or otherwise in their application address to BCAS.","....हवाई मार्ग से कैदी की ढुलाई के लिए जिम्मेदार.... का वर्गीकरण इंगित करेगा बीसीएएस को उनके आवेदन पते में खतरनाक या अन्यथा के रूप में ऐसे कैदी।",["A-Regulating authority नियामक प्राधिकरण","A-Regulating authority नियामक प्राधिकरण"],["B-Policing authority - पुलिसिंग अथॉरिटी","B-Policing authority - पुलिसिंग अथॉरिटी"],["C-Airline authority एयरलाइन प्राधिकरण","C-Airline authority एयरलाइन प्राधिकरण"],["D-Airport authority - हवाईअड्डा प्राधिकरण","D-Airport authority - हवाईअड्डा प्राधिकरण"]],[29,2,"Which among the following consignment not required security escort during normal circumstances?","निम्नलिखित में से किस खेप को सामान्य के दौरान सुरक्षा एस्कॉर्ट की आवश्यकता नही होती है? परिस्थितियाँ?",["A-Vulnerable cargo कमजोर माल","A-Vulnerable cargo कमजोर माल"],["Cabin bag हाथ में ले जाने वाला बैग","Cabin bag हाथ में ले जाने वाला बैग"],["C-Valuable cargo and mail मूल्यवान कार्गो और मेल","C-Valuable cargo and mail मूल्यवान कार्गो और मेल"],["D-bags Diplomatic / mail - बैग्स डिप्लोमैटिक / मेल","D-bags Diplomatic / mail - बैग्स डिप्लोमैटिक / मेल"]],[30,4,"Who is responsible for escorting of consignments?","खेपों के मार्गरक्षण के लिए कौन जिम्मेदार है?",["A.ASG एएसजी","A.ASG एएसजी"],["B.BCAS बीसीएएस","B.BCAS बीसीएएस"],["C.Customs department सीमा शुल्क विभाग","C.Customs department सीमा शुल्क विभाग"],["D.Agency involved D. एजेंसी शामिल है","D.Agency involved D. एजेंसी शामिल है"]],[31,2,"While escorting high value shipments, which route should be adopted?","उच्च मूल्य के शिपमेंट को एस्कॉर्ट करते समय, कौन सा मार्ग अपनाया जाना चाहिए?",["A.Unknown route अज्ञात मार्ग","A.Unknown route अज्ञात मार्ग"],["B.Route should vary for consignment to consignment खेप से खेप के लिए रूट अलग-अलग होना चाहिए","B.Route should vary for consignment to consignment खेप से खेप के लिए रूट अलग-अलग होना चाहिए"],["C.Normal/routing route सामान्य/मार्ग मार्ग","C.Normal/routing route सामान्य/मार्ग मार्ग"],["D.Shortest route सबसे छोटा रास्ता","D.Shortest route सबसे छोटा रास्ता"]],[32,3,"Who is responsible for escorting of UM?","यूएम के मार्गरक्षण के लिए कौन जिम्मेदार है?",["BCAS","BCAS"],["ASG","ASG"],["Airlines","Airlines"],["AAI","AAI"]],[33,2,"Who is responsible for Guarding of inadmissible person at refusal room?","इनकार कक्ष में अस्वीकार्य व्यक्ति की रखवाली के लिए कौन जिम्मेदार है?",["BCAS","BCAS"],["ASG/APSU","ASG/APSU"],["Airlines","Airlines"],["AAI","AAI"]],[34,4,"Which type of consignment are to be escorted after screening.","स्क्रीनिंग के बाद किस प्रकार के माल को आगे ले जाया जाना चाहिए",["A.Courierए. कूरियर","A.Courierए. कूरियर"],["B.General cargo बी. सामान्य कार्गो","B.General cargo बी. सामान्य कार्गो"],["C.Radio-active material C. रेडियो-सक्रिय पदार्थ","C.Radio-active material C. रेडियो-सक्रिय पदार्थ"],["D.All the above D. उपर्युक्त सभी","D.All the above D. उपर्युक्त सभी"]],[35,1,"Who among the following can go up to the aircraft in their own vehicle but without escort","निम्नलिखित में से कौन अपने वाहन से विमान तक जा सकता है, लेकिन बिना किसी अनुरक्षक के",["A.Prime Minister A. प्रधानमंत्री","A.Prime Minister A. प्रधानमंत्री"],["B. President बी. राष्ट्रपति","B. President बी. राष्ट्रपति"],["C.Visiting head of government/ दौरे पर आए सरकार प्रमुख","C.Visiting head of government/ दौरे पर आए सरकार प्रमुख"],["D.Chief Justice of India D. भारत के मुख्य न्यायाधीश","D.Chief Justice of India D. भारत के मुख्य न्यायाधीश"]],[36,2,"How many type of passenger disturbance level as per DGCA norms","डीजीसीए के मानदंडों के अनुसार यात्री व्यवधान स्तर कितने प्रकार के होते हैं?",["2","2"],["3","3"],["4","4"],["5","5"]],[37,3,"Which of the following is not the ground for access of vehicle up to tarmac","निम्नलिखित में से कौन सा आधार वाहन को डामर तक पहुंचने की अनुमति नहीं देता है?",["Protocol ground प्रोटोकॉल ग्राउंड","Protocol ground प्रोटोकॉल ग्राउंड"],["Security ground सुरक्षा मैदान","Security ground सुरक्षा मैदान"],["Administrative ground प्रशासनिक आधार","Administrative ground प्रशासनिक आधार"],["Medical ground मेडिकल ग्राउंड","Medical ground मेडिकल ग्राउंड"]],[38,1,"INAD Stands for","INAD का मतलब है",["INADMISSIBLE PASSENGER अस्वीकार्य यात्री","INADMISSIBLE PASSENGER अस्वीकार्य यात्री"],["UNAUTHORIZED PASSENGER अस्वीकार्य यात्री","UNAUTHORIZED PASSENGER अस्वीकार्य यात्री"],["INADMISSION PASSENGER प्रवेश यात्री","INADMISSION PASSENGER प्रवेश यात्री"],["NONE OF THESE इनमें से कोई नहीं","NONE OF THESE इनमें से कोई नहीं"]],[39,1,"Grenade is categorized as","ग्रेनेड को वर्गीकृत किया गया है",["a) Explosive / विस्फोटक","a) Explosive / विस्फोटक"],["b) Weapons / हथियार","b) Weapons / हथियार"],["c) Dangerous Article / खतरनाक आर्टिकल","c) Dangerous Article / खतरनाक आर्टिकल"],["d) Dangerous Goods / डेंजरस गुड्स","d) Dangerous Goods / डेंजरस गुड्स"]],[40,2,"Pre-embarkation Check (PEC) is a","फ्लाइट मैं चड़ने से पहले की जाने वाली जांच (पीईसी) एक है",["a) Recommended practice / रेकोमेंडेड प्रैक्टिस","a) Recommended practice / रेकोमेंडेड प्रैक्टिस"],["b) Standard Practice / स्टैण्डर्ड प्रैक्टिस","b) Standard Practice / स्टैण्डर्ड प्रैक्टिस"],["c) both a & b / दोनों a & b","c) both a & b / दोनों a & b"],["d) None of these / इनमे से कोई नहीं","d) None of these / इनमे से कोई नहीं"]],[41,3,"There are Components of ASG?","ASG के कितने घटक हैं?",["a) One","a) One"],["b) Three","b) Three"],["c) Four","c) Four"],["d) Seven/","d) Seven/"]],[42,4,"The persons who need not be escorted","किन व्यक्तियों को एअरपोएट पर एस्कॉर्ट की आवश्यकता नहीं है",["a) VIP/ वीआईपी /","a) VIP/ वीआईपी /"],["b) Person in custody / हिरासत में व्यक्ति","b) Person in custody / हिरासत में व्यक्ति"],["c) Authorized visitor/ प्राधिकृत आगंतुक","c) Authorized visitor/ प्राधिकृत आगंतुक"],["d) Passengers / यात्री","d) Passengers / यात्री"]],[43,2,"Security culture is which type of practice","सुरक्षा संस्कृति किस प्रकार की कार्य-प्रणाली है?",["a) Recommended / अनुशंसित /","a) Recommended / अनुशंसित /"],["b) Standard / मानक","b) Standard / मानक"],["c) both a & b / दोनों a & b","c) both a & b / दोनों a & b"],["d) None of these/ इनमें से कोई नहीं","d) None of these/ इनमें से कोई नहीं"]],[44,4,"Guarding is done for","रखवाली के लिए की जाती है /",["a) Psychological deterrence / मनोवैज्ञानिक निवारण /","a) Psychological deterrence / मनोवैज्ञानिक निवारण /"],["b) to protect the vulnerable points / कमजोर बिंदुओं की रक्षा के लिए","b) to protect the vulnerable points / कमजोर बिंदुओं की रक्षा के लिए"],["c) physical deterrence / शारीरिक निरोध","c) physical deterrence / शारीरिक निरोध"],["d) all the above / उपरोक्त सभी","d) all the above / उपरोक्त सभी"]],[45,2,"In night, aircraft should be parked in","रात में, विमान को में पार्क किया जाना चाहिए",["a) Dark area / डार्क एरिया /","a) Dark area / डार्क एरिया /"],["b) well-lit area / अच्छी रोशनी वाला क्षेत्र","b) well-lit area / अच्छी रोशनी वाला क्षेत्र"],["c) Without guard / बिना गार्ड के /","c) Without guard / बिना गार्ड के /"],["d) Under camouflage / छलावरण के तहत","d) Under camouflage / छलावरण के तहत"]],[46,4,"Safety fuse comes under which category?","सुरक्षा फ़्यूज़ किस श्रेणी में आता है?/",["a) Weapon/ हथियार/","a) Weapon/ हथियार/"],["b) Dangerous substances / खतरनाक पदार्थ","b) Dangerous substances / खतरनाक पदार्थ"],["c) Dangerous articles / खतरनाक लेख","c) Dangerous articles / खतरनाक लेख"],["d) Explosives/ विस्फोटक","d) Explosives/ विस्फोटक"]],[47,2,"Screener should not monitor the screen at a stretch for more than","स्क्रीनर को एक बार में कितने समय से अधिक स्क्रीन की निगरानी नहीं करनी चाहिए",["a) 18min","a) 18min"],["b) 30 min.","b) 30 min."],["c) 20 min.","c) 20 min."],["d) 40 min.","d) 40 min."]],[48,1,"Deployment of CISF at airports was a result of","हवाई अड्डों पर सीआईएसएफ की तैनाती का परिणाम थी",["a) IC-814 hijack/ आईसी-814 अपहरण/","a) IC-814 hijack/ आईसी-814 अपहरण/"],["b) Kaniska incident/ कनिस्का घटना","b) Kaniska incident/ कनिस्का घटना"],["c) Lockerbee incident / लॉकरबी घटना","c) Lockerbee incident / लॉकरबी घटना"],["d) none of these/ इनमें से कोई नहीं","d) none of these/ इनमें से कोई नहीं"]],[49,1,"Deployment of Sky marshals is a result of","स्काई मार्शलों की तैनाती का परिणाम है /",["a) IC-814 hijack/I/C 814 का अपहरण","a) IC-814 hijack/I/C 814 का अपहरण"],["b) Kaniska incident/ b) कनिस्का घटना/","b) Kaniska incident/ b) कनिस्का घटना/"],["c) First hijack / पहला अपहरण","c) First hijack / पहला अपहरण"],["US Attack/11 sept 2001","US Attack/11 sept 2001"]],[50,3,"Chamber which creates similar pressure and real flight situation?","चैंबर जो समान दबाव और वास्तविक उड़ान की स्थिति पैदा करता है?",["a) Personnel chamber/ कार्मिक कक्ष/","a) Personnel chamber/ कार्मिक कक्ष/"],["b) Sterile chamber / बाँझ कक्ष","b) Sterile chamber / बाँझ कक्ष"],["c) Simulation chamber/ सिमुलेशन कक्ष","c) Simulation chamber/ सिमुलेशन कक्ष"],["d) a & b / ए और बी दोनों","d) a & b / ए और बी दोनों"]],[51,3,"Chisels come under which category ?","छेनी किस श्रेणी में आती है?",["a) Weapon/ हथियार","a) Weapon/ हथियार"],["b) Dangerous substances / खतरनाक पदार्थ","b) Dangerous substances / खतरनाक पदार्थ"],["c) Dangerous articles / खतरनाक आर्टिकल","c) Dangerous articles / खतरनाक आर्टिकल"],["d) Explosives / विस्फोटक","d) Explosives / विस्फोटक"]],[52,1,"What was the main outcome of Chicago Convention?","शिकागो कन्वेंशन का मुख्य परिणाम क्या था?",["a) Formation of ICAO / आईसीएओ का गठन","a) Formation of ICAO / आईसीएओ का गठन"],["b) Formation of IATA / आईएटीए का गठन","b) Formation of IATA / आईएटीए का गठन"],["c) Formation of IAEA / आईएईए का गठन","c) Formation of IAEA / आईएईए का गठन"],["d) a & b Both / ए और बी दोनों","d) a & b Both / ए और बी दोनों"]],[53,1,"TIP stands for","टीआईपी का मतलब है /",["a) Threat Image Projection / थ्रेट इमेजिंग प्रोजेक्शन","a) Threat Image Projection / थ्रेट इमेजिंग प्रोजेक्शन"],["b) Threat Item Projection / थ्रेट आइटम प्रोजेक्शन","b) Threat Item Projection / थ्रेट आइटम प्रोजेक्शन"],["c) Threat Item Protection / थ्रेटआइटम प्रोटेक्शन","c) Threat Item Protection / थ्रेटआइटम प्रोटेक्शन"],["d) Three Image Projection / थ्री इमेज प्रोजेक्शन","d) Three Image Projection / थ्री इमेज प्रोजेक्शन"]],[54,1,"Which is not the duty of Airlines Security?","एयरलाइंस सुरक्षा का कौन सा कर्तव्य नहीं है?",["a) Hand baggage screening / हाथ के सामान की स्क्रीनिंग/","a) Hand baggage screening / हाथ के सामान की स्क्रीनिंग/"],["b) Registered baggage screening / पंजीकृत सामान स्क्रीनिंग","b) Registered baggage screening / पंजीकृत सामान स्क्रीनिंग"],["c) Surveillance in BMA/ बीएमए में निगरानी","c) Surveillance in BMA/ बीएमए में निगरानी"],["d) Reconciliation of baggage / सामान का मिलान","d) Reconciliation of baggage / सामान का मिलान"]],[55,1,"Why is the BWAF required?","Why is the BWAF required?",["a) To assess specific and non specific calls/क) विशिष्ट और गैर-विशिष्ट कॉलों का आकलन करना/","a) To assess specific and non specific calls/क) विशिष्ट और गैर-विशिष्ट कॉलों का आकलन करना/"],["b) To assess the Caller / ख) कॉल करने वाले का आकलन करना/","b) To assess the Caller / ख) कॉल करने वाले का आकलन करना/"],["c) To maintain perfect data about the caller /c) कॉल करने वाले के बारे में सही डेटा बनाए रखना /","c) To maintain perfect data about the caller /c) कॉल करने वाले के बारे में सही डेटा बनाए रखना /"],["d) Formality / घ) औपचारिकता /","d) Formality / घ) औपचारिकता /"]],[56,2,"Explosives are of types?","विस्फोटक प्रकार के होते हैं?",["a) One","a) One"],["b) Two","b) Two"],["c) Three","c) Three"],["d) Four","d) Four"]],[57,4,"Airport entry permit does not contain?/","हवाई अड्डे के प्रवेश परमिट में ? शामिल नहीं है",["a) Photo / एक छवि/","a) Photo / एक छवि/"],["b) Name of Pass holder / ख) पास धारक का नाम /","b) Name of Pass holder / ख) पास धारक का नाम /"],["c) Area of Validity/ ग) वैधता का क्षेत्र","c) Area of Validity/ ग) वैधता का क्षेत्र"],["d) Permanent address / घ) स्थायी पता","d) Permanent address / घ) स्थायी पता"]],[58,1,"What do you mean by APSU?","APSU से आपका क्या तात्पर्य है?",["a) Airport Security Unit/ ए) हवाई अड्डा सुरक्षा इकाई /","a) Airport Security Unit/ ए) हवाई अड्डा सुरक्षा इकाई /"],["b) Airport Sterile Unit/, ख) हवाईअड्डे कीटाणुरहित इकाई /","b) Airport Sterile Unit/, ख) हवाईअड्डे कीटाणुरहित इकाई /"],["c) Airport Security Union/, ग) हवाई अड्डा सुरक्षा संघ/,","c) Airport Security Union/, ग) हवाई अड्डा सुरक्षा संघ/,"],["d) Airport Safety Unit/ घ) हवाई अड्डा सुरक्षा इकाई/","d) Airport Safety Unit/ घ) हवाई अड्डा सुरक्षा इकाई/"]],[59,4,"The Authority responsible for regulating Safety aspects of aircrafts in India?/","भारत में विमानों की सेफ्टी संबंधी पहलुओं को विनियमित करने के लिए जिम्मेदार प्राधिकरण कौन सा है?",["a) ICAO/","a) ICAO/"],["b) Commander of concerned airports b) Commander of concerned airports/","b) Commander of concerned airports b) Commander of concerned airports/"],["c) BCAS","c) BCAS"],["d) DGCA","d) DGCA"]],[60,3,"BCAS stands for/","BCAS का अर्थ है/",["a) Bureau of Civil Aircraft Security/ ए) नागरिक विमान सुरक्षा ब्यूरो/","a) Bureau of Civil Aircraft Security/ ए) नागरिक विमान सुरक्षा ब्यूरो/"],["b) Bureau of Civil Aircraft Safety / ख) नागरिक विमान सुरक्षा ब्यूरो","b) Bureau of Civil Aircraft Safety / ख) नागरिक विमान सुरक्षा ब्यूरो"],["c) Bureau of Civil Aviation Security/ ग) नागरिक उड्डयन सुरक्षा ब्यूरो/","c) Bureau of Civil Aviation Security/ ग) नागरिक उड्डयन सुरक्षा ब्यूरो/"],["d) Bureau of Central aviation Security/ घ) केंद्रीय विमानन सुरक्षा ब्यूरो /","d) Bureau of Central aviation Security/ घ) केंद्रीय विमानन सुरक्षा ब्यूरो /"]],[61,1,"Which one is a Standard Practice? /","इनमें से कौन सी मानक प्रक्रिया है?",["a) PESC","a) PESC"],["b) SLPC","b) SLPC"],["c) BOTTLE SCANNER","c) BOTTLE SCANNER"],["d) SSLC","d) SSLC"]],[62,3,"E-cigrate is allowed in","ई-सिगरेट की अनुमति है",["In hand baggage हाथ के सामान में","In hand baggage हाथ के सामान में"],["In registered baggage रजिस्टर्ड बैगेज में","In registered baggage रजिस्टर्ड बैगेज में"],["Neither in hand baggage nor in registered baggage न तो हैंड बैगेज में और न ही रजिस्टर्ड बैगेज में","Neither in hand baggage nor in registered baggage न तो हैंड बैगेज में और न ही रजिस्टर्ड बैगेज में"],["in both hand and registered baggage हाथ के सामान और रजिस्टर्ड सामान, दोनों में","in both hand and registered baggage हाथ के सामान और रजिस्टर्ड सामान, दोनों में"]],[63,2,"ICAO stands for?","ICAO का मतलब है ?",["INDIAN COUNCIL AUTHORITY ORGANIZATION","INDIAN COUNCIL AUTHORITY ORGANIZATION"],["INTERNATIONAL CIVIL AVIATION ORGANISATION","INTERNATIONAL CIVIL AVIATION ORGANISATION"],["INTERNATIONAL CIVIL AERODROME ORGANISATION","INTERNATIONAL CIVIL AERODROME ORGANISATION"],["None of these","None of these"]],[64,1,"HLV stands for?","एचएलवी का मतलब है?",["HI LIFT VEHICLE","HI LIFT VEHICLE"],["HEAVY LIFT VEHICLE","HEAVY LIFT VEHICLE"],["HIGH LIFT VAN","HIGH LIFT VAN"],["HIGH LEVEL VEHICLE","HIGH LEVEL VEHICLE"]],[65,2,"What are the phases of handling bomb threat","बम की धमकी से निपटने के चरण क्या हैं?",["Recieve, Report, assessment. Realise","Recieve, Report, assessment. Realise"],["Recipt, Report, Assessment. Response","Recipt, Report, Assessment. Response"],["Recipt, Report, Assessment. Recieve","Recipt, Report, Assessment. Recieve"],["Recipt, Report, Threat, Recieve","Recipt, Report, Threat, Recieve"]],[66,3,"ETD WORKING PRINCIPLE","ईटीडी कार्य सिद्धांत",["lon mobility specificity","lon mobility specificity"],["lon mobile spectrometry","lon mobile spectrometry"],["lon mobility spectrometry","lon mobility spectrometry"],["lons movable sensitivity","lons movable sensitivity"]],[67,2,"Which of the following comes under category of explosives","निम्नलिखित में से कौन सा विस्फोटक की श्रेणी में आता है?",["Firearms आग्नेयास्त्रों","Firearms आग्नेयास्त्रों"],["Both Ammunition and Grenade गोला-बारूद और ग्रेनेड, दोनों","Both Ammunition and Grenade गोला-बारूद और ग्रेनेड, दोनों"],["Ammunition गोलाबारूद","Ammunition गोलाबारूद"],["Grenade ग्रेनेड","Grenade ग्रेनेड"]],[68,3,"Which of the following equipment is not used at PESC point?","निम्नलिखित में से कौन सा उपकरण PESC बिंदु पर उपयोग नहीं किया जाता है?",["DFMD","DFMD"],["HHMD","HHMD"],["UVSM","UVSM"],["X-BIS","X-BIS"]],[69,1,"What is the physical form of TNT?","TNT का भौतिक रूप क्या है?",["Crystalline","Crystalline"],["Slurry","Slurry"],["Granular","Granular"],["Block","Block"]],[70,2,"What is the natural colour of PETN","पीईटीएन का प्राकृतिक रंग क्या होता है?",["Black","Black"],["White","White"],["Green","Green"],["Yellow","Yellow"]],[71,2,"HRCM stands for?","एचआरसीएम का मतलब है?",["HIGH RISK CARGO MATERIAL","HIGH RISK CARGO MATERIAL"],["HIGH RISK CARGO AND MAIL","HIGH RISK CARGO AND MAIL"],["HIGH RISK CATERING AND MALL","HIGH RISK CATERING AND MALL"],["HIGH RATED CARGO AND MAIL","HIGH RATED CARGO AND MAIL"]],[72,2,"The US attack happened on which date","अमेरिका में किया गया हमला किस तारीख को हुआ था?",["24.11.2001","24.11.2001"],["11.09.2001","11.09.2001"],["09.11.2001","09.11.2001"],["None of these","None of these"]],[73,1,"PBIED stands for?","PBIED का मतलब है?",["Person borne IED","Person borne IED"],["Person based IED","Person based IED"],["People borne IED","People borne IED"],["None of the above","None of the above"]],[74,3,"BTAC STANDS FOR?","BTAC का मतलब है?",["BOMB THREAT AWARENESS COUNCIL","BOMB THREAT AWARENESS COUNCIL"],["BOMB THREAT AWARENESS COMMITTEE","BOMB THREAT AWARENESS COMMITTEE"],["BOMB THREAT ASSESSMENT COMMITTEE","BOMB THREAT ASSESSMENT COMMITTEE"],["BOMB THREAT ASSESSMENTCOUNCIL","BOMB THREAT ASSESSMENTCOUNCIL"]],[75,4,"Which of the following is the basic concept of security?","निम्नलिखित में से कौन सी सुरक्षा की मूल अवधारणा है?",["Delay, Deter, Detect, Respond","Delay, Deter, Detect, Respond"],["Delay, Deter, Detect, Display","Delay, Deter, Detect, Display"],["Delay, Deter, Detect, Done","Delay, Deter, Detect, Done"],["Deter, Delay, Detect, Respond","Deter, Delay, Detect, Respond"]],[76,3,"Which of following is not the concept of security?","निम्नलिखित में से कौन सी सुरक्षा की अवधारणा नहीं है?",["Delay डिले","Delay डिले"],["Deter डेटर","Deter डेटर"],["Display प्रदर्शन","Display प्रदर्शन"],["Respond रेस्पोंद","Respond रेस्पोंद"]],[77,1,"Minimum number of escort required in case of air travel of dangerous prisoner","खतरनाक कैदी की हवाई यात्रा के मामले में न्यूनतम संख्या में एस्कॉर्ट की आवश्यकता होती है",["2","2"],["3","3"],["4","4"],["1","1"]],[78,3,"What is not the provision for carriage of prisoner?","कैदी की ढुलाई के लिए क्या प्रावधान नहीं है?",["Pilot should be informedपायलट को सूचित किया जाना चाहिए","Pilot should be informedपायलट को सूचित किया जाना चाहिए"],["Prisoner should be disembarked firstकैदी को पहले जहाज से उतारा जाना चाहिए","Prisoner should be disembarked firstकैदी को पहले जहाज से उतारा जाना चाहिए"],["Prisoner shouldn't be hand-cuffed कैदी को हथकड़ी नहीं लगानी चाहिए","Prisoner shouldn't be hand-cuffed कैदी को हथकड़ी नहीं लगानी चाहिए"],["Prisoner should be boarded first कैदी को पहले वाहन में चढ़ाया जाना चाहिए","Prisoner should be boarded first कैदी को पहले वाहन में चढ़ाया जाना चाहिए"]],[79,2,"For a prisoner to be carried on board aircraft, prior permission is required from","किसी कैदी को विमान में ले जाने के लिए पूर्व अनुमति की आवश्यकता होती है",["IG, prisoner","IG, prisoner"],["BCAS","BCAS"],["DGCA","DGCA"],["Concerned Airlines","Concerned Airlines"]],[80,1,"A pax is permitted to carry more than prescribed number of ammunition in the hold baggage with the permission of","एक पैक्स को अनुमति के साथ होल्ड बैगेज में निर्धारित संख्या से अधिक गोला-बारूद ले जाने की अनुमति है",["Airline operator","Airline operator"],["COSCA","COSCA"],["DGCA","DGCA"],["CASO","CASO"]],[81,1,"Which procedure carried out by airline to avoid bad intention of gate-no-show PΡΑΧ.","गेट-नो-शो PAX के बुरे इरादे से बचने के लिए एयरलाइन द्वारा कौन सी प्रक्रिया अपनाई गई।",["Baggage reconciliation सामान मिलान","Baggage reconciliation सामान मिलान"],["issue of Boarding passबोर्डिंग पास जारी करना","issue of Boarding passबोर्डिंग पास जारी करना"],["Secondary ladder checkद्वितीयक सीढ़ी जांच","Secondary ladder checkद्वितीयक सीढ़ी जांच"],["None of the aboveइनमे से कोई भी नहीं","None of the aboveइनमे से कोई भी नहीं"]],[82,1,"What is the composition of guard to be provided by CISF for guarding of refusal room.","रिफ्यूजल रूम की सुरक्षा के लिए सीआईएसएफ द्वारा उपलब्ध कराए जाने वाले गार्ड की संरचना क्या है?",["A guard of 01 HC/GD and 04 Const","A guard of 01 HC/GD and 04 Const"],["Only one HC/GD or Const","Only one HC/GD or Const"],["A guard of 01 SI/Exe and 02 Consts","A guard of 01 SI/Exe and 02 Consts"],["None of the above","None of the above"]],[83,4,"Expand WAC?","WAC का विस्तार करें?",["weapon addition card वेपन addition कार्ड","weapon addition card वेपन addition कार्ड"],["work authorisation card वर्क ऑथोरिसेशन कार्ड","work authorisation card वर्क ऑथोरिसेशन कार्ड"],["world ammunition council वर्ल्ड अम्मुनिशन कौंसिल","world ammunition council वर्ल्ड अम्मुनिशन कौंसिल"],["weapon authorization card वेपन ऑथॉरिज़ेशन कार्ड","weapon authorization card वेपन ऑथॉरिज़ेशन कार्ड"]],[84,1,"A bonafide passanger can carry ----- cartridge in his registered baggage.","एक वास्तविक यात्री अपने पंजीकृत सामान में - कारतूस ले जा सकता है।",["50","50"],["60","60"],["70","70"],["80","80"]],[85,1,"which details are not required to be verified on the licence of passenger carrying weapon in his registered baggage?","अपने पंजीकृत सामान में हथियार ले जाने वाले यात्री के लाइसेंस पर कौन से विवरण सत्यापित करने की आवश्यकता नहीं है?",["background check पृष्ठभूमि की जांच","background check पृष्ठभूमि की जांच"],["area of validity वैधता का क्षेत्र","area of validity वैधता का क्षेत्र"],["type of weapon हथियार का प्रकार","type of weapon हथियार का प्रकार"],["weapon number हथियार संख्या","weapon number हथियार संख्या"]],[86,3,"Where the location of crash gates?","क्रैश गेट कहाँ स्थित हैं?",["Near the terminal gate टर्मिनल गेट के पास","Near the terminal gate टर्मिनल गेट के पास"],["near the opeartional gates परिचालन द्वारों के पास","near the opeartional gates परिचालन द्वारों के पास"],["Near the runway रनवे के पास","Near the runway रनवे के पास"],["Near the terminal building टर्मिनल बिल्डिंग के पास","Near the terminal building टर्मिनल बिल्डिंग के पास"]],[87,3,"Fire crackers comes under the category of","पटाखे निम्नलिखित श्रेणी के अंतर्गत आते हैं:",["Dangerous article / डेंजरस आर्टिकल","Dangerous article / डेंजरस आर्टिकल"],["Dangerous substance / डेंजरस सब्सटांस","Dangerous substance / डेंजरस सब्सटांस"],["Explosives / एक्सप्लोसिव्स","Explosives / एक्सप्लोसिव्स"],["Weapon / वेपन","Weapon / वेपन"]],[88,1,"Chilly spray comes under the category of?","मिर्च स्प्रे किस श्रेणी में आता है?",["Stunning device आश्चर्यजनक उपकरण","Stunning device आश्चर्यजनक उपकरण"],["Firearms and other weapon आग्नेयास्त्र और अन्य हथियार","Firearms and other weapon आग्नेयास्त्र और अन्य हथियार"],["Explosives विस्फोटक","Explosives विस्फोटक"],["LAGS","LAGS"]],[89,3,"Meeting of COSAH held at which location","सीओएसएएच की बैठक किस स्थान पर आयोजित हुई?",["IGI Airport आईजीआई एयरपोर्ट","IGI Airport आईजीआई एयरपोर्ट"],["Rashtrapati bhawan राष्ट्रपति भवन","Rashtrapati bhawan राष्ट्रपति भवन"],["State capital राज्य की राजधानी","State capital राज्य की राजधानी"],["District headquarter जिला मुख्यालय","District headquarter जिला मुख्यालय"]],[90,1,"Who will be the co-ordinator of BTAC","बीटीएसी का समन्वयक कौन होगा?",["Airport Director हवाई अड्डा निदेशक","Airport Director हवाई अड्डा निदेशक"],["CASO","CASO"],["BCAS","BCAS"],["Aircraft operator विमान संचालक","Aircraft operator विमान संचालक"]],[91,3,"Which of the following is not a low explosive","निम्नलिखित में से कौन सा कम विस्फोटक नहीं है?",["Gun powder गन पाउडर","Gun powder गन पाउडर"],["Pyrotechnique आतिशबाजी","Pyrotechnique आतिशबाजी"],["TNT","TNT"],["Propellents प्रणोदक","Propellents प्रणोदक"]],[92,2,"Which of the following is not the screening method for baggage","निम्नलिखित में से कौन सा सामान की जांच का तरीका नहीं है?",["X-Ray screening एक्स-रे स्क्रीनिंग","X-Ray screening एक्स-रे स्क्रीनिंग"],["Simulation chamber सिमुलेशन कक्ष","Simulation chamber सिमुलेशन कक्ष"],["Physical search भौतिक खोज","Physical search भौतिक खोज"],["ETD/EVD","ETD/EVD"]],[93,2,"Which of the following are not the method of EDS","निम्नलिखित में से कौन सी विधि ईडीएस की विधि नहीं है?",["ETD","ETD"],["NLID","NLID"],["ALL THE OPTIONS","ALL THE OPTIONS"],["EVD","EVD"]],[94,3,"Which of the following are the category of bags during screening","स्क्रीनिंग के दौरान निम्नलिखित में से कौन-सी बैग की श्रेणी आती है?",["Heavy bag भारी थैला","Heavy bag भारी थैला"],["Soft bag मुलायम थैला","Soft bag मुलायम थैला"],["Unsafe bag असुरक्षित बैग","Unsafe bag असुरक्षित बैग"],["Hard bag कठोर थैला","Hard bag कठोर थैला"]],[95,2,"Who will search the aircraft in case of non specific call","अस्पष्ट कॉल आने पर विमान की तलाशी कौन लेगा?",["BDDS, ASG, DGCA बीडीडीएस, एएसजी, डीजीसीए","BDDS, ASG, DGCA बीडीडीएस, एएसजी, डीजीसीए"],["AIRLINES SECURITY AND AIRLINES ENGINEER एयरलाइंस सुरक्षा और एयरलाइंस इंजीनियर","AIRLINES SECURITY AND AIRLINES ENGINEER एयरलाइंस सुरक्षा और एयरलाइंस इंजीनियर"],["AIRLINES SECURITY, DGCA, BDDS, EDD एयरलाइंस सुरक्षा, डीजीसीए, बीडीडीएस, ईडीडी","AIRLINES SECURITY, DGCA, BDDS, EDD एयरलाइंस सुरक्षा, डीजीसीए, बीडीडीएस, ईडीडी"],["ALL OF THE ABOVE ऊपर के सभी","ALL OF THE ABOVE ऊपर के सभी"]],[96,4,"Which of the following is not a method of search","निम्नलिखित में से कौन सा खोज का तरीका नहीं है?",["Floor to waist फर्श से कमर तक","Floor to waist फर्श से कमर तक"],["waist to head कमर से सिर तक","waist to head कमर से सिर तक"],["Interior room search आंतरिक कमरे की तलाशी","Interior room search आंतरिक कमरे की तलाशी"],["head to ceiling सिर से छत तक","head to ceiling सिर से छत तक"]],[97,1,"Any facility on or connected with an airport, which, if damaged or destroyed, would seriously impair the functioning of the airport Example ATC, Fuel storage area etc.","हवाई अड्डे पर स्थित या उससे संबंधित कोई भी सुविधा, जिसके क्षतिग्रस्त या नष्ट होने से हवाई अड्डे के कामकाज में गंभीर रूप से बाधा उत्पन्न हो सकती है। उदाहरण के लिए, एटीसी, ईंधन भंडारण क्षेत्र आदि।",["Vunlerable point/चुन्लेराब्ले पॉइंट","Vunlerable point/चुन्लेराब्ले पॉइंट"],["Airside /","Airside /"],["Parking area / पार्किंग एरिया","Parking area / पार्किंग एरिया"],["Runway / रनवे","Runway / रनवे"]],[98,2,"What is the analysis time of EVD","ईवीडी के विश्लेषण में कितना समय लगता है?",["05 sec","05 sec"],["10 sec","10 sec"],["02 sec","02 sec"],["03 sec","03 sec"]],[99,3,"Which of the following is the duty of Airlines in catering","निम्नलिखित में से कौन सा कार्य खानपान के क्षेत्र में एयरलाइंस का कर्तव्य है?",["Access control of catering premise खानपान परिसर का प्रवेश नियंत्रण","Access control of catering premise खानपान परिसर का प्रवेश नियंत्रण"],["Screening of raw materials कच्चे माल की स्क्रीनिंग","Screening of raw materials कच्चे माल की स्क्रीनिंग"],["Checking of catering carts for unusual weight खानपान की गाड़ियों में असामान्य वजन की जाँच करना","Checking of catering carts for unusual weight खानपान की गाड़ियों में असामान्य वजन की जाँच करना"],["Access control of chilling room शीतलन कक्ष का प्रवेश नियंत्रण","Access control of chilling room शीतलन कक्ष का प्रवेश नियंत्रण"]],[100,4,"Who is not exempted from PESC","पीईएससी से किसे छूट नहीं है?",["Judges of supreme court सुप्रीम कोर्ट के जज","Judges of supreme court सुप्रीम कोर्ट के जज"],["Honourable defence minister माननीय रक्षा मंत्री","Honourable defence minister माननीय रक्षा मंत्री"],["Chief Election commissioner of India भारत के मुख्य चुनाव आयुक्त","Chief Election commissioner of India भारत के मुख्य चुनाव आयुक्त"],["Judges of High court हाई कोर्ट के जज","Judges of High court हाई कोर्ट के जज"]]];
+// Shuffle the question order every time the quiz is loaded/started.
+// Fisher-Yates shuffle, done in-place on questionData BEFORE it is used
+// anywhere else, so every part of the app (grid, review, scoring,
+// "Question X of Y" numbering) stays consistent and correctly numbered
+// against the new shuffled order.
+(function shuffleQuestionData(arr) {
+for (let i = arr.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[arr[i], arr[j]] = [arr[j], arr[i]];
+}
+})(questionData);
+let questionStatus = new Array(TOTAL_QUESTIONS).fill(1); 
+let currentQuestionIndex = 0; 
+let userName = 'Candidate'; 
+let timeLeft = TOTAL_TIME_SECONDS; 
+let timerInterval; 
+let tempSelectedOption = null; 
+let savedAnswers = new Array(TOTAL_QUESTIONS).fill(null); 
+let isHindiLocal = false;
+let isExamSubmitted = false; 
+let currentZoomLevel = 1.0;
+let tabSwitchCount = 0;
+let quizInProgress = false;
+let quizLocked = false;
+const MAX_WARNINGS = 2; // Switches 1..MAX_WARNINGS => warning only, exam continues
+const MAX_LOCKS = 4; // Switches (MAX_WARNINGS+1)..MAX_LOCKS => exam locked, needs Admin password
+// Any switch beyond MAX_LOCKS => exam is submitted automatically
+// Safe storage wrapper: some mobile browsers (notably iPhone Safari in Private
+// Browsing, or when the file is opened directly from Files/WhatsApp instead of
+// through the browser) throw a SecurityError on any localStorage access, which
+// otherwise stops the script and can make the exam page fail silently.
+const safeStorage = {
+_mem: {},
+get(key) {
+try { return localStorage.getItem(key); }
+catch (e) { return this._mem[key] || null; }
+},
+set(key, value) {
+try { localStorage.setItem(key, value); }
+catch (e) { this._mem[key] = value; }
+}
+};
+const questionsContainer = document.getElementById('questions-container'); 
+const questionGrid = document.getElementById('question-grid');
+const optionButtonsContainer = document.getElementById('option-buttons'); 
+const timerDisplay = document.getElementById('timer-display'); 
+const resultDisplay = document.getElementById('result-display');
+const controlPanel = document.getElementById('exam-control-panel');
+// 1. Safe retry submission function
+async function submitQuizResult(payload, attempt = 0) {
+const MAX_ATTEMPTS = 10;
+try {
+const response = await fetch(APPS_SCRIPT_URL, {
+method: "POST",
+body: JSON.stringify(payload)
+});
+const result = await response.json();
+if (result.status === "success") {
+return result;
+} 
+// Server hit a lock timeout block
+if (result.status === "busy" && attempt < MAX_ATTEMPTS) {
+// Wait 3 seconds before trying again
+await new Promise(resolve => setTimeout(resolve, 3000));
+return submitQuizResult(payload, attempt + 1);
+}
+throw new Error(result.message || "Submission failed");
+} catch (error) {
+// Catches network glitches or 503/429 HTML error pages from Google
+if (attempt < MAX_ATTEMPTS) {
+const delay = Math.floor(Math.random() * 2000) + 3000; // Wait 3-5 seconds
+await new Promise(resolve => setTimeout(resolve, delay));
+return submitQuizResult(payload, attempt + 1);
+} else {
+throw error;
+}
+}
+}
+// 2. Attach it to your "Submit Exam" button click
+async function onFinishQuizClick() {
+const submitBtn = document.getElementById("submitQuizBtn");
+if (submitBtn) {
+submitBtn.disabled = true;
+submitBtn.innerText = "Submitting Score... Please wait";
+}
+// Retrieve student details (passed via URL query params or localStorage)
+const urlParams = new URLSearchParams(window.location.search);
+const payload = {
+action: "submitScore",
+spreadsheetId: SPREADSHEET_ID,
+username: urlParams.get('username') || safeStorage.get('currentUsername') || 'N/A',
+studentName: urlParams.get('studentName') || safeStorage.get('currentStudent') || userName || 'Trainee',
+designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || 'Trainee',
+section: urlParams.get('section') || safeStorage.get('studentSectionContext') || 'basic',
+quizName: "DAY 9 PAPER 2", 
+score: `${savedAnswers.filter((ans, idx) => ans && ans.toString() === questionData[idx][1].toString()).length}/${TOTAL_QUESTIONS}`,
+timestamp: new Date().toLocaleString()
+};
+try {
+await submitQuizResult(payload);
+alert("Your quiz has been successfully saved!");
+// window.location.href = "student-dashboard.html"; // Uncomment if redirection is needed
+} catch (err) {
+alert("Server is extremely busy right now. Please click 'Submit' one more time.");
+if (submitBtn) {
+submitBtn.disabled = false;
+submitBtn.innerText = "Retry Submission";
+}
+}
+}
+function handleVisibilityChange() {
+if (!quizInProgress || isExamSubmitted) return;
+if (document.hidden) {
+registerTabSwitch();
+}
+}
+function registerTabSwitch() {
+if (quizLocked || isExamSubmitted) return;
+tabSwitchCount++;
+if (tabSwitchCount <= MAX_WARNINGS) {
+showWarning();
+} else if (tabSwitchCount <= MAX_LOCKS) {
+lockQuiz();
+} else {
+forceSubmitForCheating();
+}
+}
+function showWarning() {
+quizLocked = true; // overlay is open; guards against double-counting a single switch
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+const errorMsg = document.getElementById('unlock-error-msg');
+if (errorMsg) errorMsg.style.display = 'none';
+if (title) title.textContent = '⚠ Warning';
+if (msg) msg.textContent = `Warning ${tabSwitchCount} of ${MAX_WARNINGS}: you switched or minimized the screen. Doing this again beyond the warning limit will LOCK your exam and require an Administrator password. Repeated attempts will submit your exam automatically. Click Continue to resume your exam.`;
+if (unlockBox) unlockBox.style.display = 'none';
+if (warnBox) warnBox.style.display = 'flex';
+if (overlay) overlay.style.display = 'flex';
+}
+function continueAfterWarning() {
+if (isExamSubmitted) return;
+quizLocked = false;
+const overlay = document.getElementById('cheat-lock-overlay');
+if (overlay) overlay.style.display = 'none';
+}
+function lockQuiz() {
+quizLocked = true;
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+const errorMsg = document.getElementById('unlock-error-msg');
+const passInput = document.getElementById('admin-unlock-input');
+if (errorMsg) errorMsg.style.display = 'none';
+if (passInput) passInput.value = '';
+if (title) title.textContent = '⚠ Exam Locked';
+if (warnBox) warnBox.style.display = 'none';
+if (msg) msg.textContent = `You switched or minimized the screen ${tabSwitchCount} time(s). Your exam is LOCKED, contact your Administrator to resume. Reaching ${MAX_LOCKS + 1} total switches will submit your exam automatically.`;
+if (unlockBox) unlockBox.style.display = 'flex';
+if (overlay) overlay.style.display = 'flex';
+if (passInput) setTimeout(() => passInput.focus(), 100);
+}
+function forceSubmitForCheating() {
+quizLocked = true;
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+if (title) title.textContent = '⚠ Exam Locked';
+if (warnBox) warnBox.style.display = 'none';
+if (unlockBox) unlockBox.style.display = 'none';
+if (msg) msg.textContent = `You switched or minimized the screen ${tabSwitchCount} time(s), which exceeds the allowed limit. Your exam is being submitted automatically.`;
+if (overlay) overlay.style.display = 'flex';
+setTimeout(() => { submitTest(); }, 2500);
+}
+function attemptUnlock() {
+const passInput = document.getElementById('admin-unlock-input');
+const errorMsg = document.getElementById('unlock-error-msg');
+const enteredValue = passInput ? passInput.value : '';
+if (enteredValue === ADMIN_UNLOCK_PASSWORD) {
+resumeQuiz();
+} else {
+if (errorMsg) errorMsg.style.display = 'block';
+if (passInput) { passInput.value = ''; passInput.focus(); }
+}
+}
+document.addEventListener('keydown', function(e) {
+if (e.key === 'Enter' && document.getElementById('admin-unlock-input') === document.activeElement) {
+attemptUnlock();
+}
+});
+function resumeQuiz() {
+if (isExamSubmitted) return;
+quizLocked = false;
+const overlay = document.getElementById('cheat-lock-overlay');
+const errorMsg = document.getElementById('unlock-error-msg');
+if (overlay) overlay.style.display = 'none';
+if (errorMsg) errorMsg.style.display = 'none';
+}
+document.addEventListener('visibilitychange', handleVisibilityChange);
+window.addEventListener('pagehide', () => {
+if (quizInProgress && !isExamSubmitted) registerTabSwitch();
+});
+// Keeps the fixed bottom control bar from ever overlapping the question text.
+// The bar's real height varies a lot by phone width (buttons wrap differently
+// on a small screen vs a large one), so instead of guessing a fixed padding
+// we measure it live and push the question area down by exactly that much.
+function adjustMobileLayout() {
+if (window.innerWidth > 768) {
+const questionArea = document.querySelector('.question-area');
+const mainContent = document.querySelector('.main-content');
+if (questionArea) questionArea.style.paddingBottom = '';
+if (mainContent) mainContent.style.paddingBottom = '';
+return;
+}
+const controlPanel = document.getElementById('exam-control-panel');
+const footerEl = document.querySelector('footer');
+const questionArea = document.querySelector('.question-area');
+const mainContent = document.querySelector('.main-content');
+if (!controlPanel || !footerEl || !questionArea || !mainContent) return;
+const footerHeight = footerEl.offsetHeight;
+const panelHeight = controlPanel.offsetHeight;
+// Pin the control panel directly above the footer, whatever height the
+// footer actually renders at on this device.
+controlPanel.style.bottom = footerHeight + 'px';
+// Reserve exactly enough space below the last question option so the
+// fixed control panel + footer never covers it, plus a small buffer.
+const totalReserved = panelHeight + footerHeight + 24;
+mainContent.style.paddingBottom = totalReserved + 'px';
+questionArea.style.paddingBottom = '20px';
+}
+window.addEventListener('load', () => {
+adjustMobileLayout();
+const urlParams = new URLSearchParams(window.location.search);
+const urlStudentName = urlParams.get('studentName');
+const urlUsername = urlParams.get('username');
+const urlDesignation = urlParams.get('designation');
+const urlSection = urlParams.get('section');
+if (urlStudentName) safeStorage.set('currentStudent', urlStudentName);
+if (urlUsername) safeStorage.set('currentUsername', urlUsername);
+if (urlDesignation) safeStorage.set('currentDesignation', urlDesignation);
+if (urlSection) safeStorage.set('studentSectionContext', urlSection);
+const activeUser = urlStudentName || safeStorage.get('currentStudent');
+if (activeUser) {
+document.getElementById('user-name-input').value = activeUser;
+}
+updateStartBtnState();
+});
+function updateStartBtnState() {
+const nameFilled = document.getElementById('user-name-input').value.trim().length > 0;
+const declared = document.getElementById('declaration-check').checked;
+document.getElementById('start-btn').disabled = !(nameFilled && declared);
+}
+document.getElementById('user-name-input').addEventListener('input', updateStartBtnState);
+document.getElementById('declaration-check').addEventListener('change', updateStartBtnState);
+document.getElementById('start-btn').addEventListener('click', () => { 
+const nameInput = document.getElementById('user-name-input').value.trim(); 
+const declared = document.getElementById('declaration-check').checked;
+if (nameInput && declared) { 
+userName = nameInput; 
+document.getElementById('header-user-name').textContent = `Candidate: ${userName}`; 
+document.getElementById('initial-setup').style.display = 'none'; 
+document.getElementById('main-header').style.display = 'flex'; 
+document.getElementById('main-test-area').style.display = 'flex'; 
+document.querySelector('.zoom-controls').style.display = 'flex'; 
+generateQuestions(); 
+generateQuestionGrid(); 
+displayQuestion(0); 
+startTimer(); 
+quizInProgress = true;
+// Panel is hidden (display:none) until now, so its real height can
+// only be measured once it's actually visible on screen.
+setTimeout(adjustMobileLayout, 50);
+}
+});
+window.addEventListener('resize', adjustMobileLayout);
+window.addEventListener('orientationchange', () => setTimeout(adjustMobileLayout, 200));
+function generateQuestions() {
+questionsContainer.innerHTML = ''; 
+const optionLabels = ['A', 'B', 'C', 'D']; 
+questionData.forEach((q, index) => { 
+const qId = q[0]; 
+const qEn = q[2]; 
+const qHi = q[3]; 
+const options = q.slice(4); 
+let optionsHtml = '<div class="option-text-container">'; 
+options.forEach((opt, optIndex) => { 
+const optValue = optIndex + 1; 
+const label = optionLabels[optIndex]; 
+optionsHtml += `
+<div class="option-label" data-option-id="${optValue}"> 
+<strong class="english-text">${label}.</strong> <span class="english-text">${opt[0]}</span><br class="english-text"> 
+<strong class="hindi-text">${label}.</strong> <span class="hindi-text">${opt[1]}</span> 
+</div> 
+`; 
+}); 
+optionsHtml += '</div>'; 
+const qHtml = `
+<div class="question-box" id="q${qId}" data-correct-answer="${q[1]}"> 
+<p style="font-size: 1.5em; font-weight: 700;">Question ${index + 1} of ${TOTAL_QUESTIONS}</p> 
+<div class="question-text"> 
+<span class="english-text">${qEn}</span> 
+<span class="hindi-text">${qHi}</span> 
+</div> 
+${optionsHtml} 
+</div> 
+`; 
+questionsContainer.innerHTML += qHtml; 
+});
+}
+function displayQuestion(index) { 
+if (isExamSubmitted || index < 0 || index >= TOTAL_QUESTIONS) return;
+document.querySelectorAll('.question-box').forEach(qBox => qBox.classList.remove('active')); 
+const questionId = questionData[index][0]; 
+const currentQBox = document.getElementById(`q${questionId}`); 
+if (currentQBox) { 
+currentQBox.classList.add('active'); 
+currentQuestionIndex = index; 
+tempSelectedOption = savedAnswers[index];
+updateOptionButtonVisual(); 
+updateMarkButtonVisual(index);
+updateLocalLanguage();
+applyZoom();
+}
+}
+function setQuestionZoom(step) {
+currentZoomLevel += step;
+if (currentZoomLevel < 0.7) currentZoomLevel = 0.7;
+if (currentZoomLevel > 2.0) currentZoomLevel = 2.0;
+applyZoom();
+}
+function applyZoom() {
+document.querySelectorAll('.question-text, .option-label').forEach(el => {
+el.style.fontSize = currentZoomLevel + 'em';
+});
+}
+function updateOptionButtonVisual() {
+document.querySelectorAll('.btn-option').forEach(btn => {
+btn.classList.remove('selected');
+if (tempSelectedOption !== null && parseInt(btn.dataset.value) === tempSelectedOption) {
+btn.classList.add('selected');
+}
+});
+}
+function selectOption(value) {
+if (isExamSubmitted) return;
+tempSelectedOption = value;
+updateOptionButtonVisual();
+}
+function eraseAnswer() {
+if (isExamSubmitted) return;
+tempSelectedOption = null;
+savedAnswers[currentQuestionIndex] = null; 
+questionStatus[currentQuestionIndex] = (questionStatus[currentQuestionIndex] === 4) ? 3 : 1; 
+updateOptionButtonVisual();
+updateQuestionGridButton(currentQuestionIndex); 
+updateMarkButtonVisual(currentQuestionIndex);
+}
+function markQuestion() {
+if (isExamSubmitted) return;
+const index = currentQuestionIndex;
+const currentStatus = questionStatus[index];
+// Persist whatever is currently selected, just like Save & Next does,
+// so the answer isn't lost if the user navigates away without clicking Save & Next.
+savedAnswers[index] = tempSelectedOption;
+const isAnswered = savedAnswers[index] !== null;
+if (currentStatus === 3 || currentStatus === 4) {
+questionStatus[index] = isAnswered ? 2 : 1; 
+} else {
+questionStatus[index] = isAnswered ? 4 : 3; 
+}
+updateQuestionGridButton(index);
+updateMarkButtonVisual(index);
+}
+function togglePalette() {
+const sidebar = document.getElementById('question-sidebar');
+const backdrop = document.getElementById('sidebar-backdrop');
+if (!sidebar) return;
+sidebar.classList.toggle('open');
+if (backdrop) backdrop.classList.toggle('open', sidebar.classList.contains('open'));
+}
+function closePalette() {
+const sidebar = document.getElementById('question-sidebar');
+const backdrop = document.getElementById('sidebar-backdrop');
+if (sidebar) sidebar.classList.remove('open');
+if (backdrop) backdrop.classList.remove('open');
+}
+function updateMarkButtonVisual(index) {
+const checkbox = document.getElementById('mark-checkbox');
+if (!checkbox) return;
+const status = questionStatus[index];
+const isMarked = (status === 3 || status === 4);
+checkbox.classList.toggle('checked', isMarked);
+}
+function saveAndNext() {
+if (isExamSubmitted) return;
+const index = currentQuestionIndex;
+savedAnswers[index] = tempSelectedOption;
+const isCurrentlyMarked = (questionStatus[index] === 3 || questionStatus[index] === 4);
+const isAnswered = savedAnswers[index] !== null;
+if (isAnswered) {
+questionStatus[index] = isCurrentlyMarked ? 4 : 2; 
+} else {
+questionStatus[index] = isCurrentlyMarked ? 3 : 1; 
+}
+updateQuestionGridButton(index);
+updateMarkButtonVisual(index);
+navigateQuestion(1);
+}
+function navigateQuestion(step) {
+if (isExamSubmitted) return;
+const nextIndex = currentQuestionIndex + step;
+displayQuestion(nextIndex);
+}
+function generateQuestionGrid() {
+questionGrid.innerHTML = '';
+for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+const button = document.createElement('button');
+button.className = 'q-button status-1'; 
+button.textContent = i + 1;
+button.setAttribute('data-index', i);
+button.onclick = () => {
+if (isExamSubmitted || i === currentQuestionIndex) { closePalette(); return; }
+if (tempSelectedOption !== null && savedAnswers[currentQuestionIndex] !== tempSelectedOption) {
+saveAndNext(); 
+displayQuestion(i);
+} else {
+displayQuestion(i);
+}
+closePalette();
+};
+questionGrid.appendChild(button);
+}
+}
+function updateQuestionGridButton(index) {
+const button = questionGrid.querySelector(`[data-index="${index}"]`);
+if (button) {
+button.className = 'q-button';
+button.classList.add(`status-${questionStatus[index]}`);
+}
+}
+function updateLocalLanguage() {
+if (isHindiLocal) {
+document.body.classList.add('lang-hindi-global');
+} else {
+document.body.classList.remove('lang-hindi-global');
+}
+}
+document.getElementById('lang-toggle-local').addEventListener('click', toggleLanguageHandler);
+function toggleLanguageHandler() {
+isHindiLocal = !isHindiLocal;
+updateLocalLanguage();
+}
+function startTimer() {
+timerInterval = setInterval(() => {
+timeLeft--;
+timerDisplay.textContent = formatTime(timeLeft);
+if (timeLeft <= 0) {
+clearInterval(timerInterval);
+alert("Time's up! The exam will now be submitted automatically.");
+submitTest();
+}
+if (timeLeft <= 5 * 60) {
+timerDisplay.style.backgroundColor = '#dc3545'; 
+timerDisplay.style.color = 'white';
+}
+}, 1000);
+}
+function formatTime(seconds) {
+const min = Math.floor(seconds / 60);
+const sec = seconds % 60;
+return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+}
+function getSummary() {
+let answered = 0; let notAnswered = 0; let reviewNotAnswered = 0; let reviewAnswered = 0; 
+questionStatus.forEach(status => {
+if (status === 2) answered++;
+else if (status === 1) notAnswered++;
+else if (status === 3) reviewNotAnswered++;
+else if (status === 4) reviewAnswered++;
+});
+return { 
+totalAnswered: answered + reviewAnswered, 
+totalMarked: reviewNotAnswered + reviewAnswered, 
+totalUnattempted: notAnswered + reviewNotAnswered 
+};
+}
+function confirmSubmit() {
+if (isExamSubmitted) return;
+if (tempSelectedOption !== null && savedAnswers[currentQuestionIndex] !== tempSelectedOption) {
+const saveConfirm = confirm("You have an unsaved option selected for the current question. Press OK to Save and then Submit, or Cancel to review the unsaved question.");
+if (saveConfirm) {
+saveAndNext(); 
+} else {
+return; 
+}
+}
+const summary = getSummary();
+const confirmationMessage = `Test Summary / परीक्षा सारांश:\n` + 
+`Total Questions / कुल प्रश्न: ${TOTAL_QUESTIONS}\n` + 
+`Answered / उत्तर दिया: ${summary.totalAnswered}\n` + 
+`Marked for Review / समीक्षा के लिए चिह्नित: ${summary.totalMarked}\n` + 
+`Not Answered / प्रयास नहीं किया: ${TOTAL_QUESTIONS - summary.totalAnswered}\n` + 
+`Screen Switches / Minimizes Detected: ${tabSwitchCount}\n\n` + 
+`Do you want to submit the test? / क्या आप परीक्षा जमा करना चाहते हैं?`;
+if (confirm(confirmationMessage)) {
+submitTest();
+}
+}
+async function submitTest() {
+if (isExamSubmitted) return;
+isExamSubmitted = true;
+quizInProgress = false;
+quizLocked = false;
+const cheatOverlay = document.getElementById('cheat-lock-overlay');
+if (cheatOverlay) cheatOverlay.style.display = 'none';
+const mainHeader = document.getElementById('main-header');
+if (mainHeader) mainHeader.style.setProperty('display', 'none', 'important');
+if (controlPanel) controlPanel.style.setProperty('display', 'none', 'important');
+clearInterval(timerInterval);
+document.querySelector('.zoom-controls').style.display = 'none';
+let score = 0;
+let wrongCount = 0;
+let unattemptedCount = 0;
+let detailedResultsHtml = '';
+const optionLabels = ['A', 'B', 'C', 'D']; 
+questionData.forEach((q, index) => {
+const qId = q[0];
+const qEn = q[2];
+const qHi = q[3];
+const options = q.slice(4); 
+const selectedValue = savedAnswers[index] ? savedAnswers[index].toString() : null;
+const correctAnswerValue = q[1].toString();
+let resultClass = 'unattempted';
+let statusText = 'Not Attempted / प्रयास नहीं किया';
+if (selectedValue !== null) {
+if (selectedValue === correctAnswerValue) {
+score++;
+resultClass = 'correct';
+statusText = 'Correct / सही उत्तर';
+} else {
+wrongCount++;
+resultClass = 'wrong';
+statusText = 'Incorrect / गलत उत्तर';
+}
+} else {    
+unattemptedCount++;
+}
+let optionsHtml = '';
+options.forEach((opt, optIndex) => {
+const optValue = (optIndex + 1).toString();
+const label = optionLabels[optIndex];
+let optionClass = '';
+if (optValue === correctAnswerValue) optionClass = 'correct';
+else if (optValue === selectedValue) optionClass = 'wrong';
+let remark = "";
+if (optValue === selectedValue && selectedValue === correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#006400;padding:3px 10px;border-radius:5px;">Your Answer - It is Correct ✓</span>`;
+} else if (optValue === selectedValue && selectedValue !== correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#8B0000;padding:3px 10px;border-radius:5px;">Your Answer - This is Wrong ✗</span>`;
+} else if (optValue === correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#006400;padding:3px 10px;border-radius:5px;">Correct Answer ✓</span>`;
+}
+optionsHtml += `
+<div class="result-option ${optionClass}">
+<div>
+${label}. <span class="english-text">${opt[0]}</span>
+<span class="hindi-text">${opt[1]}</span>
+</div>
+${remark}
+</div>
+`;
+});
+detailedResultsHtml += ` 
+<div class="result-question review-item" data-status="${resultClass}">
+<p style="font-weight:600; margin-top:0;">Q${index + 1}: <span class="english-text">${qEn}</span> <span class="hindi-text">${qHi}</span> </p>
+<p style="font-weight: bold; margin-bottom:10px;">Status: ${statusText}</p>
+${optionsHtml}
+</div>
+`;
+});
+displayResults(score, wrongCount, unattemptedCount, detailedResultsHtml);
+const finalScoreString = `${score} / ${TOTAL_QUESTIONS}`;
+const urlParams = new URLSearchParams(window.location.search);
+const payload = {
+action: "submitScore",
+spreadsheetId: SPREADSHEET_ID,
+studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
+username: urlParams.get('username') || safeStorage.get('currentUsername') || "trainee",
+studentSection: urlParams.get('section') || safeStorage.get('studentSectionContext') || "SCREENER",
+designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || "Trainee",
+quizName: "DAY 9 PAPER 2",
+score: finalScoreString,
+tabSwitchCount: tabSwitchCount,
+timestamp: new Date().toLocaleString()
+};
+if (APPS_SCRIPT_URL) {
+try {
+await submitQuizResult(payload);
+alert("Your score (" + finalScoreString + ") has been saved successfully!");
+} catch (err) {
+console.error("Score logging error:", err);
+alert("Server is extremely busy right now, but your results have been rendered locally.");
+}
+}
+}
+function displayResults(score, wrongCount, unattemptedCount, detailedHtml) {
+let finalPercentage = (score / TOTAL_QUESTIONS) * 100;
+let resultStatusHtml = (finalPercentage >= 80) ? 
+`<p><strong>Result Status:</strong> <span style="font-size:1.3em; color:#16a34a; font-weight:bold;">PASS - Congratulations!</span></p>` :
+`<p><strong>Result Status:</strong> <span style="font-size:1.3em; color:#dc3545; font-weight:bold;">FAIL</span></p>`;
+resultDisplay.innerHTML = `
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+<h2 style="margin: 0; font-size: 1.8em; color: #0284c7; flex: 1; min-width: 250px;">Exam Review & Performance Metrics</h2>
+<div style="display: flex; gap: 10px;">
+<button type="button" class="btn-download-pdf" onclick="downloadSummaryOnly(${score}, ${wrongCount}, ${unattemptedCount})">📄 Download Summary PDF</button>
+<button type="button" class="lang-toggle-btn" id="lang-toggle-review" onclick="toggleLanguageHandler()">Toggle Hindi / English</button>
+</div>
+</div>
+<hr style="border: 0; border-top: 1px solid #ccc; margin-bottom: 20px;">
+<div id="summary-metrics-box" style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ccc;">
+<p style="margin:5px 0;"><strong>Candidate Name:</strong> ${userName}</p>
+<p style="margin:5px 0;"><strong>Final Score (Marks Earned):</strong> <span style="font-size:1.3em; color:#0284c7; font-weight:700;">${score} / ${TOTAL_QUESTIONS}</span></p>
+${resultStatusHtml}
+<p style="margin:5px 0;"><strong>Accuracy / Percentage:</strong> ${finalPercentage.toFixed(1)}%</p>
+<p style="margin:5px 0;"><strong>Screen Switch / Minimize Count:</strong> <span style="font-weight:700; color:${tabSwitchCount > 0 ? '#dc3545' : '#16a34a'};">${tabSwitchCount}</span></p>
+</div>
+<div class="filter-container">
+<button class="filter-btn active" onclick="filterReview('all', this)" style="background-color:#007bff;">All (${TOTAL_QUESTIONS})</button>
+<button class="filter-btn" onclick="filterReview('correct', this)" style="background-color:#16a34a;">Correct (${score})</button>
+<button class="filter-btn" onclick="filterReview('wrong', this)" style="background-color:#dc3545;">Wrong (${wrongCount})</button>
+<button class="filter-btn" onclick="filterReview('unattempted', this)" style="background-color:#6c757d;">Unattempted (${unattemptedCount})</button>
+</div>
+<h3 style="color:#0284c7;">Detailed Question Analysis:</h3>
+<div id="filtered-questions-box">${detailedHtml}</div>
+<br>
+<button onclick="window.close();" class="btn-control btn-submit-test" style="width:100%; text-align:center;">CLOSE & EXIT</button>
+`;
+document.getElementById('main-test-area').style.display = 'none';
+resultDisplay.style.display = 'block';
+updateLocalLanguage();
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function downloadSummaryOnly(score, wrongCount, unattemptedCount) {
+let finalPercentage = (score / TOTAL_QUESTIONS) * 100;
+let statusText = (finalPercentage >= 80) ? "PASS" : "FAIL";
+let statusColor = (finalPercentage >= 80) ? "#16a34a" : "#dc3545";
+const candidateDesignation = safeStorage.get('currentDesignation') || "N/A";
+const candidateSection = safeStorage.get('studentSectionContext') || "N/A";
+const submissionTime = new Date().toLocaleString();
+// Create wrapper for rendering
+const pdfContainer = document.createElement('div');
+pdfContainer.id = "mobile-pdf-render-box";
+pdfContainer.style.position = 'fixed';
+pdfContainer.style.top = '0';
+pdfContainer.style.left = '0';
+pdfContainer.style.width = '100%';
+pdfContainer.style.height = '100%';
+pdfContainer.style.backgroundColor = 'rgba(0,0,0,0.8)';
+pdfContainer.style.zIndex = '999999';
+pdfContainer.style.display = 'flex';
+pdfContainer.style.justifyContent = 'center';
+pdfContainer.style.alignItems = 'center';
+const innerBox = document.createElement('div');
+innerBox.style.width = '750px';
+innerBox.style.backgroundColor = '#ffffff';
+innerBox.style.padding = '30px';
+innerBox.style.fontFamily = 'Poppins, sans-serif';
+innerBox.style.color = '#333';
+innerBox.style.borderRadius = '8px';
+innerBox.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)';
+innerBox.innerHTML = `
+<div style="border-bottom: 2px solid #38bdf8; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">
+<h1 style="color: #0284c7; margin: 0; font-size: 24px;">ASTI DELHI</h1>
+<h3 style="margin: 5px 0 0 0; color: #555; font-size: 16px;">Exam Performance Summary</h3>
+</div>
+<div style="background: #f8f9fa; border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+<table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+<tr>
+<td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>
+<td style="padding: 6px 0;">DAY 9 PAPER 2</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>
+<td style="padding: 6px 0;">${userName}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Designation:</td>
+<td style="padding: 6px 0;">${candidateDesignation}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Section:</td>
+<td style="padding: 6px 0;">${candidateSection}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Time of Submission:</td>
+<td style="padding: 6px 0;">${submissionTime}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Final Score / Marks:</td>
+<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: #0284c7;">${score} / ${TOTAL_QUESTIONS}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Percentage / Accuracy:</td>
+<td style="padding: 6px 0;">${finalPercentage.toFixed(1)}%</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Result Status:</td>
+<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: ${statusColor};">${statusText}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Screen Switch / Minimize Count:</td>
+<td style="padding: 6px 0; font-weight: bold; color: ${tabSwitchCount > 0 ? '#dc3545' : '#16a34a'};">${tabSwitchCount}</td>
+</tr>
+</table>
+</div>
+<h3 style="color: #0284c7; margin-bottom: 10px; font-size: 16px;">Summary Breakdown Statistics</h3>
+<table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
+<thead>
+<tr style="background-color: #0284c7; color: white;">
+<th style="padding: 10px; border: 1px solid #38bdf8;">Total Questions</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Correct</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Wrong</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Unattempted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">${TOTAL_QUESTIONS}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a; font-weight: bold;">${score}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #dc3545; font-weight: bold;">${wrongCount}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #6c757d; font-weight: bold;">${unattemptedCount}</td>
+</tr>
+</tbody>
+</table>
+<div style="margin-top: 40px; text-align: center; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 10px;">
+This is an official automated performance report generated by ASTI Delhi Exam Portal.
+</div>
+`;
+pdfContainer.appendChild(innerBox);
+document.body.appendChild(pdfContainer);
+const opt = {
+margin:       10,
+filename:     `${userName.toLowerCase().replace(/\s+/g, '_')}_summary.pdf`,
+image:        { type: 'jpeg', quality: 0.98 },
+html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+};
+// Wait 300ms for browser layout & fonts to resolve
+setTimeout(() => {
+html2pdf().set(opt).from(innerBox).save().then(() => {
+if (pdfContainer.parentNode) {
+pdfContainer.parentNode.removeChild(pdfContainer);
+}
+}).catch(err => {
+console.error("PDF generation failed:", err);
+if (pdfContainer.parentNode) {
+pdfContainer.parentNode.removeChild(pdfContainer);
+}
+});
+}, 300);
+}
+function filterReview(filterType, btnElement) {
+const reviewItems = document.querySelectorAll('.review-item');
+reviewItems.forEach(item => {
+const itemStatus = item.getAttribute('data-status');
+if (filterType === 'all' || itemStatus === filterType) {
+item.style.display = 'block';
+} else {
+item.style.display = 'none';
+}
+});
+const filterButtons = document.querySelectorAll('.filter-container .filter-btn');
+filterButtons.forEach(btn => btn.classList.remove('active'));
+if (btnElement) {
+btnElement.classList.add('active');
+}
+}
+</script>
+</body>
+</html>

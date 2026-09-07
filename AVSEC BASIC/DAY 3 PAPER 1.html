@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>ASTI Delhi – DAY 3 PAPER 1 (100 Questions | 50 Min)</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
+document.addEventListener('keydown', function(e) {
+if (e.key === 'F12' || (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'i' || e.key === 'j'))) {
+e.preventDefault();
+}
+});
+</script>
+<style>*{box-sizing:border-box}body{font-family:'Poppins',sans-serif;margin:0;padding:0;background:linear-gradient(160deg,#f0faff 0%,#f0fdf4 100%);color:#333;overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh}.header{background:linear-gradient(90deg,#aedcf6 0%,#d9f0fc 55%,#eef9ff 100%);color:#123b66;padding:10px 22px;display:flex;justify-content:space-between;align-items:center;position:fixed;top:0;left:0;width:100%;box-shadow:0 2px 6px rgba(20,90,140,0.25);z-index:100;height:60px;border-bottom:3px solid #7ec4ea}.header .test-title h3{margin:0;font-size:1.4em;font-weight:700;color:#0c3b66}.header .institute-logo{font-size:0.95em;font-weight:600;opacity:0.85;margin-top:3px;color:#14527f}.main-content{display:flex;padding-top:60px;flex:1}.question-area{flex:1;padding:20px 20px 150px 20px;min-height:calc(100vh - 60px);margin-right:420px}.sidebar{width:400px;background-color:#dbeefc;padding:16px;box-shadow:-2px 0 5px rgba(0,0,0,0.1);position:fixed;right:0;top:60px;bottom:0;overflow-y:auto;z-index:50;border-left:4px solid #7ec4ea}.sidebar h3{color:#0c3b66;font-size:1.05em;margin-top:0}#timer-display{font-size:1.15em;font-weight:700;background-color:#fff3cd;color:#b02a2a;padding:5px 12px;border-radius:5px;border:1px solid #f0c96b}.user-info span{font-weight:600;margin-right:15px;color:#123b66}.question-box{background-color:#ffffff;border:1px solid #cfe6f7;border-left:5px solid #38bdf8;padding:15px 20px;margin-bottom:25px;border-radius:8px;min-height:250px;display:none}.question-box.active{display:block}.question-text{font-size:1.2em;font-weight:600;margin-bottom:15px;line-height:1.5;color:#1a1a1a}.option-text-container{margin-top:20px;border-top:1px solid #ccc;padding-top:10px}.option-label{display:block;margin:5px 0;padding:5px;font-size:1em}.hindi-text{display:none}.english-text{display:inline}body.lang-hindi-global .english-text{display:none !important}body.lang-hindi-global .hindi-text{display:inline !important}.lang-toggle-container{display:flex;justify-content:flex-end;margin-bottom:15px}.lang-toggle-btn{padding:8px 30px 8px 16px;background-color:#ffffff;border:1px solid #7ec4ea;border-radius:6px;font-weight:600;color:#14527f;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.08);position:relative;appearance:none}.lang-toggle-btn::after{content:"\25BE";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#14527f}.status-legend{padding:10px;border:1px solid #a9d3ef;border-radius:8px;margin-bottom:15px;background-color:#eef8ff}.status-legend div{margin-bottom:8px;font-size:0.85em;display:flex;align-items:center;color:#123b66}.legend-box{display:inline-block;width:15px;height:15px;margin-right:8px;border-radius:3px;border:1px solid #666}.legend-box.status-1{background-color:#b9c9ea !important;color:#333;border-radius:3px;border-color:#93a8d6}.legend-box.status-2{clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background-color:#16a34a !important;border-color:#16a34a}.legend-box.status-3{border-radius:50%;background-color:#ffc107 !important;border-color:#ffc107}.legend-box.status-4{border-radius:50%;background-color:#fd7e14 !important;border-color:#fd7e14}#question-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:15px}.q-button{height:32px;width:100%;line-height:32px;padding:0;border:1px solid #93a8d6;border-radius:5px;cursor:pointer;text-align:center;font-weight:600;font-size:0.85em;transition:background-color 0.2s}.status-1,.status-0{background-color:#b9c9ea;color:#1a2c56;border-radius:5px;border-color:#93a8d6}.status-2{background-color:#16a34a;color:white;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);border-radius:0;border-color:#16a34a}.status-3{background-color:#ffc107;color:#333;border-radius:50%;border-color:#ffc107}.status-4{background-color:#fd7e14;color:white;border-radius:50%;border-color:#fd7e14}.control-panel{display:flex;flex-direction:column;padding:0;background-color:#ffffff;border-top:2px solid #cfe6f7;position:fixed;bottom:0;left:0;width:calc(100% - 420px);z-index:90;box-shadow:0 -2px 5px rgba(0,0,0,0.1)}.control-row{display:flex;align-items:center;justify-content:space-between;padding:10px 15px}.option-action-row{display:flex;align-items:center;padding:10px 15px;border-bottom:1px solid #ddd;margin-bottom:0;justify-content:space-between}.option-buttons-container{display:flex;gap:12px;margin:0 20px}.btn-option{width:38px;height:38px;padding:0;font-size:1em;font-weight:700;border:2px solid #007bff;border-radius:50%;cursor:pointer;background-color:#ffffff;color:#007bff;transition:background-color 0.2s}.btn-option.selected{background-color:#007bff;color:white}.btn-control{padding:10px 15px;font-size:0.95em;font-weight:600;border:none;border-radius:6px;cursor:pointer;transition:filter 0.2s;margin:0 5px;min-width:100px}.btn-mark{background-color:#eaa93e;color:#402a00;margin-left:0;border-radius:20px;display:inline-flex;align-items:center;gap:6px}.mark-checkbox{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:2px solid #402a00;border-radius:3px;background-color:#fff9ee;flex-shrink:0}.mark-checkbox::after{content:''}.mark-checkbox.checked{background-color:#402a00}.mark-checkbox.checked::after{content:'✔';color:#ffffff;font-size:11px;line-height:1;font-weight:900}.btn-save-next{background-color:#1e8449;color:white}.btn-erase{background-color:#8256c4;color:white;margin-right:0}.btn-prev,.btn-next{background-color:#ffffff;color:#0a6fb0;border:2px solid #7ec4ea;border-radius:20px;font-weight:700}.btn-prev:hover,.btn-next:hover{background-color:#eaf7ff}.btn-submit-test{background-color:#0c3b66;color:white;padding:10px 25px;font-size:1em;font-weight:700;border-radius:6px}.btn-control:hover{filter:brightness(1.08)}.navigation-row{display:flex;justify-content:space-between;background-color:#f3f6f9;padding:10px 15px}.exam-note{background-color:#f6e9c2;border-top:1px solid #e6d097;color:#4a3a10;font-size:0.85em;padding:8px 15px}.exam-note strong{color:#4a3a10}#result-display{width:95%;max-width:1100px;margin:30px auto 100px auto;padding:25px;background-color:#ffffff;border:2px solid #38bdf8;border-radius:10px;display:none;box-shadow:0 4px 15px rgba(0,0,0,0.08)}.result-question{padding:15px 20px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:15px;background-color:#f9fbfd;width:100%}.result-option{padding:10px 14px;margin-top:8px;border-radius:5px;font-size:0.95em;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border:1px solid #e2e8f0}.result-option.correct{background-color:#d4edda;color:#155724;border-color:#c3e6cb}.result-option.wrong{background-color:#f8d7da;color:#721c24;border-color:#f5c6cb}.filter-container{display:flex;justify-content:center;gap:12px;margin:25px 0;flex-wrap:wrap}.filter-btn{padding:10px 20px;font-size:0.95em;font-weight:600;border:2px solid transparent;border-radius:6px;cursor:pointer;transition:all 0.2s ease;color:white;min-width:110px;text-align:center}.filter-btn:hover{opacity:0.9}.filter-btn.active{border-color:#000;transform:scale(1.03);box-shadow:0 4px 8px rgba(0,0,0,0.2)}.btn-download-pdf{background-color:#17a2b8;color:white;padding:10px 20px;font-size:1em;font-weight:600;border:none;border-radius:5px;cursor:pointer;transition:background-color 0.2s;box-shadow:0 2px 5px rgba(0,0,0,0.1)}.btn-download-pdf:hover{background-color:#138496}#initial-setup{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#f0faff;z-index:200;display:flex;justify-content:center;align-items:stretch}#setup-box{background-color:white;border-radius:0;text-align:left;box-shadow:none;font-family:'Poppins',sans-serif;width:100%;max-width:100%;height:100%;max-height:100%;display:flex;flex-direction:column;overflow:hidden}@media (min-width:1300px){#setup-box{max-width:1200px}}.mock-exam-wrap{border:1px solid #d7ecec;border-radius:8px;padding:14px;background:#f8fdff;margin-bottom:14px}.mock-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}.mock-header-bar{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 14px;flex:1;min-width:260px}.mock-logo-box{border:1px solid #999;border-radius:4px;padding:4px 8px;font-size:0.65em;font-weight:700;text-align:center;color:#555;line-height:1.2}.mock-timer{background:#ffc107;color:#333;font-weight:700;padding:4px 10px;border-radius:5px;font-size:0.85em}.mock-candidate{font-size:0.78em;color:#333}.mock-qno-bar{flex:1;min-width:260px;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:0.85em}.mock-btn-mini{border:1px solid #999;background:#eee;border-radius:4px;padding:2px 6px;font-size:0.72em;margin-left:4px;font-weight:700}.mock-lang-mini{font-size:0.72em;margin-left:8px}.callout{background:#ffe4c4;border:2px solid #7a2e0e;border-radius:6px;padding:8px 10px;font-size:0.76em;color:#3a2410;line-height:1.4;flex:1;min-width:200px}.callout strong{color:#7a2e0e}.mock-split{display:flex;gap:14px;flex-wrap:wrap}.mock-question-col{flex:1.4;min-width:260px}.mock-grid-col{flex:1;min-width:220px}.mock-question-box{background:#fff;border:1px solid #cfe8f5;border-left:4px solid #38bdf8;border-radius:6px;padding:10px 14px;font-size:0.85em;margin-bottom:8px}.mock-option{padding:2px 0;font-size:0.85em}.mock-answer-pad{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #cfe8f5;border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:0.8em}.mock-check{display:flex;align-items:center;gap:4px;font-weight:600}.mock-opt-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid #007bff;border-radius:4px;color:#007bff;font-weight:700;font-size:0.75em}.mock-opt-btn.selected{background:#007bff;color:#fff}.mock-btn-green,.mock-btn-red,.mock-btn-grey,.mock-btn-blue{color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:0.75em;font-weight:700}.mock-btn-green{background:#16a34a}.mock-btn-red{background:#dc3545}.mock-btn-grey{background:#6c757d}.mock-btn-blue{background:#007bff}.mock-nav-row{display:flex;justify-content:space-between;margin-top:6px}.mock-grid-summary{font-size:0.7em;margin-bottom:6px;line-height:1.6}.dot{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:middle}.dot-green{background:#16a34a}.dot-grey{background:#f0f0f0;border:1px solid #ccc}.dot-orange{background:#fd7e14;border-radius:50%}.dot-yellow{background:#ffc107;border-radius:50%}.mock-qgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:8px}.qg{display:flex;align-items:center;justify-content:center;height:20px;font-size:0.65em;font-weight:700;border-radius:3px;color:#fff}.qg.green{background:#16a34a}.qg.grey{background:#f0f0f0;color:#333;border:1px solid #ccc}.qg.orange{background:#fd7e14;border-radius:50%}.qg.yellow{background:#ffc107;color:#333;border-radius:50%}.post-submit-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}.callout-mini{flex:1;min-width:200px}.safety-note{background:#fff3e0;border:1px solid #f0b37e;border-left:4px solid #dc3545;border-radius:6px;padding:10px 14px;font-size:0.85em;color:#333}#setup-topbar{background:linear-gradient(135deg,#0ea5e9 0%,#22c55e 100%);color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 20px;flex-shrink:0}#setup-topbar .setup-org{font-size:0.95em;font-weight:700;opacity:0.95}#setup-topbar .setup-exam-name{font-size:1.15em;font-weight:700}#setup-topbar .setup-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:0.9em;font-weight:600}#setup-topbar .setup-meta span{background:rgba(255,255,255,0.18);padding:4px 10px;border-radius:5px}#setup-name-row{display:flex;align-items:center;gap:10px;padding:14px 22px;border-bottom:1px solid #eee;flex-shrink:0;flex-wrap:wrap}#setup-name-row label{font-weight:600;color:#333}#setup-box input#user-name-input{padding:9px 12px;border:1px solid #ccc;border-radius:5px;font-size:1em;flex:1;min-width:180px;font-family:'Poppins',sans-serif}#setup-instructions{padding:16px 22px;overflow-y:auto;flex:1;min-height:0}#setup-instructions h3{color:#0284c7;margin:14px 0 8px 0;font-size:1em}#setup-instructions h3:first-child{margin-top:0}#setup-instructions ul{margin:0 0 4px 0;padding-left:20px}#setup-instructions li{margin-bottom:6px;font-size:0.92em;line-height:1.5;color:#333}#setup-declaration{display:flex;align-items:flex-start;gap:10px;padding:14px 22px;border-top:1px solid #eee;background:#f8fafc;flex-shrink:0}#setup-declaration input[type="checkbox"]{margin-top:3px;width:17px;height:17px;flex-shrink:0;cursor:pointer}#setup-declaration label{font-size:0.92em;font-weight:600;color:#333;cursor:pointer}#setup-footer-row{padding:14px 22px;flex-shrink:0;text-align:center}#start-btn{background-color:#16a34a;color:white;padding:10px 20px;border:none;border-radius:5px;font-weight:600;cursor:pointer;width:100%;font-size:1.05em;transition:background-color 0.2s,opacity 0.2s}#start-btn:disabled{background-color:#9ca3af;cursor:not-allowed;opacity:0.8}@media (max-width:600px){#setup-topbar{flex-direction:column;align-items:flex-start}}.zoom-controls{position:fixed;top:70px;left:10px;z-index:9999;display:none;flex-direction:row;gap:8px}.zoom-controls button{padding:6px 12px;background:#0ea5e9;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer}footer{background-color:#0284c7;color:white;text-align:center;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));font-size:0.85em;font-weight:500;position:fixed;bottom:0;left:0;width:100%;z-index:80;box-sizing:border-box}.palette-toggle-btn{display:none}.sidebar-close-btn{display:none}.sidebar-backdrop{display:none}@media (max-width:768px){.header{flex-wrap:wrap;height:auto;padding:8px 10px;position:relative}.main-content{display:block!important;padding-top:10px;padding-bottom:260px}.question-area{margin-right:0!important;padding:10px 10px 20px 10px!important;min-height:auto;width:100%}.sidebar{position:fixed!important;top:0!important;right:0!important;left:auto!important;width:85%!important;max-width:340px;height:100%!important;border-left:none!important;box-shadow:-3px 0 12px rgba(0,0,0,0.3)!important;padding:16px;padding-top:55px!important;margin-bottom:0px !important;z-index:998!important;transform:translateX(100%);transition:transform 0.25s ease;overflow-y:auto!important}.sidebar.open{transform:translateX(0)}.control-panel{width:100%!important;left:0!important;position:fixed;bottom:40px}.option-action-row,.control-row,.navigation-row{flex-wrap:wrap;gap:8px;justify-content:center}.option-buttons-container{flex-wrap:wrap;justify-content:center;margin:0}.btn-control{min-width:120px}.zoom-controls{position:static;margin:10px;display:flex}.question-text,.option-label{word-break:break-word}.q-button{height:26px;font-size:0.7em}.exam-note{position:relative}#question-grid{grid-template-columns:repeat(10,1fr);gap:4px}#result-display{width:98%;padding:15px;margin-top:15px}.palette-toggle-btn{display:flex;position:fixed;right:14px;bottom:90px;z-index:96;background:#0ea5e9;color:#fff;border:none;border-radius:24px;padding:10px 16px;align-items:center;gap:6px;font-weight:700;font-size:0.85em;box-shadow:0 3px 10px rgba(0,0,0,0.3);cursor:pointer}.sidebar-close-btn{display:block;position:fixed;top:10px;right:10px;background:#dc3545;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:700;font-size:0.8em;cursor:pointer;z-index:999}.sidebar{display:flex;flex-direction:column;overflow:hidden !important}.sidebar-scroll-body{flex:1;min-height:0;overflow-y:auto}.sidebar-backdrop{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:997}.sidebar-backdrop.open{display:block}}</style>
+</head>
+<body>
+<div class='zoom-controls'><button onclick='setQuestionZoom(0.1)'>A+</button><button onclick='setQuestionZoom(-0.1)'>A-</button></div>
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closePalette()"></div>
+<button type="button" class="palette-toggle-btn" id="palette-toggle-btn" onclick="togglePalette()">📋 Palette</button>
+<div id="initial-setup">
+<div id="setup-box">
+<div id="setup-topbar">
+<div>
+<div class="setup-org">ASTI Delhi</div>
+<div class="setup-exam-name">DAY 3 PAPER 1</div>
+</div>
+<div class="setup-meta">
+<span>Questions: 100</span>
+<span>Duration: 50 Min</span>
+</div>
+</div>
+<div id="setup-name-row">
+<label for="user-name-input">Candidate Name:</label>
+<input type="text" id="user-name-input" placeholder="Enter Your Full Name" required>
+</div>
+<div id="setup-instructions">
+<p style="margin: 0 0 10px 0; font-weight: 600; color: #0284c7; font-size: 0.95em;">Here's how your exam screen works:</p>
+<div class="mock-exam-wrap">
+<div class="mock-row">
+<div class="mock-header-bar" style="justify-content: space-between;">
+<div>
+<div style="font-weight: 700; font-size: 0.95em;">DAY 3 PAPER 1</div>
+<div style="font-size: 0.75em; opacity: 0.75;">ASTI Delhi</div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px;">
+<span style="font-weight: 600; font-size: 0.8em;">Candidate: Your Name</span>
+<span class="mock-timer">50:00</span>
+</div>
+</div>
+<div class="callout">⏱️ <strong>HEADER &amp; TIMER</strong><br>Your name, the exam title, and the remaining time are always visible at the top and count down automatically.</div>
+</div>
+<div class="mock-row">
+<div style="display: flex; gap: 8px; align-items: center;">
+<button class="mock-btn-mini" style="padding: 5px 10px;">A+</button>
+<button class="mock-btn-mini" style="padding: 5px 10px;">A-</button>
+<button class="mock-btn-mini" style="padding: 5px 10px;">Toggle Hindi / English</button>
+</div>
+<div class="callout">🔤 <strong>TEXT SIZE &amp; LANGUAGE</strong><br>The A+ / A- buttons (top-left of the screen) resize question text. "Toggle Hindi / English" switches the question language, any time.</div>
+</div>
+<div class="mock-split">
+<div class="mock-question-col">
+<div class="mock-question-box">
+<p style="margin: 0 0 6px 0; font-weight: 700;">Question 1 of 100</p>
+<p style="margin: 0 0 6px 0;">How much percentage of Rs.45 is Rs.6.75?</p>
+<div class="mock-option">A. 12%</div>
+<div class="mock-option">B. 18%</div>
+<div class="mock-option">C. 20%</div>
+<div class="mock-option">D. 15%</div>
+</div>
+<div class="callout" style="margin-bottom: 8px;">❓ <strong>QUESTION AREA</strong><br>One question is shown at a time, along with its options.</div>
+<div class="mock-answer-pad">
+<button class="mock-btn-mini" style="background: #ffc107; border-color: #ffc107; font-weight: 700;">Mark for Review</button>
+<span class="mock-opt-btn">A</span><span class="mock-opt-btn">B</span><span class="mock-opt-btn">C</span><span class="mock-opt-btn selected">D</span>
+<button class="mock-btn-green">Save &amp; Next</button>
+<button class="mock-btn-red">Erase Answer</button>
+</div>
+<div class="mock-nav-row">
+<span><button class="mock-btn-grey">Previous</button> <button class="mock-btn-blue">Next</button></span>
+<button class="mock-btn-mini" style="background: #0284c7; color: #fff; border: none; padding: 5px 12px;">Submit Exam</button>
+</div>
+<div class="callout" style="margin-top: 10px;">✅ <strong>ANSWERING &amp; NAVIGATION</strong><br>Pick an option, then click <strong>Save &amp; Next</strong> to save it and move on. Use <strong>Mark for Review</strong> to flag a question and <strong>Erase Answer</strong> to clear your choice. <strong>Previous / Next</strong> move between questions, and <strong>Submit Exam</strong> ends your attempt whenever you're ready.</div>
+</div>
+<div class="mock-grid-col">
+<p style="margin: 0 0 6px 0; font-weight: 700; font-size: 0.82em; color: #0284c7;">Question Palette</p>
+<div class="mock-grid-summary">
+<span class="dot" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;"></span>Question Answered<br>
+<span class="dot dot-grey"></span>Not Answered<br>
+<span class="dot dot-orange"></span>Review Answered<br>
+<span class="dot dot-yellow"></span>Review Not Answered
+</div>
+<div class="mock-qgrid">
+<span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">1</span><span class="qg grey">2</span><span class="qg orange">3</span><span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">4</span><span class="qg grey">5</span><span class="qg yellow">6</span>
+<span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">7</span><span class="qg grey">8</span><span class="qg" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); background: #16a34a;">9</span><span class="qg grey">10</span><span class="qg orange">11</span><span class="qg grey">12</span>
+</div>
+<div class="callout">🧭 <strong>QUESTION PALETTE</strong><br>Click any number to jump straight to that question — this does <strong>not</strong> save your current answer, so use Save &amp; Next for that first.</div>
+</div>
+</div>
+</div>
+<div class="post-submit-row">
+<div class="callout callout-mini">🔁 <strong>AUTO-SUBMIT</strong><br>When the timer hits 0:00, your quiz submits automatically — no action needed from you.</div>
+<div class="callout callout-mini">🔍 <strong>REVIEW OPTION</strong><br>After submitting, see every question with the correct answer, filterable by Correct / Wrong / Unattempted.</div>
+<div class="callout callout-mini">📄 <strong>SUMMARY PDF</strong><br>Download a PDF of your score, accuracy, and other details once the quiz ends.</div>
+</div>
+<div class="safety-note">🔒 <strong>Please Note:</strong> Minimizing this window or switching to another tab/application during the quiz is tracked. For the first 2 time(s) you do this, you will only get a WARNING and the exam continues. On attempt number 3 through attempt number 4, your exam will be LOCKED immediately and will require an Administrator password to resume. On attempt number 5, your exam will be submitted automatically. Please stay on this tab for the entire duration.</div>
+</div>
+<div id="setup-declaration">
+<input type="checkbox" id="declaration-check">
+<label for="declaration-check">I have read and understood all the instructions above.</label>
+</div>
+<div id="setup-footer-row">
+<button id="start-btn" disabled>Start the Quiz</button>
+</div>
+</div>
+</div>
+<div class="header" style="display: none;" id="main-header">
+<div class="test-title">
+<h3 style="font-size: 1.5em;">DAY 3 PAPER 1</h3>
+<div class="institute-logo">ASTI Delhi</div>
+</div>
+<div class="user-info">
+<span id="header-user-name">Candidate: N/A</span>
+<span id="timer-display">50:00</span>
+</div>
+</div>
+<div class="main-content" style="display: none;" id="main-test-area">
+<div class="question-area">
+<div class="lang-toggle-container">
+<button type="button" class="lang-toggle-btn" id="lang-toggle-local">Toggle Hindi / English</button>
+</div>
+<div id="questions-container"></div>
+<div class="control-panel" id="exam-control-panel">
+<div class="option-action-row">
+<button type="button" class="btn-control btn-mark" id="mark-review-btn" onclick="markQuestion()"><span class="mark-checkbox" id="mark-checkbox"></span> Mark for Review</button>
+<div class="option-buttons-container" id="option-buttons">
+<button type="button" class="btn-option" data-value="1" onclick="selectOption(1)">A</button>
+<button type="button" class="btn-option" data-value="2" onclick="selectOption(2)">B</button>
+<button type="button" class="btn-option" data-value="3" onclick="selectOption(3)">C</button>
+<button type="button" class="btn-option" data-value="4" onclick="selectOption(4)">D</button>
+</div>
+<div style="display: flex; gap: 5px;">
+<button type="button" class="btn-control btn-save-next" onclick="saveAndNext()">Save & Next</button>
+<button type="button" class="btn-control btn-erase" onclick="eraseAnswer()">Erase Answer</button>
+</div>
+</div>
+<div class="control-row navigation-row">
+<div style="display: flex; gap: 5px;">
+<button type="button" class="btn-control btn-prev" onclick="navigateQuestion(-1)">◀ Previous</button>
+<button type="button" class="btn-control btn-next" onclick="navigateQuestion(1)">Next ▶</button>
+</div>
+<button type="button" class="btn-control btn-submit-test" id="submitQuizBtn" onclick="confirmSubmit()">Submit Exam</button>
+</div>
+<div class="exam-note">Note : You must click on the <strong>Save &amp; Next</strong> button to save your answer. If not your answer will not be saved.</div>
+</div>
+</div>
+<div class="sidebar" id="question-sidebar">
+<button type="button" class="sidebar-close-btn" onclick="closePalette()">✕ Close</button>
+<div class="sidebar-scroll-body">
+<h3>Question Palette / प्रश्न पैलेट</h3>
+<div class="status-legend">
+<div><span class="legend-box status-2"></span> Question Answered (उत्तर दिया - Pentagon)</div>
+<div><span class="legend-box status-1"></span> Not Answered (उत्तर नहीं दिया - Square)</div>
+<div><span class="legend-box status-4"></span> Review Answered (समीक्षा + उत्तर दिया - Circle)</div>
+<div><span class="legend-box status-3"></span> Review Not Answered (समीक्षा + उत्तर नहीं दिया - Circle)</div>
+</div>
+<div id="question-grid"></div>
+</div>
+</div>
+</div>
+<div id="result-display"></div>
+<div id="cheat-lock-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(20,20,20,0.96); z-index:99999; color:#fff; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box;">
+<h2 id="cheat-lock-title" style="color:#ff6b6b; margin-bottom:10px;">⚠ Exam Locked</h2>
+<p id="cheat-lock-message" style="max-width:500px; font-size:1.05em; line-height:1.5;"></p>
+<div id="warning-box" style="margin-top:20px; display:none;">
+<button type="button" id="warning-continue-btn" onclick="continueAfterWarning()" style="padding:12px 30px; background:#f59e0b; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Continue Exam</button>
+</div>
+<div id="unlock-form-box" style="margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+<input type="password" id="admin-unlock-input" placeholder="Enter Administrator Password" style="padding:10px 14px; border-radius:6px; border:none; width:250px; max-width:80vw; font-size:1em;">
+<button type="button" id="admin-unlock-btn" onclick="attemptUnlock()" style="padding:12px 30px; background:#0ea5e9; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Unlock Exam</button>
+<p id="unlock-error-msg" style="color:#ff6b6b; font-size:0.9em; margin:0; display:none;">Incorrect password. Please contact your Administrator.</p>
+</div>
+</div>
+<footer>
+ASTI Delhi Quiz Examination
+</footer>
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPwPhD5WTBPut3gC0LYF_wq1gXZ14O5z78yukoKs1-RQTy4N9YwvSF0axQLHzcUjon/exec";
+const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
+const ADMIN_UNLOCK_PASSWORD = "igiasti123";
+const TOTAL_QUESTIONS = 100;
+const TOTAL_TIME_SECONDS = 50 * 60; 
+const questionData = [[1,1,"The area where passengers collect their luggage after a flight is called","उड़ान के बाद यात्री अपने सामान को जहाँ प्राप्त करते हैं उसे क्या कहते हैं?",["Departure Hall","प्रस्थान हॉल"],["Arrival Hall","आगमन हॉल"],["Check-in Counter","चेक-इन काउंटर"],["Security Area","सुरक्षा क्षेत्र"]],[2,2,"The ATC complex at an airport manages","हवाई अड्डे का ATC परिसर किसका प्रबंधन करता है?",["Passengers' check-in","यात्रियों का चेक-इन"],["Air traffic control","हवाई यातायात नियंत्रण"],["Baggage handling","सामान प्रबंधन"],["Refueling","ईंधन भरना"]],[3,2,"The building where airline offices and airport management functions are located is the","वह इमारत जहाँ एयरलाइन कार्यालय और हवाई अड्डे का प्रशासन कार्य होता है, कहलाती है -",["Terminal Building","टर्मिनल भवन"],["Administration Building","प्रशासन भवन"],["Hangar","हैंगर"],["Cargo Terminal","कार्गो टर्मिनल"]],[4,2,"The main purpose of the Cargo Complex is","कार्गो कॉम्प्लेक्स का मुख्य उद्देश्य क्या है?",["Passenger transport","यात्री परिवहन"],["Freight handling","माल हैंडलिंग"],["Fuel storage","ईंधन भंडारण"],["Catering","भोजन आपूर्ति"]],[5,3,"The area reserved for aircraft maintenance is called","जहाज़ों के रखरखाव के लिए आरक्षित क्षेत्र को क्या कहते हैं?",["Apron","एप्रन"],["Runway","रनवे"],["Hangar","हैंगर"],["Terminal","टर्मिनल"]],[6,2,"Baggage make-up area is used for","सामान तैयार करने का क्षेत्र किसके लिए उपयोग किया जाता है?",["Ticket booking","टिकट बुकिंग"],["Sorting checked-in baggage","चेक-इन किए गए सामान को छांटने के लिए"],["Catering services","केटरिंग सेवाएं"],["Customs checking","सीमा शुल्क जांच"]],[7,2,"The cargo hold is located","कार्गो होल्ड कहाँ स्थित होता है?",["Inside the terminal","टर्मिनल के अंदर"],["Under the aircraft cabin","विमान के केबिन के नीचे"],["On the airport rooftop","हवाई अड्डे की छत पर"],["Within the control tower","नियंत्रण टावर में"]],[8,2,"What is the primary responsibility of ground handling staff?","ग्राउंड हैंडलिंग स्टाफ की मुख्य जिम्मेदारी क्या होती है?",["Flying aircraft","विमान उड़ाना"],["Managing baggage and aircraft on ground","जमीन पर विमान और सामान का प्रबंधन"],["Operating radar systems","रडार सिस्टम चलाना"],["Conducting security checks","सुरक्षा जांच करना"]],[9,1,"The fuel storage area in an airport is called","हवाई अड्डे में ईंधन भंडारण क्षेत्र को क्या कहते हैं?",["Fuel farm","फ्यूल फार्म"],["Cargo bay","कार्गो बे"],["Apron","एप्रन"],["Fire station","अग्निशमन केंद्र"]],[10,2,"ATC stands for","ATC का पूरा नाम क्या है?",["Airport Transport Control","एयरपोर्ट ट्रांसपोर्ट कंट्रोल"],["Air Traffic Control","एयर ट्रैफिक कंट्रोल"],["Air Terminal Cell","एयर टर्मिनल सेल"],["Aircraft Travel Channel","एयरक्राफ्ट ट्रैवल चैनल"]],[11,2,"The catering establishment at an airport provides","हवाई अड्डे में केटरिंग प्रतिष्ठान क्या प्रदान करता है?",["Aircraft fuel","विमान का ईंधन"],["Passenger meals","यात्रियों का भोजन"],["Ticketing assistance","टिकट सहायता"],["Security checks","सुरक्षा जांच"]],[12,2,"Air navigation aids are used for","एयर नेविगेशन एड्स का उपयोग किसके लिए किया जाता है?",["Cleaning runways","रनवे की सफाई"],["Guiding aircraft navigation","विमान के मार्गदर्शन के लिए"],["Ticket checking","टिकट जांच"],["Passenger announcements","यात्रियों की घोषणा"]],[13,2,"The area where passengers collect their luggage after a flight is called","उड़ान के बाद यात्री अपने सामान को जहाँ प्राप्त करते हैं, उसे क्या कहते हैं?",["Departure Hall","प्रस्थान हॉल"],["Arrival Hall","आगमन हॉल"],["Check-in Counter","चेक-इन काउंटर"],["Security Area","सुरक्षा क्षेत्र"]],[14,2,"What is the main function of the ATC Complex?","ATC परिसर का मुख्य कार्य क्या है?",["Baggage handling","सामान संभालना"],["Air traffic control","हवाई यातायात नियंत्रण"],["Refueling","ईंधन भरना"],["Catering","भोजन आपूर्ति"]],[15,3,"Where tickets are generally issued at an airport?","हवाई अड्डे पर आम तौर पर टिकट कहाँ जारी किए जाते हैं?",["Security Gate","सुरक्षा द्वार"],["Taxiway","टैक्सीवे"],["Check-in Counter","चेक-इन काउंटर"],["Baggage Claim","सामान दावा क्षेत्र"]],[16,2,"Where does aircraft maintenance usually occur?","विमान का रखरखाव आमतौर पर कहाँ किया जाता है?",["Apron","एप्रन"],["Hangar","हैंगर"],["Runway","रनवे"],["Terminal","टर्मिनल"]],[17,2,"Fuel for aircraft is stored at the:","विमानों का ईंधन कहाँ संग्रहित किया जाता है?",["Terminal","टर्मिनल"],["Fuel farm","फ्यूल फार्म"],["Control tower","नियंत्रण टावर"],["Cargo bay","कार्गो बे"]],[18,2,"The baggage make-up area is used for:","सामान तैयार करने का क्षेत्र किसके लिए प्रयोग किया जाता है?",["Passenger boarding","यात्री चढना"],["Sorting luggage","सामान छाँटना"],["Refueling","ईंधन भरना"],["Aircraft parking","विमान पार्किंग"]],[19,3,"Which area controls the landing and takeoff of aircraft?","कौन सा क्षेत्र विमान के उतरने और उड़ान नियंत्रित करता है?",["Maintenance area","रखरखाव क्षेत्र"],["Catering zone","भोजन क्षेत्र"],["ATC Complex","ATC परिसर"],["Parking lot","पार्किंग क्षेत्र"]],[20,2,"Emergency evacuation drills are conducted for:","आपातकालीन निकासी अभ्यास क्यों किया जाता है?",["Marketing","विपणन"],["Practice of crisis response","संकट प्रतिक्रिया अभ्यास"],["Luggage handling","सामान प्रबंधन"],["Refueling staff","ईंधन कर्मचारी"]],[21,1,"What are air navigation aids used for?","एयर नेविगेशन एड्स का उपयोग किसके लिए होता है?",["Guiding aircraft","विमान का मार्गदर्शन"],["Cleaning","सफाई"],["Serving food","भोजन सेवा"],["Selling tickets","टिकट बिक्री"]],[22,1,"In which area do passengers clear customs?","यात्री सीमा शुल्क कहाँ पर साफ़ करते हैं?",["Arrival Hall","आगमन हॉल"],["Duty Free","ड्यूटी फ्री"],["Security","सुरक्षा"],["Maintenance","रखरखाव"]],[23,2,"What action should be taken for defective Unit Load Devices (ULD)?","दोषपूर्ण यूनिट लोड डिवाइस (ULD) के लिए क्या किया जाना चाहिए?",["Still use","प्रयोग जारी रखें"],["Tag as unserviceable","अशक्त टैग करें"],["Ignore defect","दोष को नज़रअंदाज़ करें"],["Paint it","रंग करें"]],[24,2,"The main function of an airport terminal building is","हवाई अड्डे के टर्मिनल भवन का मुख्य कार्य क्या है?",["Aircraft refueling","विमान को ईंधन भरना"],["Housing passengers","यात्रियों को ठहराना"],["Aircraft parking","विमान पार्किंग"],["Food supply","भोजन आपूर्ति"]],[25,2,"What is the cargo complex used for?","कार्गो कॉम्प्लेक्स किसके लिए उपयोग किया जाता है?",["Carrying passengers","यात्रियों को ले जाने के लिए"],["Handling goods/freight","माल / माल संभालने के लिए"],["Issuing tickets","टिकट जारी करने के लिए"],["Food supply","भोजन आपूर्ति"]],[26,2,"The main airport administration building contains","मुख्य हवाई अड्डा प्रशासन भवन में क्या होता है?",["Shops","दुकाने"],["Airline offices","एयरलाइन कार्यालय"],["Fuel tanks","ईंधन टैंक"],["Runways","रनवे"]],[27,3,"The area for controlling all airport movements is known as","हवाई अड्डे में सभी गतिविधियों को नियंत्रित करने वाला क्षेत्र कौन सा है?",["Maintenance area","रखरखाव क्षेत्र"],["Apron","एप्रन"],["ATC","एटीसी"],["Terminal","टर्मिनल"]],[28,1,"Which of the following is not found inside the cargo hold?","निम्नलिखित में से क्या कार्गो होल्ड में नहीं पाया जाता है?",["Passenger seats","यात्री सीटें"],["Luggage","सामान"],["Freight","माल"],["Parcels","पार्सल"]],[29,3,"Cargo loaded onto aircraft is generally stored in","विमान पर लादा गया कार्गो सामान्यतः कहाँ रखा जाता है?",["Cabin","केबिन"],["Cockpit","कॉकपिट"],["Cargo hold","कार्गो होल्ड"],["Taxiway","टैक्सीवे"]],[30,1,"Baggage tags help","बैगेज टैग किसमें मदद करते हैं?",["Identify lost baggage","खोया सामान पहचानने में"],["Announce flights","उड़ान की घोषणा करने में"],["Refuel planes","जहाजों में ईंधन भरने में"],["Count seats","सीटें गिनने में"]],[31,1,"ATC stands for","ATC का पूर्ण रूप क्या है?",["Air Traffic Control","एयर ट्रैफिक कंट्रोल"],["Aircraft Terminal Coordination","विमान टर्मिनल समन्वय"],["Arrival Terminal Counter","आगमन टर्मिनल काउंटर"],["Air Transport Company","एयर ट्रांसपोर्ट कंपनी"]],[32,3,"What is the check-in counter used for?","चेक-इन काउंटर किसके लिए होता है?",["Dispensing food","भोजन देने के लिए"],["Security checks","सुरक्षा जांच के लिए"],["Issuing boarding passes","बोर्डिंग पास जारी करने के लिए"],["Selling souvenirs","उपहार बेचने के लिए"]],[33,1,"when the red revolving light on top and below the aircraft is lit what does it show?","जब विमान के ऊपर और नीचे घूमने वाली लाल बत्ती जलती है तो वह क्या दिखाती है?",["shows that engines are running","दिखाता है कि इंजन चल रहे हैं"],["shows the light is in working condition","दिखाता है कि लाइट काम करने की स्थिति में है"],["shows that it belong to airline","दिखाता है कि यह एयरलाइन का है"],["shows the Red mean to stop the airline","एयरलाइन को रोकने का लाल मतलब दिखाता है"]],[34,1,"Screening of Passenger and its bag is done for ?","यात्री और उसके बैग की स्क्रीनिंग किसके लिए की जाती है?",["Prohibit entry of prohibited items","खतरनाक वस्तुओं के प्रवेश पर रोक लगाएं"],["Prohibit entry of Vehicle into airside","हवाई क्षेत्र में वाहन के प्रवेश पर रोक लगाएं"],["Prohibit visitor entering into terminal","विज़िटर को टर्मिनल में प्रवेश करने से रोकें"],["None of the above","इनमे से कोई भी नहीं"]],[35,1,"What does 'Wilco' mean ?","'विल्को' का क्या मतलब है?",["I understood your message and will comply","मैं आपका संदेश समझ गया हूं और उसका अनुपालन करूंगा"],["I understood your language and will inform","मैं आपकी भाषा समझ गया और बताऊंगा"],["I understood your voice","मैं आपकी आवाज़ समझ गया"],["I understood your and will go immediately","मैं आपकी बात समझ गया हूं और तुरंत जाऊंगा"]],[36,1,"Roger' mean?","'रोजर' का मतलब?",["I have received your last message","मुझे आपका अंतिम संदेश मिल गया है"],["I have received your first message","मुझे आपका पहला संदेश प्राप्त हुआ"],["I have received the signal","मुझे सिग्नल मिल गया है"],["I didn't understand your message","मुझे आपका संदेश समझ नहीं आया"]],[37,2,"In phonetic 'G' & 'H' Stands for ?","ध्वन्यात्मक 'जी' में",["Gate & Hill","Gate & Hill"],["Golf & Hotel","Golf & Hotel"],["Golf & Hilton","Golf & Hilton"],["Graft & Heaven","Graft & Heaven"]],[38,2,"In phonetic 0 spelling is","ध्वन्यात्मक में 0 वर्तनी है",["ZERO","ZERO"],["ZE-RO","ZE-RO"],["ZER-O","ZER-O"],["Z-ERO","Z-ERO"]],[39,2,"In phonetic '7' spelling is","ध्वन्यात्मक रूप में '7' की वर्तनी है",["SEVEN","SEVEN"],["SE-VEN","SE-VEN"],["SEV-EN","SEV-EN"],["S-EVEN","S-EVEN"]],[40,1,"Appropriate phonetics for \"I\" in RT communication:","RT कम्युनिकेशन में \"।\" के लिए सही फ़ोनेटिक्स",["India","India"],["Intelligent","Intelligent"],["Internet","Internet"],["Innocent","Innocent"]],[41,4,"Patrolling is basically which Security responsibility?","पेट्रोलिंग असल में कौन सी सिक्योरिटी ज़िम्मेदारी है?",["Airport Staff","हवाईअड्डा कर्मचारी"],["Private Security","निजी सुरक्षा"],["Airline","एयरलाइन"],["ASG","एजी"]],[42,1,"Due to translation effect from bomb explosion human bodies are lifted feet high.","बम विस्फोट से होने वाले ट्रांसलेशन इफेक्ट के कारण इंसानी शरीर फीट ऊपर उठ जाते हैं।",["30 to 60 feet","30 to 60 feet"],["100 to 200 mtrs","100 to 200 mtrs"],["80 to 100 feet","80 to 100 feet"],["100 to 120 mtrs","100 to 120 mtrs"]],[43,2,"Watch Towers/Patrolling - Foot or mobile is","वॉच टावर/गश्त - पैदल या मोबाइल",["Anti-Hijacking measures","अपहरण रोधी उपाय"],["Anti-Sabotage measures","तोड़फोड़ रोधी उपाय"],["Security of Personnel","कार्मिक की सुरक्षा"],["Anti-Terrorist measures","आतंकवाद विरोधी उपाय"]],[44,1,"In communication R stands for","संचार में R का मतलब है",["Romeo","रोमियो"],["All of the Options","सभी विकल्प"],["Remember","याद करना"],["Remote","दूर"]],[45,4,"Appropriate authority of aviation security is","एविएशन सिक्योरिटी का सही अथॉरिटी है।",["DGCA","DGCA"],["Chairman AAI","Chairman AAI"],["DG CISF","DG CISF"],["DG BCAS","DG BCAS"]],[46,2,"Which rule was implemented after 1st hijacking in India","भारत में पहली हाईजैकिंग के बाद कौन सा नियम लागू किया गया था?",["Rule 8A of Aircraft Rules 1922","विमान नियम 1922 का नियम 8ए"],["Rule 8A of Aircraft Rules 1937","विमान नियम 1937 का नियम 8ए"],["Sec 5A of Aircraft act 1934","विमान अधिनियम 1934 की धारा 5ए"],["Sec 5 of Aircraft Rules 1937","विमान नियम 1937 की धारा 5"]],[47,1,"What is MANPAD?","MANPAD क्या है?",["Man Portable Air Defense System","मानव-चालित वायु रक्षा प्रणाली"],["Machine Portable Aircraft System","मशीन पोर्टेबल विमान प्रणाली"],["Manual Printing Aerial Software","मैनुअल प्रिंटिंग एरियल सॉफ्टवेयर"],["Man Portable Aircraft Defend System","मानव-चालित विमान रक्षा प्रणाली"]],[48,4,"ACI stands for what?","ACI का मतलब क्या है?",["Airport Conference International","हवाई अड्डा सम्मेलन अंतर्राष्ट्रीय"],["Airport Council International Union","एयरपोर्ट काउंसिल इंटरनेशनल यूनियन"],["Airport Conference India","हवाई अड्डा सम्मेलन भारत"],["Airports Council International","एयरपोर्ट्स काउंसिल इंटरनेशनल"]],[49,3,".Which is not the characteristic of profiler?","प्रोफ़ाइलर की कौन सी ववशेषत़ा नहींहै?",["A-Quick decision maker","A- त्वररत र्नणिय लेनेवाला"],["B-Intelligent","बी-बुत्रिमान"],["C-Rigid","सी-कठोर"],["D-Endurance","डी-धीरज"]],[50,1,"What is the full form of CAPPS?","CAPPS क़ा पूणारूप क्य़ा है?",["A. Computer Aided Passenger profiling System","A. कं ्यूटर एडेड पैसेंजर प्रोफ़ाइनलंग नसथटम"],["B. Calling All passengers for Physical Security","बी. सभी यात्रत्रयों को शारीररक सुरक्षा केर्लए बुलाना"],["C. Computer Application for Perimeter Protection System","सी. पररर्ध सुरक्षा प्रणाली केर्लए कं प्यूटर अनुप्रयोग"],["D. Code of Application for Passenger Profiling System","डी. यात्री प्रोफाइर्लंग प्रणाली केर्लए आवेदन का कोड"]],[51,3,"Degree of ‘’ profiling” is not based on which the following?","''प्रोफ़ाइनलंग'' की कडग्री ननम्पननलक्षखत मेंसेककस पर आध़ाररत नहींहै?",["A. Passenger","यात्री"],["B. Documents","दस्तावेज़"],["C. Habits","आदतें"],["D. Baggage","सामान"]],[52,3,"How many stages are there in profiling","प्रोफ़ाइनलंग मेंककतनेचरण होतेहैं?",["6","6"],["5","5"],["4","4"],["3","3"]],[53,4,"What is the full form of BIPPS?","BIPPS क़ा पूणारूप क्य़ा है?",["A. Bureau of Indian Police and Public Sector","A. भारतीय पुर्लस और साविजर्नक क्षेत्र ब्यूरो"],["B. barometric Integrated Passenger Profiling System.","बी. बैरोमीटररक इंटीग्रेटेड पैसेंजर प्रोफाइर्लंग र्सस्टम।"],["C. Biometric Instrument on Passenger profiling System","सी. यात्री प्रोफाइर्लंग र्सस्टम पर बायोमेटट्क उपकरण"],["D. Biometric Integrated passenger Profiling System","डी. ब़ायोमेकट्रक इंटीग्रेटेड पैसेंजर प्रोफ़ाइनलंग नसथटम"]],[54,3,"Which is not the characteristic of profiler?","प्रोफाइलर की कौन सी विशेषता नहीं है?",["a) alertness","ए) सजगता"],["b) awareness","बी) जागरूकता"],["c) Ignorance","अज्ञान"],["d) flexible","घ) नम्य"]],[55,4,"what is not a racial profiling?","नस्लीय प्रोफाइलिंग क्या नहीं है?",["A.subjecting passenger of a particular country to intense security checks","A. किसी विशेष देश के यात्रियों की गहन सुरक्षा जांच करना"],["B.subjecting passengers of a particular religion/community to intense security checks","B. किसी विशेष धर्म/समुदाय के यात्रियों की गहन सुरक्षा जांच करना"],["C.subjecting passengers of a particular skin colour to intense security check","C. एक विशेष त्वचा के रंग के यात्रियों की गहन सुरक्षा जांच करना"],["D.subjecting on passengers dress","D. यात्रियों की पोशाक पर आपत्ति"]],[56,4,"To safe guard the aircraft \" profiling\" is not performed to detect","विमान की सुरक्षा के लिए \"प्रोफाइलिंग\" का पता लगाने के लिए नहीं किया जाता है",["A.terrorists","आतंकवादियों"],["B.smugglers","तस्कर"],["C.asylum seekers","शरण चाहने वाले"],["D.pilgrims","तीर्थ यात्रा"]],[57,3,"which of the following steps is not followed in passenger profiling?","यात्री प्रोफाइलिंग में निम्नलिखित में से किस चरण का पालन नहीं किया जाता है?",["A.pat down search","ए. पैट डाउन सर्च"],["B.x-bis screening of passenger,s baggage","बी. एक्स-बी यात्रियों के सामान की स्क्रीनिंग करता है"],["C.colour of the dress worn by the passenger","C. यात्री द्वारा पहनी गई पोशाक का रंग"],["D. passport, ticket, boarding card verification","डी. पासपोर्ट, टिकट, बोर्डिंग कार्ड सत्यापन"]],[58,2,"which of the following qualities are required for a screener to conduct profiling?","प्रोफाइलिंग करने के लिए एक स्क्रीनर के लिए निम्नलिखित में से कौन से गुण आवश्यक हैं?",["A.habits of the screener","A. स्क्रीनर की आदतें"],["B.knowledge on modus operandi","बी. कार्यप्रणाली पर ज्ञान"],["C.punctuality of screener","C. स्क्रीनर की समय की पाबंदी"],["D.uniform of the screener","डी. स्क्रीनर की वर्दी"]],[59,4,"which of the following are not to be looked while profiling vehicles on landside of the airport?","हवाई अड्डे के भूभाग पर वाहनों की प्रोफाइलिंग करते समय निम्नलिखित में से किस पर ध्यान नहीं दिया जाना चाहिए?",["A.vehicle with tempered number plate","टेम्पर्ड नंबर प्लेट वाला वाहन"],["B.vehicle with dark window glasses","काले शीशों वाली गाड़ी"],["C.speeding vehicle","तेज रफ्तार वाहन"],["D.colour of the vehicle","वाहन का रंग"]],[60,4,"Which of the following is the first step of profiling","निम्नलिखित में से कौन सा प्रोफाइलिंग का पहला चरण है?",["The interviewing process","साक्षात्कार प्रक्रिया"],["Visual profile of the potential threat","संभावित खतरे का दृश्य स्वरूप"],["Threat assessment","ख़तरे का आकलन"],["Knowledge of the average traveller","औसत यात्री का ज्ञान"]],[61,3,"How many steps are there in Behaviour detection","व्यवहार पहचान में कितने चरण होते हैं?",["5","5"],["4","4"],["3","3"],["2","2"]],[62,4,"Profiling of travel document is done to detect","पता लगाने के लिए यात्रा दस्तावेज की प्रोफाइलिंग की जाती है",["A.fake tickets and boarding cards","A. नकली टिकट और बोर्डिंग कार्ड"],["B.fake passport and VISAS","B. फर्जी पासपोर्ट और वीजा"],["C.Quality of air ticket","C. हवाई टिकट की गुणवत्ता"],["D.A and B","D. A and B"]],[63,1,"What is the first step of Behaviour derection","व्यवहार निर्देशन का पहला चरण क्या है?",["Threat assessment","खतरे का आकलन"],["Profile of your passenger","आपके यात्री की प्रोफ़ाइल"],["Interviewing process","साक्षात्कार प्रक्रिया"],["Profile of potential terrorist","संभावित आतंकवादी की प्रोफ़ाइल"]],[64,2,"Profiling is a","प्रोफाइलिंग एक है",["A. Descriminaating measure","ए. विभेदकारी उपाय"],["B. Proactive measure","बी. सक्रिय उपाय"],["C. reactive measure","सी. प्रतिक्रियाशील उपाय"],["D. condemnation measure","डी. निंदा उपाय"]],[65,3,"Profiling is done by 1. Observation 2.interview 3.ignorance 4.searching, which of the above statement is/are correct","प्रोफाइलिंग 1. अवलोकन 2. साक्षात्कार 3. अज्ञान 4. खोज द्वारा की जाती है, उपरोक्त में से कौन सा/से कथन सही है/हैं",["A. 1&2 only","A. 1&2 only"],["B.2&3 only","B.2&3 only"],["C.1,2 and 4","C.1,2 and 4"],["D. all","D. all"]],[66,2,"framed terrorist is catogorised as","फंसाया गया आतंकवादी किस श्रेणी में आता है",["A. aware passanger","ए. जागरूक यात्री"],["B. unaware passanger","बी. अनजान यात्री"],["C. non threating passanger","सी. गैर-धमकी देने वाला यात्री"],["D. none of above","D. उपरोक्त में से कोई नहीं"]],[67,2,"which of the following is not a tool use for profiling?","प्रोफाइलिंग के लिए निम्नलिखित में से कौन सा उपकरण उपयोग में नहीं आता है?",["A.x-bis","A.x-bis"],["B.9mm pistol","B.9mm pistol"],["c.ETD","c.ETD"],["D.metal detector","D.metal detector"]],[68,3,"The implementation of security measures to increase their deterrent effect and their efficiency, by applying them at irregular frequencies, different locations and/or with varying means, in accordance with a defined framework.","सुरक्षा उपायों को लागू करना ताकि उनकी निवारक क्षमता और दक्षता को बढ़ाया जा सके, और उन्हें अनियमित अंतराल पर, विभिन्न स्थानों पर और/या परिभाषित ढांचे के अनुसार विभिन्न साधनों के साथ लागू किया जा सके।",["Profiling","रूपरेखा"],["Behaviour detection","व्यवहार का पता लगाना"],["Unprectibility","अप्रत्याशितता"],["None of these","इनमें से कोई नहीं"]],[69,3,"What should not be the attitude of the security personnel during security check?","सुरक्षा जांच के दौरान सुरक्षाकर्मियों का रवैया क्या नहीं होना चाहिए?",["A-Well conversation","A-अच्छी बातचीत"],["B-Co-operation with the passenger","B-यात्री के साथ सहयोग"],["C-Irritate on the behaviour of the passenger","C-यात्री के व्यवहार से चिढ़ना"],["D-Smiling face","डी-मुस्कुराता हुआ चेहरा"]],[70,3,"Profilling is not done to detect the following:-","निम्नलिखित का पता लगाने के लिए प्रोफाइलिंग नहीं की जाती है:-",["A-Terrorist with intend to harm the airline","ए-आतंकवादी एयरलाइन को नुकसान पहुंचाने का इरादा रखता है"],["B-Criminal","Criminal"],["C-Celebrities","Celebrities"],["D-Trafficking of drugs.","Trafficking of drugs."]],[71,3,"What should not be the course of action if we notice suspicious sign during profiling?","प्रोफाइलिंग के दौरान यदि हमें कोई संदिग्ध संकेत दिखे तो क्या कार्रवाई नहीं होनी चाहिए?",["A-Inform supervisor","ए-पर्यवेक्षक को सूचित करें"],["B-Increase surveillance","बी-निगरानी बढाएँ"],["C-Ignore and carry out regular security procedure","सी-अनदेखा करें और नियमित सुरक्षा प्रक्रिया अपनाएं"],["D-Ensure that he has cleared all security points","डी-सुनिश्चित करें कि उसने सभी सुरक्षा बिंदुओं को पूरा कर लिया है"]],[72,3,"Is one who has connection with a terrorist organization, is carrying materials for them, but is not aware what will be the consequences of carrying the same. Instead of the documents, his organization has given him an IED to carry.","एक व्यक्ति जिसका किसी आतंकवादी संगठन से संबंध है, उनके लिए सामग्री ले जा रहा है, लेकिन उसे इस बात का अंदाजा नहीं है कि ऐसा करने के क्या परिणाम होंगे। दस्तावेजों के बदले, उसके संगठन ने उसे एक विस्फोटित बम (आईईडी) ले जाने के लिए दिया है।",["Framed terrorist","Framed terrorist"],["Suicidal attack","Suicidal attack"],["Partially naive","Partially naive"],["Naive","Naive"]],[73,4,"Profiling is not done by which of the following staff in airport?","हवाई अड्डे पर निम्नलिखित में से किस कर्मचारी द्वारा प्रोफाइलिंग नहीं की जाती है?",["A.airline staff at check in counters","A. चेक-इन काउंटर पर एयरलाइन कर्मचारी"],["B.CISF screeners at preembarkation security check point","बी.प्रीबाके शन सुरक्षा जांच त्रबदं ुपर सीआईएसएफ स्क्रीनसि"],["C.officer at immigration and customs counter","C. आव्रजन और सीमा शुल्क काउं टर पर अर्धकारी"],["D.railway reservation clerk","डी.रेलवेआरिण क्लका"]],[74,3,".Systmatic observation of passenger to categorised them into threatning and non threatning so that additional attention can be given to threatning passenger is known as :-","य़ात्री को धमकी देनेव़ालेऔर गैर-धमकी देनेव़ालेमेंवगीकृ त करनेके नलए य़ात्री क़ा व्यवक्षथित अवलोकन करऩा त़ाकक धमकी देनेव़ालेय़ात्री पर अनतररक्त ध्य़ान कदय़ा ज़ा सके, इसेकह़ा ज़ात़ा है:-",["A. positioning","पोग्जशर्नंग"],["B.projection","अनुमान"],["C.profiling","C.profiling"],["D.sampling","D.sampling"]],[75,4,"what are the characteristic of computer aided pax profiling system?",".कं ्यूटर सह़ायत़ा प्ऱाप्त पैक्स प्रोफ़ाइनलंग प्रण़ाली की ववशेषत़ाएाँक्य़ा हैं?",["A.to know the health status of the passenger","A.यात्री की स्वास््य ग्स्थर्त जाननेकेर्लए"],["B.to know the bank balance of the passenger","B.यात्री का बैंक बैलेंस जाननेकेर्लए"],["C .To know the IQ of passenger","C .यात्री का IQ जाननेकेर्लए"],["D-Study the passengers personal detail before check-in","डी-चेक-इन सेपहलेय़ात्री की ननजी ज़ानक़ारी क़ा अध्ययन करें"]],[76,4,"Which of the bag is not suspicious bag?","इनमेंसेकौन स़ा बैग संकदग्ध बैग नहींहै?",["A-Dusty trolley bag","ए-धूल भरा ट्ॉली बैग"],["B-Big bag with less weight","बी-कम वजन वाला बडा बैग"],["C-Small bag with more weight","सी-अर्धक वजन वाला छोटा बैग"],["D-Baggage with books and cloths","डी-स़ाम़ान ककत़ाब़ों और कपड़ों के स़ाि"]],[77,3,"Which of the following best describes the purpose of profiling?","ननम्पननलक्षखत मेंसेकौन प्रोफ़ाइनलंग के उद्देश्य क़ा सबसेअच्छ़ा वणान करत़ा है?",["A-To conduct 100% physical check of baggage","A-सामान की 100% भौर्तक जांच करना"],["B-To minimise the inconvenience caused to passenger due to security check","बी-सुरक्षा जांच केकारण यात्रत्रयों को होनेवाली असुत्रवधा को कम करना"],["C.to identify passenger who may pose a threat to civil aaviation operations and to subject them to further security check","C. ऐसे यात्रियों की पहचान करना जो नागरिक उड्डयन परिचालन के लिए खतरा पैदा कर सकते हैं और उन्हें आगे की सुरक्षा जांच के अधीन करना"],["D.to identify the celebrity among the passenger","D. यात्री के बीच सेलिब्रिटी की पहचान करना"]],[78,4,"which of the following data is not verified in CAPPS?","निम्नलिखित में से कौन सा डेटा CAPPS में सत्यापित नहीं है?",["A.passenger personnel data such as date of birth, native place, address etc.","A. यात्री कार्मिक डेटा जैसे जन्म तिथि, मूल स्थान, पता आदि।"],["B.passenger educational detals","बी. यात्री शैक्षिक विवरण"],["C.passenger bank account details, travel records, club membership details","C. यात्री बैंक खाता विवरण, यात्रा रिकॉर्ड, क्लब सदस्यता विवरण"],["D.health status of the passenger","D. यात्री की स्वास्थ्य स्थिति"]],[79,4,"which of the following is not-a tool for profiling?","निम्नलिखित में से कौन सा प्रोफाइलिंग का उपकरण नहीं है?",["A. x-bis","A. x-bis"],["B.DFMD","B.DFMD"],["C.thermal imager","C.thermal imager"],["D. dosimeter","D. dosimeter"]],[80,3,"which of the passenger do you concentrate more during security checks?","सुरक्षा जांच के दौरान आप किस यात्री पर अधिक ध्यान देते हैं?",["A.educated passenger","A. शिक्षित यात्री"],["B. business class passenger","बी बिजनेस क्लास यात्री"],["c. passenger with many VISAS in his passport","सी। जिस यात्री के पासपोर्ट में कई वीजा हों"],["D, frequent flyer","डी, फ्रीक्वेंट फ़्लायर"]],[81,2,"Profiling can be done on things","प्रोफाइलिंग चीजों पर की जा सकती है",["a) One","a) One"],["b) Three","b) Three"],["c) Six","c) Six"],["d) Seven","d) Seven"]],[82,3,"Passenger profiling is","यात्री प्रोफाइलिंग है",["a) Observation of passenger, baggage and documents","क) यात्री, सामान और दस्तावेजों का निरीक्षण"],["b) Checking of passenger, baggage and documents","ख) यात्री, सामान और दस्तावेजों की जांच"],["c) Both the above","c) Both the above"],["d) None of the above","d) None of the above"]],[83,4,"Which is not one of the suspicious signs in a person?","किसी व्यक्ति में कौन सा लक्षण संदिग्ध नहीं है?",["a) Feeling of fear","क) डर का एहसास"],["b) Posing as a VIP","ख) वीआईपी के रूप में खुद को प्रस्तुत करना"],["c) Minute observation of security personnel","ग) सुरक्षा कर्मियों का सूक्ष्म निरीक्षण"],["d) Following procedures","घ) निम्नलिखित प्रक्रियाएं"]],[84,2,"Activity where systematic observation is done for categorization of passenger into threatening and non-threatening category is","वह गतिविधि जहां यात्रियों को धमकी देने वाली और गैर-धमकी देने वाली श्रेणी में वर्गीकृत करने के लिए व्यवस्थित अवलोकन किया जाता है",["a) Personating","a) Personating"],["b) Profiling","b) Profiling"],["c) Counseling","c) Counseling"],["d) None of these","d) None of these"]],[85,4,"Which one of the following are leads to profiling?","निम्नलिखित में से कौन सा प्रोफाइलिंग की ओर ले जाता है?",["a) Alert messages from BCAS","ए) बीसीएएस से अलर्ट संदेश"],["b)Inputs from Local Police","बी) स्थानीय पुलिस से इनपुट"],["c)Food menu of the Airport lounge","ग) हवाई अड्डे के लाउंज का भोजन मेनू"],["d)A & B Only","d)A & B Only"]],[86,4,"Which of the following is a suspicious sign in a passenger","किसी यात्री में निम्नलिखित में से कौन सा एक संदिग्ध लक्षण है",["a) Frequent visit to washroom","a) बार-बार वॉशरूम जाना"],["b) Person sitting in isolation","ख) एकांत में बैठा व्यक्ति"],["c) Avoiding eye contact","ग) आँख मिलाने से बचना"],["d) All the above","d) All the above"]],[87,3,"What will be the course of action when you notice suspicious sign on a passenger during profiling:","प्रोफाइलिंग के दौरान किसी यात्री पर संदिग्ध चिन्ह दिखने पर आप क्या कार्रवाई करेंगे:",["a) Notify supervisor","a) Notify supervisor"],["b) Thorough observation","b) Thorough observation"],["c) Both a and b","c) Both a and b"],["d) Arrest the passenger","d) Arrest the passenger"]],[88,3,"How many step of behaviour detection","व्यवहार का पता लगाने के कितने चरण हैं?",["a) One","a) One"],["b) three","b) three"],["c) four","c) four"],["d) five","d) five"]],[89,2,"Profiling is a systematic observation to","प्रोफाइलिंग एक व्यवस्थित अवलोकन है",["a) to identify the person","a) व्यक्ति की पहचान करना"],["b) to categorize the person","बी) व्यक्ति को वर्गीकृत करने के लिए"],["c) to recognize the person","ग) व्यक्ति को पहचानना"],["d) None of the above","d) None of the above"]],[90,4,"Which is not a suspicious sing in a Passenger","जो किसी यात्री में संदिग्ध संकेत नहीं है",["Nervous Behavior","Nervous Behavior"],["luring other","luring other"],["First and Last Passenger","First and Last Passenger"],["Reporting on Time","Reporting on Time"]],[91,3,"Which is not a madatory baggage control question control (MBCQ)","कौन सा अनिवार्य सामान नियंत्रण प्रश्न नियंत्रण (एमसीक्यू) नहीं है?*",["a) is it your bag ?","क) क्या यह आपका बैग है?"],["B) Did you pack it yourself?","बी) क्या आपने इसे स्वयं पैक किया?"],["C) Was the bag in your hand throughout ?","क्या बैग पूरे समय आपके हाथ में था?"],["D) Do you know the comtent ?","क्या आप इसकी विषयवस्तु जानते हैं?"]],[92,4,"Which is the first step of profiling ?","प्रोफाइलिंग का पहला चरण कौन सा है?*",["a) threat assesment","क) खतरे का आकलन"],["B) The interviewing process","बी) साक्षात्कार प्रक्रिया"],["C) visual profile of potential threat","सी) संभावित खतरे का दृश्य प्रोफ़ाइल"],["D) knowledge of the average traveler","D) औसत यात्री का ज्ञान"]],[93,3,"Profiling depends on the effectivenes of","प्रोफ़ाइनलंग ककसकी प्रभ़ावशीलत़ा पर ननभार करती है?",["a) XBIS operation","a) XBIS संचालन"],["b) HHMD operation","बी) एचएचएमडी ऑपरेशन"],["c) behaviour detection process","ग) व्यवह़ार पहच़ान प्रकिय़ा"],["d) none of the above","घ) उपरोक्त मेंसेकोई नहीं"]],[94,3,"Which is non threating reason ?","कौन स़ा क़ारण गैर-धमकी भऱा है?",["a) the terrorist","क) आतंकवादी"],["B) drug smuggler","बी) ड्रग तस्कर"],["C) Asylum seeker","सी) शरण च़ाहनेव़ाल़ा"],["D) criminal","डी) अपराधी"]],[95,1,"Checking of document comes under","दथत़ावेज की ज़ााँच इसकेअंतगात आती है",["A. Profiling","रूपरेख़ा"],["B. Behaviour Detection","व्यवहार का पता लगाना"],["C. Observation","अवलोकन"],["D. None of the above","इनमेसेकोई भी नहीं"]],[96,3,"In profiling, what is considered the initial step?","प्रोफ़ाइनलंग मेंपहल़ा कदम क्य़ा म़ाऩा ज़ात़ा है?",["Interview","स़ि़ात्क़ार"],["Threat Assessment","ख़तरेका आकलन"],["Knowledge of the average traveller","औसत यात्री का ज्ञान"],["Visual Profile","दृश्य प्रोफाइल"]],[97,3,"Behaviour detection in not done on ________","________ पर व्यवह़ार क़ा पत़ा नहींलग़ाय़ा ज़ात़ा है",["Passenger","यात्री"],["Staff","कमिचारी"],["Baggage","स़ाम़ान"],["Non Travelling","गैर यात्रा"]],[98,4,"Passenger profiling is","पैसेंजर प्रोफाइलिंग है।",["Checking of passenger","यात्री की चेकिंग"],["None of the option","कोई भी विकल्प नहीं"],["Searching of baggage","सामान की तलाशी"],["Observation of passenger, baggage, documents.","यात्रियों, सामान और दस्तावेजों की निगरानी।"]],[99,1,"How many types of passenger threatening category","यात्री को खतरे में डालने वाली श्रेणियों के कितने प्रकार हैं?",["3","3"],["2","2"],["4","4"],["1","1"]],[100,3,"Which of the following statement is correct","निम्नलिखित में से कौन सा कथन सही है?",["For ADP, NOC from commissioner is required","एडीपी के लिए आयुक्त से एनओसी आवश्यक है।"],["ADP is issued only after AEC issuance","एडीपी केवल एईसी जारी होने के बाद ही जारी किया जाता है।"],["AEC is issued only after ADP issuance","एईसी केवल एडीपी जारी होने के बाद ही जारी किया जाता है।"],["ADP is issued by BCAS","एडीपी बीसीएएस द्वारा जारी किया जाता है"]]];
+// Shuffle the question order every time the quiz is loaded/started.
+// Fisher-Yates shuffle, done in-place on questionData BEFORE it is used
+// anywhere else, so every part of the app (grid, review, scoring,
+// "Question X of Y" numbering) stays consistent and correctly numbered
+// against the new shuffled order.
+(function shuffleQuestionData(arr) {
+for (let i = arr.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[arr[i], arr[j]] = [arr[j], arr[i]];
+}
+})(questionData);
+let questionStatus = new Array(TOTAL_QUESTIONS).fill(1); 
+let currentQuestionIndex = 0; 
+let userName = 'Candidate'; 
+let timeLeft = TOTAL_TIME_SECONDS; 
+let timerInterval; 
+let tempSelectedOption = null; 
+let savedAnswers = new Array(TOTAL_QUESTIONS).fill(null); 
+let isHindiLocal = false;
+let isExamSubmitted = false; 
+let currentZoomLevel = 1.0;
+let tabSwitchCount = 0;
+let quizInProgress = false;
+let quizLocked = false;
+const MAX_WARNINGS = 2; // Switches 1..MAX_WARNINGS => warning only, exam continues
+const MAX_LOCKS = 4; // Switches (MAX_WARNINGS+1)..MAX_LOCKS => exam locked, needs Admin password
+// Any switch beyond MAX_LOCKS => exam is submitted automatically
+// Safe storage wrapper: some mobile browsers (notably iPhone Safari in Private
+// Browsing, or when the file is opened directly from Files/WhatsApp instead of
+// through the browser) throw a SecurityError on any localStorage access, which
+// otherwise stops the script and can make the exam page fail silently.
+const safeStorage = {
+_mem: {},
+get(key) {
+try { return localStorage.getItem(key); }
+catch (e) { return this._mem[key] || null; }
+},
+set(key, value) {
+try { localStorage.setItem(key, value); }
+catch (e) { this._mem[key] = value; }
+}
+};
+const questionsContainer = document.getElementById('questions-container'); 
+const questionGrid = document.getElementById('question-grid');
+const optionButtonsContainer = document.getElementById('option-buttons'); 
+const timerDisplay = document.getElementById('timer-display'); 
+const resultDisplay = document.getElementById('result-display');
+const controlPanel = document.getElementById('exam-control-panel');
+// 1. Safe retry submission function
+async function submitQuizResult(payload, attempt = 0) {
+const MAX_ATTEMPTS = 10;
+try {
+const response = await fetch(APPS_SCRIPT_URL, {
+method: "POST",
+body: JSON.stringify(payload)
+});
+const result = await response.json();
+if (result.status === "success") {
+return result;
+} 
+// Server hit a lock timeout block
+if (result.status === "busy" && attempt < MAX_ATTEMPTS) {
+// Wait 3 seconds before trying again
+await new Promise(resolve => setTimeout(resolve, 3000));
+return submitQuizResult(payload, attempt + 1);
+}
+throw new Error(result.message || "Submission failed");
+} catch (error) {
+// Catches network glitches or 503/429 HTML error pages from Google
+if (attempt < MAX_ATTEMPTS) {
+const delay = Math.floor(Math.random() * 2000) + 3000; // Wait 3-5 seconds
+await new Promise(resolve => setTimeout(resolve, delay));
+return submitQuizResult(payload, attempt + 1);
+} else {
+throw error;
+}
+}
+}
+// 2. Attach it to your "Submit Exam" button click
+async function onFinishQuizClick() {
+const submitBtn = document.getElementById("submitQuizBtn");
+if (submitBtn) {
+submitBtn.disabled = true;
+submitBtn.innerText = "Submitting Score... Please wait";
+}
+// Retrieve student details (passed via URL query params or localStorage)
+const urlParams = new URLSearchParams(window.location.search);
+const payload = {
+action: "submitScore",
+spreadsheetId: SPREADSHEET_ID,
+username: urlParams.get('username') || safeStorage.get('currentUsername') || 'N/A',
+studentName: urlParams.get('studentName') || safeStorage.get('currentStudent') || userName || 'Trainee',
+designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || 'Trainee',
+section: urlParams.get('section') || safeStorage.get('studentSectionContext') || 'basic',
+quizName: "DAY 3 PAPER 1", 
+score: `${savedAnswers.filter((ans, idx) => ans && ans.toString() === questionData[idx][1].toString()).length}/${TOTAL_QUESTIONS}`,
+timestamp: new Date().toLocaleString()
+};
+try {
+await submitQuizResult(payload);
+alert("Your quiz has been successfully saved!");
+// window.location.href = "student-dashboard.html"; // Uncomment if redirection is needed
+} catch (err) {
+alert("Server is extremely busy right now. Please click 'Submit' one more time.");
+if (submitBtn) {
+submitBtn.disabled = false;
+submitBtn.innerText = "Retry Submission";
+}
+}
+}
+function handleVisibilityChange() {
+if (!quizInProgress || isExamSubmitted) return;
+if (document.hidden) {
+registerTabSwitch();
+}
+}
+function registerTabSwitch() {
+if (quizLocked || isExamSubmitted) return;
+tabSwitchCount++;
+if (tabSwitchCount <= MAX_WARNINGS) {
+showWarning();
+} else if (tabSwitchCount <= MAX_LOCKS) {
+lockQuiz();
+} else {
+forceSubmitForCheating();
+}
+}
+function showWarning() {
+quizLocked = true; // overlay is open; guards against double-counting a single switch
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+const errorMsg = document.getElementById('unlock-error-msg');
+if (errorMsg) errorMsg.style.display = 'none';
+if (title) title.textContent = '⚠ Warning';
+if (msg) msg.textContent = `Warning ${tabSwitchCount} of ${MAX_WARNINGS}: you switched or minimized the screen. Doing this again beyond the warning limit will LOCK your exam and require an Administrator password. Repeated attempts will submit your exam automatically. Click Continue to resume your exam.`;
+if (unlockBox) unlockBox.style.display = 'none';
+if (warnBox) warnBox.style.display = 'flex';
+if (overlay) overlay.style.display = 'flex';
+}
+function continueAfterWarning() {
+if (isExamSubmitted) return;
+quizLocked = false;
+const overlay = document.getElementById('cheat-lock-overlay');
+if (overlay) overlay.style.display = 'none';
+}
+function lockQuiz() {
+quizLocked = true;
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+const errorMsg = document.getElementById('unlock-error-msg');
+const passInput = document.getElementById('admin-unlock-input');
+if (errorMsg) errorMsg.style.display = 'none';
+if (passInput) passInput.value = '';
+if (title) title.textContent = '⚠ Exam Locked';
+if (warnBox) warnBox.style.display = 'none';
+if (msg) msg.textContent = `You switched or minimized the screen ${tabSwitchCount} time(s). Your exam is LOCKED, contact your Administrator to resume. Reaching ${MAX_LOCKS + 1} total switches will submit your exam automatically.`;
+if (unlockBox) unlockBox.style.display = 'flex';
+if (overlay) overlay.style.display = 'flex';
+if (passInput) setTimeout(() => passInput.focus(), 100);
+}
+function forceSubmitForCheating() {
+quizLocked = true;
+const overlay = document.getElementById('cheat-lock-overlay');
+const title = document.getElementById('cheat-lock-title');
+const msg = document.getElementById('cheat-lock-message');
+const unlockBox = document.getElementById('unlock-form-box');
+const warnBox = document.getElementById('warning-box');
+if (title) title.textContent = '⚠ Exam Locked';
+if (warnBox) warnBox.style.display = 'none';
+if (unlockBox) unlockBox.style.display = 'none';
+if (msg) msg.textContent = `You switched or minimized the screen ${tabSwitchCount} time(s), which exceeds the allowed limit. Your exam is being submitted automatically.`;
+if (overlay) overlay.style.display = 'flex';
+setTimeout(() => { submitTest(); }, 2500);
+}
+function attemptUnlock() {
+const passInput = document.getElementById('admin-unlock-input');
+const errorMsg = document.getElementById('unlock-error-msg');
+const enteredValue = passInput ? passInput.value : '';
+if (enteredValue === ADMIN_UNLOCK_PASSWORD) {
+resumeQuiz();
+} else {
+if (errorMsg) errorMsg.style.display = 'block';
+if (passInput) { passInput.value = ''; passInput.focus(); }
+}
+}
+document.addEventListener('keydown', function(e) {
+if (e.key === 'Enter' && document.getElementById('admin-unlock-input') === document.activeElement) {
+attemptUnlock();
+}
+});
+function resumeQuiz() {
+if (isExamSubmitted) return;
+quizLocked = false;
+const overlay = document.getElementById('cheat-lock-overlay');
+const errorMsg = document.getElementById('unlock-error-msg');
+if (overlay) overlay.style.display = 'none';
+if (errorMsg) errorMsg.style.display = 'none';
+}
+document.addEventListener('visibilitychange', handleVisibilityChange);
+window.addEventListener('pagehide', () => {
+if (quizInProgress && !isExamSubmitted) registerTabSwitch();
+});
+// Keeps the fixed bottom control bar from ever overlapping the question text.
+// The bar's real height varies a lot by phone width (buttons wrap differently
+// on a small screen vs a large one), so instead of guessing a fixed padding
+// we measure it live and push the question area down by exactly that much.
+function adjustMobileLayout() {
+if (window.innerWidth > 768) {
+const questionArea = document.querySelector('.question-area');
+const mainContent = document.querySelector('.main-content');
+if (questionArea) questionArea.style.paddingBottom = '';
+if (mainContent) mainContent.style.paddingBottom = '';
+return;
+}
+const controlPanel = document.getElementById('exam-control-panel');
+const footerEl = document.querySelector('footer');
+const questionArea = document.querySelector('.question-area');
+const mainContent = document.querySelector('.main-content');
+if (!controlPanel || !footerEl || !questionArea || !mainContent) return;
+const footerHeight = footerEl.offsetHeight;
+const panelHeight = controlPanel.offsetHeight;
+// Pin the control panel directly above the footer, whatever height the
+// footer actually renders at on this device.
+controlPanel.style.bottom = footerHeight + 'px';
+// Reserve exactly enough space below the last question option so the
+// fixed control panel + footer never covers it, plus a small buffer.
+const totalReserved = panelHeight + footerHeight + 24;
+mainContent.style.paddingBottom = totalReserved + 'px';
+questionArea.style.paddingBottom = '20px';
+}
+window.addEventListener('load', () => {
+adjustMobileLayout();
+const urlParams = new URLSearchParams(window.location.search);
+const urlStudentName = urlParams.get('studentName');
+const urlUsername = urlParams.get('username');
+const urlDesignation = urlParams.get('designation');
+const urlSection = urlParams.get('section');
+if (urlStudentName) safeStorage.set('currentStudent', urlStudentName);
+if (urlUsername) safeStorage.set('currentUsername', urlUsername);
+if (urlDesignation) safeStorage.set('currentDesignation', urlDesignation);
+if (urlSection) safeStorage.set('studentSectionContext', urlSection);
+const activeUser = urlStudentName || safeStorage.get('currentStudent');
+if (activeUser) {
+document.getElementById('user-name-input').value = activeUser;
+}
+updateStartBtnState();
+});
+function updateStartBtnState() {
+const nameFilled = document.getElementById('user-name-input').value.trim().length > 0;
+const declared = document.getElementById('declaration-check').checked;
+document.getElementById('start-btn').disabled = !(nameFilled && declared);
+}
+document.getElementById('user-name-input').addEventListener('input', updateStartBtnState);
+document.getElementById('declaration-check').addEventListener('change', updateStartBtnState);
+document.getElementById('start-btn').addEventListener('click', () => { 
+const nameInput = document.getElementById('user-name-input').value.trim(); 
+const declared = document.getElementById('declaration-check').checked;
+if (nameInput && declared) { 
+userName = nameInput; 
+document.getElementById('header-user-name').textContent = `Candidate: ${userName}`; 
+document.getElementById('initial-setup').style.display = 'none'; 
+document.getElementById('main-header').style.display = 'flex'; 
+document.getElementById('main-test-area').style.display = 'flex'; 
+document.querySelector('.zoom-controls').style.display = 'flex'; 
+generateQuestions(); 
+generateQuestionGrid(); 
+displayQuestion(0); 
+startTimer(); 
+quizInProgress = true;
+// Panel is hidden (display:none) until now, so its real height can
+// only be measured once it's actually visible on screen.
+setTimeout(adjustMobileLayout, 50);
+}
+});
+window.addEventListener('resize', adjustMobileLayout);
+window.addEventListener('orientationchange', () => setTimeout(adjustMobileLayout, 200));
+function generateQuestions() {
+questionsContainer.innerHTML = ''; 
+const optionLabels = ['A', 'B', 'C', 'D']; 
+questionData.forEach((q, index) => { 
+const qId = q[0]; 
+const qEn = q[2]; 
+const qHi = q[3]; 
+const options = q.slice(4); 
+let optionsHtml = '<div class="option-text-container">'; 
+options.forEach((opt, optIndex) => { 
+const optValue = optIndex + 1; 
+const label = optionLabels[optIndex]; 
+optionsHtml += `
+<div class="option-label" data-option-id="${optValue}"> 
+<strong class="english-text">${label}.</strong> <span class="english-text">${opt[0]}</span><br class="english-text"> 
+<strong class="hindi-text">${label}.</strong> <span class="hindi-text">${opt[1]}</span> 
+</div> 
+`; 
+}); 
+optionsHtml += '</div>'; 
+const qHtml = `
+<div class="question-box" id="q${qId}" data-correct-answer="${q[1]}"> 
+<p style="font-size: 1.5em; font-weight: 700;">Question ${index + 1} of ${TOTAL_QUESTIONS}</p> 
+<div class="question-text"> 
+<span class="english-text">${qEn}</span> 
+<span class="hindi-text">${qHi}</span> 
+</div> 
+${optionsHtml} 
+</div> 
+`; 
+questionsContainer.innerHTML += qHtml; 
+});
+}
+function displayQuestion(index) { 
+if (isExamSubmitted || index < 0 || index >= TOTAL_QUESTIONS) return;
+document.querySelectorAll('.question-box').forEach(qBox => qBox.classList.remove('active')); 
+const questionId = questionData[index][0]; 
+const currentQBox = document.getElementById(`q${questionId}`); 
+if (currentQBox) { 
+currentQBox.classList.add('active'); 
+currentQuestionIndex = index; 
+tempSelectedOption = savedAnswers[index];
+updateOptionButtonVisual(); 
+updateMarkButtonVisual(index);
+updateLocalLanguage();
+applyZoom();
+}
+}
+function setQuestionZoom(step) {
+currentZoomLevel += step;
+if (currentZoomLevel < 0.7) currentZoomLevel = 0.7;
+if (currentZoomLevel > 2.0) currentZoomLevel = 2.0;
+applyZoom();
+}
+function applyZoom() {
+document.querySelectorAll('.question-text, .option-label').forEach(el => {
+el.style.fontSize = currentZoomLevel + 'em';
+});
+}
+function updateOptionButtonVisual() {
+document.querySelectorAll('.btn-option').forEach(btn => {
+btn.classList.remove('selected');
+if (tempSelectedOption !== null && parseInt(btn.dataset.value) === tempSelectedOption) {
+btn.classList.add('selected');
+}
+});
+}
+function selectOption(value) {
+if (isExamSubmitted) return;
+tempSelectedOption = value;
+updateOptionButtonVisual();
+}
+function eraseAnswer() {
+if (isExamSubmitted) return;
+tempSelectedOption = null;
+savedAnswers[currentQuestionIndex] = null; 
+questionStatus[currentQuestionIndex] = (questionStatus[currentQuestionIndex] === 4) ? 3 : 1; 
+updateOptionButtonVisual();
+updateQuestionGridButton(currentQuestionIndex); 
+updateMarkButtonVisual(currentQuestionIndex);
+}
+function markQuestion() {
+if (isExamSubmitted) return;
+const index = currentQuestionIndex;
+const currentStatus = questionStatus[index];
+// Persist whatever is currently selected, just like Save & Next does,
+// so the answer isn't lost if the user navigates away without clicking Save & Next.
+savedAnswers[index] = tempSelectedOption;
+const isAnswered = savedAnswers[index] !== null;
+if (currentStatus === 3 || currentStatus === 4) {
+questionStatus[index] = isAnswered ? 2 : 1; 
+} else {
+questionStatus[index] = isAnswered ? 4 : 3; 
+}
+updateQuestionGridButton(index);
+updateMarkButtonVisual(index);
+}
+function togglePalette() {
+const sidebar = document.getElementById('question-sidebar');
+const backdrop = document.getElementById('sidebar-backdrop');
+if (!sidebar) return;
+sidebar.classList.toggle('open');
+if (backdrop) backdrop.classList.toggle('open', sidebar.classList.contains('open'));
+}
+function closePalette() {
+const sidebar = document.getElementById('question-sidebar');
+const backdrop = document.getElementById('sidebar-backdrop');
+if (sidebar) sidebar.classList.remove('open');
+if (backdrop) backdrop.classList.remove('open');
+}
+function updateMarkButtonVisual(index) {
+const checkbox = document.getElementById('mark-checkbox');
+if (!checkbox) return;
+const status = questionStatus[index];
+const isMarked = (status === 3 || status === 4);
+checkbox.classList.toggle('checked', isMarked);
+}
+function saveAndNext() {
+if (isExamSubmitted) return;
+const index = currentQuestionIndex;
+savedAnswers[index] = tempSelectedOption;
+const isCurrentlyMarked = (questionStatus[index] === 3 || questionStatus[index] === 4);
+const isAnswered = savedAnswers[index] !== null;
+if (isAnswered) {
+questionStatus[index] = isCurrentlyMarked ? 4 : 2; 
+} else {
+questionStatus[index] = isCurrentlyMarked ? 3 : 1; 
+}
+updateQuestionGridButton(index);
+updateMarkButtonVisual(index);
+navigateQuestion(1);
+}
+function navigateQuestion(step) {
+if (isExamSubmitted) return;
+const nextIndex = currentQuestionIndex + step;
+displayQuestion(nextIndex);
+}
+function generateQuestionGrid() {
+questionGrid.innerHTML = '';
+for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+const button = document.createElement('button');
+button.className = 'q-button status-1'; 
+button.textContent = i + 1;
+button.setAttribute('data-index', i);
+button.onclick = () => {
+if (isExamSubmitted || i === currentQuestionIndex) { closePalette(); return; }
+if (tempSelectedOption !== null && savedAnswers[currentQuestionIndex] !== tempSelectedOption) {
+saveAndNext(); 
+displayQuestion(i);
+} else {
+displayQuestion(i);
+}
+closePalette();
+};
+questionGrid.appendChild(button);
+}
+}
+function updateQuestionGridButton(index) {
+const button = questionGrid.querySelector(`[data-index="${index}"]`);
+if (button) {
+button.className = 'q-button';
+button.classList.add(`status-${questionStatus[index]}`);
+}
+}
+function updateLocalLanguage() {
+if (isHindiLocal) {
+document.body.classList.add('lang-hindi-global');
+} else {
+document.body.classList.remove('lang-hindi-global');
+}
+}
+document.getElementById('lang-toggle-local').addEventListener('click', toggleLanguageHandler);
+function toggleLanguageHandler() {
+isHindiLocal = !isHindiLocal;
+updateLocalLanguage();
+}
+function startTimer() {
+timerInterval = setInterval(() => {
+timeLeft--;
+timerDisplay.textContent = formatTime(timeLeft);
+if (timeLeft <= 0) {
+clearInterval(timerInterval);
+alert("Time's up! The exam will now be submitted automatically.");
+submitTest();
+}
+if (timeLeft <= 5 * 60) {
+timerDisplay.style.backgroundColor = '#dc3545'; 
+timerDisplay.style.color = 'white';
+}
+}, 1000);
+}
+function formatTime(seconds) {
+const min = Math.floor(seconds / 60);
+const sec = seconds % 60;
+return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+}
+function getSummary() {
+let answered = 0; let notAnswered = 0; let reviewNotAnswered = 0; let reviewAnswered = 0; 
+questionStatus.forEach(status => {
+if (status === 2) answered++;
+else if (status === 1) notAnswered++;
+else if (status === 3) reviewNotAnswered++;
+else if (status === 4) reviewAnswered++;
+});
+return { 
+totalAnswered: answered + reviewAnswered, 
+totalMarked: reviewNotAnswered + reviewAnswered, 
+totalUnattempted: notAnswered + reviewNotAnswered 
+};
+}
+function confirmSubmit() {
+if (isExamSubmitted) return;
+if (tempSelectedOption !== null && savedAnswers[currentQuestionIndex] !== tempSelectedOption) {
+const saveConfirm = confirm("You have an unsaved option selected for the current question. Press OK to Save and then Submit, or Cancel to review the unsaved question.");
+if (saveConfirm) {
+saveAndNext(); 
+} else {
+return; 
+}
+}
+const summary = getSummary();
+const confirmationMessage = `Test Summary / परीक्षा सारांश:\n` + 
+`Total Questions / कुल प्रश्न: ${TOTAL_QUESTIONS}\n` + 
+`Answered / उत्तर दिया: ${summary.totalAnswered}\n` + 
+`Marked for Review / समीक्षा के लिए चिह्नित: ${summary.totalMarked}\n` + 
+`Not Answered / प्रयास नहीं किया: ${TOTAL_QUESTIONS - summary.totalAnswered}\n` + 
+`Screen Switches / Minimizes Detected: ${tabSwitchCount}\n\n` + 
+`Do you want to submit the test? / क्या आप परीक्षा जमा करना चाहते हैं?`;
+if (confirm(confirmationMessage)) {
+submitTest();
+}
+}
+async function submitTest() {
+if (isExamSubmitted) return;
+isExamSubmitted = true;
+quizInProgress = false;
+quizLocked = false;
+const cheatOverlay = document.getElementById('cheat-lock-overlay');
+if (cheatOverlay) cheatOverlay.style.display = 'none';
+const mainHeader = document.getElementById('main-header');
+if (mainHeader) mainHeader.style.setProperty('display', 'none', 'important');
+if (controlPanel) controlPanel.style.setProperty('display', 'none', 'important');
+clearInterval(timerInterval);
+document.querySelector('.zoom-controls').style.display = 'none';
+let score = 0;
+let wrongCount = 0;
+let unattemptedCount = 0;
+let detailedResultsHtml = '';
+const optionLabels = ['A', 'B', 'C', 'D']; 
+questionData.forEach((q, index) => {
+const qId = q[0];
+const qEn = q[2];
+const qHi = q[3];
+const options = q.slice(4); 
+const selectedValue = savedAnswers[index] ? savedAnswers[index].toString() : null;
+const correctAnswerValue = q[1].toString();
+let resultClass = 'unattempted';
+let statusText = 'Not Attempted / प्रयास नहीं किया';
+if (selectedValue !== null) {
+if (selectedValue === correctAnswerValue) {
+score++;
+resultClass = 'correct';
+statusText = 'Correct / सही उत्तर';
+} else {
+wrongCount++;
+resultClass = 'wrong';
+statusText = 'Incorrect / गलत उत्तर';
+}
+} else {    
+unattemptedCount++;
+}
+let optionsHtml = '';
+options.forEach((opt, optIndex) => {
+const optValue = (optIndex + 1).toString();
+const label = optionLabels[optIndex];
+let optionClass = '';
+if (optValue === correctAnswerValue) optionClass = 'correct';
+else if (optValue === selectedValue) optionClass = 'wrong';
+let remark = "";
+if (optValue === selectedValue && selectedValue === correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#006400;padding:3px 10px;border-radius:5px;">Your Answer - It is Correct ✓</span>`;
+} else if (optValue === selectedValue && selectedValue !== correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#8B0000;padding:3px 10px;border-radius:5px;">Your Answer - This is Wrong ✗</span>`;
+} else if (optValue === correctAnswerValue) {
+remark = `<span style="font-weight:bold;color:#ffffff;background:#006400;padding:3px 10px;border-radius:5px;">Correct Answer ✓</span>`;
+}
+optionsHtml += `
+<div class="result-option ${optionClass}">
+<div>
+${label}. <span class="english-text">${opt[0]}</span>
+<span class="hindi-text">${opt[1]}</span>
+</div>
+${remark}
+</div>
+`;
+});
+detailedResultsHtml += ` 
+<div class="result-question review-item" data-status="${resultClass}">
+<p style="font-weight:600; margin-top:0;">Q${index + 1}: <span class="english-text">${qEn}</span> <span class="hindi-text">${qHi}</span> </p>
+<p style="font-weight: bold; margin-bottom:10px;">Status: ${statusText}</p>
+${optionsHtml}
+</div>
+`;
+});
+displayResults(score, wrongCount, unattemptedCount, detailedResultsHtml);
+const finalScoreString = `${score} / ${TOTAL_QUESTIONS}`;
+const urlParams = new URLSearchParams(window.location.search);
+const payload = {
+action: "submitScore",
+spreadsheetId: SPREADSHEET_ID,
+studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
+username: urlParams.get('username') || safeStorage.get('currentUsername') || "trainee",
+studentSection: urlParams.get('section') || safeStorage.get('studentSectionContext') || "SCREENER",
+designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || "Trainee",
+quizName: "DAY 3 PAPER 1",
+score: finalScoreString,
+tabSwitchCount: tabSwitchCount,
+timestamp: new Date().toLocaleString()
+};
+if (APPS_SCRIPT_URL) {
+try {
+await submitQuizResult(payload);
+alert("Your score (" + finalScoreString + ") has been saved successfully!");
+} catch (err) {
+console.error("Score logging error:", err);
+alert("Server is extremely busy right now, but your results have been rendered locally.");
+}
+}
+}
+function displayResults(score, wrongCount, unattemptedCount, detailedHtml) {
+let finalPercentage = (score / TOTAL_QUESTIONS) * 100;
+let resultStatusHtml = (finalPercentage >= 80) ? 
+`<p><strong>Result Status:</strong> <span style="font-size:1.3em; color:#16a34a; font-weight:bold;">PASS - Congratulations!</span></p>` :
+`<p><strong>Result Status:</strong> <span style="font-size:1.3em; color:#dc3545; font-weight:bold;">FAIL</span></p>`;
+resultDisplay.innerHTML = `
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+<h2 style="margin: 0; font-size: 1.8em; color: #0284c7; flex: 1; min-width: 250px;">Exam Review & Performance Metrics</h2>
+<div style="display: flex; gap: 10px;">
+<button type="button" class="btn-download-pdf" onclick="downloadSummaryOnly(${score}, ${wrongCount}, ${unattemptedCount})">📄 Download Summary PDF</button>
+<button type="button" class="lang-toggle-btn" id="lang-toggle-review" onclick="toggleLanguageHandler()">Toggle Hindi / English</button>
+</div>
+</div>
+<hr style="border: 0; border-top: 1px solid #ccc; margin-bottom: 20px;">
+<div id="summary-metrics-box" style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ccc;">
+<p style="margin:5px 0;"><strong>Candidate Name:</strong> ${userName}</p>
+<p style="margin:5px 0;"><strong>Final Score (Marks Earned):</strong> <span style="font-size:1.3em; color:#0284c7; font-weight:700;">${score} / ${TOTAL_QUESTIONS}</span></p>
+${resultStatusHtml}
+<p style="margin:5px 0;"><strong>Accuracy / Percentage:</strong> ${finalPercentage.toFixed(1)}%</p>
+<p style="margin:5px 0;"><strong>Screen Switch / Minimize Count:</strong> <span style="font-weight:700; color:${tabSwitchCount > 0 ? '#dc3545' : '#16a34a'};">${tabSwitchCount}</span></p>
+</div>
+<div class="filter-container">
+<button class="filter-btn active" onclick="filterReview('all', this)" style="background-color:#007bff;">All (${TOTAL_QUESTIONS})</button>
+<button class="filter-btn" onclick="filterReview('correct', this)" style="background-color:#16a34a;">Correct (${score})</button>
+<button class="filter-btn" onclick="filterReview('wrong', this)" style="background-color:#dc3545;">Wrong (${wrongCount})</button>
+<button class="filter-btn" onclick="filterReview('unattempted', this)" style="background-color:#6c757d;">Unattempted (${unattemptedCount})</button>
+</div>
+<h3 style="color:#0284c7;">Detailed Question Analysis:</h3>
+<div id="filtered-questions-box">${detailedHtml}</div>
+<br>
+<button onclick="window.close();" class="btn-control btn-submit-test" style="width:100%; text-align:center;">CLOSE & EXIT</button>
+`;
+document.getElementById('main-test-area').style.display = 'none';
+resultDisplay.style.display = 'block';
+updateLocalLanguage();
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function downloadSummaryOnly(score, wrongCount, unattemptedCount) {
+let finalPercentage = (score / TOTAL_QUESTIONS) * 100;
+let statusText = (finalPercentage >= 80) ? "PASS" : "FAIL";
+let statusColor = (finalPercentage >= 80) ? "#16a34a" : "#dc3545";
+const candidateDesignation = safeStorage.get('currentDesignation') || "N/A";
+const candidateSection = safeStorage.get('studentSectionContext') || "N/A";
+const submissionTime = new Date().toLocaleString();
+// Create wrapper for rendering
+const pdfContainer = document.createElement('div');
+pdfContainer.id = "mobile-pdf-render-box";
+pdfContainer.style.position = 'fixed';
+pdfContainer.style.top = '0';
+pdfContainer.style.left = '0';
+pdfContainer.style.width = '100%';
+pdfContainer.style.height = '100%';
+pdfContainer.style.backgroundColor = 'rgba(0,0,0,0.8)';
+pdfContainer.style.zIndex = '999999';
+pdfContainer.style.display = 'flex';
+pdfContainer.style.justifyContent = 'center';
+pdfContainer.style.alignItems = 'center';
+const innerBox = document.createElement('div');
+innerBox.style.width = '750px';
+innerBox.style.backgroundColor = '#ffffff';
+innerBox.style.padding = '30px';
+innerBox.style.fontFamily = 'Poppins, sans-serif';
+innerBox.style.color = '#333';
+innerBox.style.borderRadius = '8px';
+innerBox.style.boxShadow = '0 5px 15px rgba(0,0,0,0.5)';
+innerBox.innerHTML = `
+<div style="border-bottom: 2px solid #38bdf8; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">
+<h1 style="color: #0284c7; margin: 0; font-size: 24px;">ASTI DELHI</h1>
+<h3 style="margin: 5px 0 0 0; color: #555; font-size: 16px;">Exam Performance Summary</h3>
+</div>
+<div style="background: #f8f9fa; border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+<table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+<tr>
+<td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>
+<td style="padding: 6px 0;">DAY 3 PAPER 1</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>
+<td style="padding: 6px 0;">${userName}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Designation:</td>
+<td style="padding: 6px 0;">${candidateDesignation}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Section:</td>
+<td style="padding: 6px 0;">${candidateSection}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Time of Submission:</td>
+<td style="padding: 6px 0;">${submissionTime}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Final Score / Marks:</td>
+<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: #0284c7;">${score} / ${TOTAL_QUESTIONS}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Percentage / Accuracy:</td>
+<td style="padding: 6px 0;">${finalPercentage.toFixed(1)}%</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Result Status:</td>
+<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: ${statusColor};">${statusText}</td>
+</tr>
+<tr>
+<td style="padding: 6px 0; font-weight: bold;">Screen Switch / Minimize Count:</td>
+<td style="padding: 6px 0; font-weight: bold; color: ${tabSwitchCount > 0 ? '#dc3545' : '#16a34a'};">${tabSwitchCount}</td>
+</tr>
+</table>
+</div>
+<h3 style="color: #0284c7; margin-bottom: 10px; font-size: 16px;">Summary Breakdown Statistics</h3>
+<table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
+<thead>
+<tr style="background-color: #0284c7; color: white;">
+<th style="padding: 10px; border: 1px solid #38bdf8;">Total Questions</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Correct</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Wrong</th>
+<th style="padding: 10px; border: 1px solid #38bdf8;">Unattempted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">${TOTAL_QUESTIONS}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a; font-weight: bold;">${score}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #dc3545; font-weight: bold;">${wrongCount}</td>
+<td style="padding: 10px; border: 1px solid #ccc; color: #6c757d; font-weight: bold;">${unattemptedCount}</td>
+</tr>
+</tbody>
+</table>
+<div style="margin-top: 40px; text-align: center; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 10px;">
+This is an official automated performance report generated by ASTI Delhi Exam Portal.
+</div>
+`;
+pdfContainer.appendChild(innerBox);
+document.body.appendChild(pdfContainer);
+const opt = {
+margin:       10,
+filename:     `${userName.toLowerCase().replace(/\s+/g, '_')}_summary.pdf`,
+image:        { type: 'jpeg', quality: 0.98 },
+html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+};
+// Wait 300ms for browser layout & fonts to resolve
+setTimeout(() => {
+html2pdf().set(opt).from(innerBox).save().then(() => {
+if (pdfContainer.parentNode) {
+pdfContainer.parentNode.removeChild(pdfContainer);
+}
+}).catch(err => {
+console.error("PDF generation failed:", err);
+if (pdfContainer.parentNode) {
+pdfContainer.parentNode.removeChild(pdfContainer);
+}
+});
+}, 300);
+}
+function filterReview(filterType, btnElement) {
+const reviewItems = document.querySelectorAll('.review-item');
+reviewItems.forEach(item => {
+const itemStatus = item.getAttribute('data-status');
+if (filterType === 'all' || itemStatus === filterType) {
+item.style.display = 'block';
+} else {
+item.style.display = 'none';
+}
+});
+const filterButtons = document.querySelectorAll('.filter-container .filter-btn');
+filterButtons.forEach(btn => btn.classList.remove('active'));
+if (btnElement) {
+btnElement.classList.add('active');
+}
+}
+</script>
+</body>
+</html>
