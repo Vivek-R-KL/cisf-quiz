@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Question Editing - CISF ASTI Delhi</title>
+<style>
+    :root {
+        --bg-main: #f4f6f9;
+        --card-bg: #ffffff;
+        --card-border: #d1d5db;
+        --text-primary: #1f2937;
+        --text-muted: #6b7280;
+        --accent-yellow: #d97706;
+        --accent-yellow-hover: #b45309;
+        --accent-red: #ef4444;
+        --accent-red-hover: #dc2626;
+        --accent-green: #10b981;
+        --accent-green-hover: #059669;
+        --accent-blue: #0b3c5d;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg-main);
+        color: var(--text-primary);
+        margin: 0;
+        padding: 20px;
+        padding-bottom: 110px;
+    }
+    .header-bar {
+        background: #ffffff;
+        border: 2px solid var(--accent-yellow);
+        color: var(--accent-yellow);
+        padding: 18px 20px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .header-bar h2 { margin: 0; font-size: 19px; }
+    .header-bar a.back-link { color: var(--accent-blue); font-weight: bold; text-decoration: none; font-size: 14px; }
+
+    .card {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        border: 1px solid var(--card-border);
+        margin-bottom: 20px;
+    }
+    .card h3 {
+        margin-top: 0;
+        font-size: 16px;
+        border-bottom: 2px solid var(--accent-yellow);
+        padding-bottom: 8px;
+        color: var(--accent-yellow);
+    }
+
+    label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--text-muted); }
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 12px;
+        background-color: #f9fafb;
+        color: var(--text-primary);
+        border: 1px solid var(--card-border);
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 14px;
+    }
+    textarea { resize: vertical; min-height: 44px; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-yellow); background: #fff; }
+
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+    @media (max-width: 700px) { .settings-grid { grid-template-columns: 1fr; } }
+
+    button { cursor: pointer; border: none; font-weight: bold; border-radius: 5px; transition: background 0.2s; }
+    .btn-primary { background: var(--accent-yellow); color: #fff; padding: 11px 18px; }
+    .btn-primary:hover { background: var(--accent-yellow-hover); }
+    .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
+    .btn-green { background: var(--accent-green); color: #fff; padding: 11px 18px; }
+    .btn-green:hover { background: var(--accent-green-hover); }
+    .btn-danger { background: var(--accent-red); color: #fff; padding: 8px 14px; font-size: 13px; }
+    .btn-danger:hover { background: var(--accent-red-hover); }
+    .btn-mini { background: #e5e7eb; color: var(--text-primary); padding: 6px 10px; font-size: 12px; }
+    .btn-mini:hover { background: #d1d5db; }
+
+    #status { font-size: 13px; margin-top: 10px; padding: 10px; border-radius: 5px; display: none; }
+    #status.ok { display: block; background: #d1fae5; color: #065f46; }
+    #status.err { display: block; background: #fee2e2; color: #991b1b; }
+    #status.info { display: block; background: #dbeafe; color: #1e40af; }
+
+    .q-card {
+        border: 1px solid var(--card-border);
+        border-left: 5px solid var(--accent-yellow);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        background: #fdfdfd;
+        position: relative;
+    }
+    .q-card .q-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .q-card .q-top .q-num {
+        font-weight: bold;
+        font-size: 15px;
+        color: var(--accent-blue);
+    }
+    .q-actions { display: flex; gap: 6px; }
+
+    .lang-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 700px) { .lang-row { grid-template-columns: 1fr; } }
+    .lang-row label { color: #9ca3af; font-size: 11px; text-transform: uppercase; }
+
+    .opt-block {
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin-top: 8px;
+        background: #fff;
+    }
+    .opt-block.correct { border-color: var(--accent-green); background: #f0fdf9; box-shadow: 0 0 0 1px var(--accent-green); }
+    .opt-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+    }
+    .opt-letter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        font-weight: bold;
+        font-size: 13px;
+        margin-right: 8px;
+    }
+    .opt-block.correct .opt-letter { background: var(--accent-green); color: #fff; }
+    .correct-toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+        user-select: none;
+    }
+    .opt-block.correct .correct-toggle { color: #047857; }
+    .correct-toggle input { width: auto; margin: 0; }
+
+    .empty-state { text-align: center; color: var(--text-muted); padding: 40px 10px; }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border-top: 2px solid var(--accent-yellow);
+        padding: 14px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        z-index: 500;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
+    }
+    .bottom-bar .info { font-size: 13px; color: var(--text-muted); }
+    #addQuestionFab {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: var(--accent-blue);
+        color: #fff;
+        font-size: 14px;
+        margin-top: 6px;
+    }
+    #addQuestionFab:hover { background: #082c47; }
+
+    .hidden { display: none !important; }
+    small.hint { color: var(--text-muted); display: block; margin: -6px 0 12px 0; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header-bar">
+    <h2>📝 Question Editing</h2>
+    <a class="back-link" href="admin-dashboard.html">← Back to Admin Dashboard</a>
+</div>
+
+<!-- CONNECTION SETTINGS -->
+<div class="card">
+    <h3>1. Connect to GitHub</h3>
+    <small class="hint">
+        Set this up once. It is saved on this device only. You need a GitHub Personal Access Token with
+        write access to the repository where your quiz files are hosted (Settings → Developer settings →
+        Fine-grained tokens → grant "Contents: Read and write" for this repository).
+    </small>
+    <div class="settings-grid">
+        <div>
+            <label>GitHub Username / Organization</label>
+            <input type="text" id="ghOwner" placeholder="e.g. vivekr">
+        </div>
+        <div>
+            <label>Repository Name</label>
+            <input type="text" id="ghRepo" placeholder="e.g. cisf-asti-quiz">
+        </div>
+        <div>
+            <label>Branch</label>
+            <input type="text" id="ghBranch" placeholder="main" value="main">
+        </div>
+        <div>
+            <label>Access Token</label>
+            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx">
+        </div>
+    </div>
+    <button class="btn-primary" onclick="saveSettingsAndLoadFiles()">Save & Connect</button>
+    <div id="connectStatus" style="margin-top:10px;"></div>
+</div>
+
+<!-- FILE PICKER -->
+<div class="card" id="filePickerCard" style="display:none;">
+    <h3>2. Choose the Question Paper to Edit</h3>
+    <label>Quiz File</label>
+    <select id="fileSelect"></select>
+    <button class="btn-primary" onclick="loadSelectedFile()">Open This Paper for Editing</button>
+    <div id="loadStatus"></div>
+</div>
+
+<!-- QUESTION EDITOR -->
+<div class="card" id="editorCard" style="display:none;">
+    <h3 id="editorTitle">3. Edit Questions</h3>
+    <small class="hint">Click a bubble (A, B, C, D) to mark it as the correct answer. Changes are only saved to GitHub when you press "Save Changes to GitHub" below.</small>
+    <div id="questionsWrap"></div>
+    <button id="addQuestionFab" onclick="addNewQuestion()">➕ Add New Question</button>
+</div>
+
+<div class="bottom-bar" id="bottomBar" style="display:none;">
+    <span class="info" id="questionCountLabel">0 questions</span>
+    <button class="btn-green" style="padding:12px 26px;" onclick="saveToGithub()" id="saveBtn">💾 Save Changes to GitHub</button>
+</div>
+
+<script>
+/* ================= SETTINGS ================= */
+function loadSettings() {
+    document.getElementById('ghOwner').value = localStorage.getItem('qeOwner') || '';
+    document.getElementById('ghRepo').value = localStorage.getItem('qeRepo') || '';
+    document.getElementById('ghBranch').value = localStorage.getItem('qeBranch') || 'main';
+    document.getElementById('ghToken').value = localStorage.getItem('qeToken') || '';
+}
+function getSettings() {
+    return {
+        owner: document.getElementById('ghOwner').value.trim(),
+        repo: document.getElementById('ghRepo').value.trim(),
+        branch: document.getElementById('ghBranch').value.trim() || 'main',
+        token: document.getElementById('ghToken').value.trim()
+    };
+}
+function showStatus(elId, msg, type) {
+    const el = document.getElementById(elId);
+    el.className = type;
+    el.style.display = 'block';
+    el.innerText = msg;
+}
+
+/* ================= GITHUB API HELPERS ================= */
+function ghHeaders(token) {
+    return {
+        "Authorization": "Bearer " + token,
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+    };
+}
+
+// Files in the repo that are app UI, not quiz question papers - hide these from the picker
+const EXCLUDED_FILES = new Set([
+    "index.html", "index_2.html", "admin-login.html", "admin-dashboard.html",
+    "student-dashboard.html", "question-editor.html", "manifest.json", "sw.js", "style.css"
+]);
+
+async function saveSettingsAndLoadFiles() {
+    const s = getSettings();
+    if (!s.owner || !s.repo || !s.token) {
+        showStatus('connectStatus', 'Please fill in Username, Repository and Access Token.', 'err');
+        return;
+    }
+    localStorage.setItem('qeOwner', s.owner);
+    localStorage.setItem('qeRepo', s.repo);
+    localStorage.setItem('qeBranch', s.branch);
+    localStorage.setItem('qeToken', s.token);
+
+    showStatus('connectStatus', 'Connecting to GitHub…', 'info');
+
+    try {
+        const res = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/git/trees/${encodeURIComponent(s.branch)}?recursive=1`, {
+            headers: ghHeaders(s.token)
+        });
+        if (!res.ok) {
+            const errBody = await res.json().catch(() => ({}));
+            throw new Error(errBody.message || `GitHub responded with status ${res.status}`);
+        }
+        const data = await res.json();
+        const htmlFiles = (data.tree || [])
+            .filter(item => item.type === 'blob' && item.path.toLowerCase().endsWith('.html'))
+            .filter(item => !EXCLUDED_FILES.has(item.path.split('/').pop()))
+            .map(item => item.path)
+            .sort();
+
+        if (htmlFiles.length === 0) {
+            showStatus('connectStatus', 'Connected, but no quiz question-paper files were found in this repo/branch.', 'err');
+            return;
+        }
+
+        const select = document.getElementById('fileSelect');
+        select.innerHTML = htmlFiles.map(p => `<option value="${p.replace(/"/g, '&quot;')}">${p}</option>`).join('');
+
+        showStatus('connectStatus', `Connected successfully. Found ${htmlFiles.length} quiz file(s).`, 'ok');
+        document.getElementById('filePickerCard').style.display = 'block';
+    } catch (e) {
+        showStatus('connectStatus', 'Could not connect: ' + e.message, 'err');
+    }
+}
+
+/* ================= UTF-8 SAFE BASE64 ================= */
+function utf8ToBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+}
+function base64ToUtf8(str) {
+    return decodeURIComponent(escape(atob(str.replace(/\n/g, ''))));
+}
+
+/* ================= PARSING questionData OUT OF THE FILE ================= */
+// Finds `const questionData = [ ... ]` and returns {start, end, raw} where
+// start/end are indices in `content` spanning the full array literal (inclusive).
+function locateArrayLiteral(content, varName) {
+    const marker = `const ${varName}`;
+    let idx = content.indexOf(marker);
+    if (idx === -1) throw new Error(`Could not find "${varName}" in this file. It may not be a supported quiz question paper.`);
+    let bracketStart = content.indexOf('[', idx);
+    if (bracketStart === -1) throw new Error(`Could not find the start of "${varName}" array.`);
+
+    let depth = 0, inString = false, quoteChar = '', i = bracketStart;
+    for (; i < content.length; i++) {
+        const ch = content[i];
+        if (inString) {
+            if (ch === '\\') { i++; continue; }
+            if (ch === quoteChar) { inString = false; }
+            continue;
+        }
+        if (ch === '"' || ch === "'" || ch === '`') { inString = true; quoteChar = ch; continue; }
+        if (ch === '[') depth++;
+        else if (ch === ']') {
+            depth--;
+            if (depth === 0) break;
+        }
+    }
+    if (depth !== 0) throw new Error(`The "${varName}" array in this file appears malformed (unbalanced brackets).`);
+    return { start: bracketStart, end: i }; // inclusive indices of [ ... ]
+}
+
+let currentFile = null;    // { path, sha, content }
+let questions = [];        // array of {q:[num, correct, engQ, hinQ, [opt1en,opt1hi], ...]}
+let totalQuestionsMatch = null;
+
+async function loadSelectedFile() {
+    const s = getSettings();
+    const path = document.getElementById('fileSelect').value;
+    if (!path) return;
+
+    showStatus('loadStatus', 'Loading question paper…', 'info');
+    document.getElementById('editorCard').style.display = 'none';
+    document.getElementById('bottomBar').style.display = 'none';
+
+    try {
+        const res = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(s.branch)}`, {
+            headers: ghHeaders(s.token)
+        });
+        if (!res.ok) {
+            const errBody = await res.json().catch(() => ({}));
+            throw new Error(errBody.message || `GitHub responded with status ${res.status}`);
+        }
+        const fileData = await res.json();
+        const content = base64ToUtf8(fileData.content);
+
+        const loc = locateArrayLiteral(content, 'questionData');
+        const arrayText = content.slice(loc.start, loc.end + 1);
+
+        let parsed;
+        try {
+            parsed = Function('"use strict"; return (' + arrayText + ');')();
+        } catch (parseErr) {
+            throw new Error('Found the question data but could not read it: ' + parseErr.message);
+        }
+        if (!Array.isArray(parsed)) throw new Error('Question data in this file is not in the expected format.');
+
+        currentFile = { path, sha: fileData.sha, content };
+        questions = parsed.map(q => Array.isArray(q) ? q.slice() : q);
+
+        document.getElementById('editorTitle').innerText = `3. Edit Questions — ${path}`;
+        renderQuestions();
+        document.getElementById('editorCard').style.display = 'block';
+        document.getElementById('bottomBar').style.display = 'flex';
+        showStatus('loadStatus', `Loaded ${questions.length} questions. Edit below, then save.`, 'ok');
+    } catch (e) {
+        showStatus('loadStatus', 'Could not open this file: ' + e.message, 'err');
+    }
+}
+
+/* ================= RENDERING ================= */
+function renderQuestions() {
+    const wrap = document.getElementById('questionsWrap');
+    document.getElementById('questionCountLabel').innerText = `${questions.length} question(s)`;
+
+    if (questions.length === 0) {
+        wrap.innerHTML = '<div class="empty-state">No questions yet. Click "Add New Question" below to create one.</div>';
+        return;
+    }
+
+    wrap.innerHTML = questions.map((q, idx) => {
+        const [num, correct, engQ, hinQ, o1, o2, o3, o4] = q;
+        const opts = [o1, o2, o3, o4];
+        const letters = ['A', 'B', 'C', 'D'];
+
+        const optsHtml = opts.map((opt, oi) => {
+            const isCorrect = (correct === (oi + 1));
+            const oEn = (opt && opt[0]) || '';
+            const oHi = (opt && opt[1]) || '';
+            return `
+                <div class="opt-block ${isCorrect ? 'correct' : ''}">
+                    <div class="opt-header">
+                        <span><span class="opt-letter">${letters[oi]}</span>Option ${letters[oi]}</span>
+                        <label class="correct-toggle">
+                            <input type="radio" name="correct-${idx}" ${isCorrect ? 'checked' : ''}
+                                onchange="setCorrect(${idx}, ${oi + 1})">
+                            Correct Answer
+                        </label>
+                    </div>
+                    <label>English</label>
+                    <input type="text" value="${escapeAttr(oEn)}" oninput="updateOption(${idx}, ${oi}, 0, this.value)" placeholder="Option ${letters[oi]} in English">
+                    <label>Hindi</label>
+                    <input type="text" value="${escapeAttr(oHi)}" oninput="updateOption(${idx}, ${oi}, 1, this.value)" placeholder="Option ${letters[oi]} in Hindi (optional)">
+                </div>`;
+        }).join('');
+
+        return `
+            <div class="q-card" id="qcard-${idx}">
+                <div class="q-top">
+                    <span class="q-num">Question ${idx + 1}</span>
+                    <div class="q-actions">
+                        <button class="btn-mini" onclick="moveQuestion(${idx}, -1)" title="Move up">⬆️</button>
+                        <button class="btn-mini" onclick="moveQuestion(${idx}, 1)" title="Move down">⬇️</button>
+                        <button class="btn-danger" onclick="deleteQuestion(${idx})">🗑️ Delete</button>
+                    </div>
+                </div>
+                <div class="lang-row">
+                    <div>
+                        <label>Question (English)</label>
+                        <textarea oninput="updateQuestionText(${idx}, 0, this.value)" placeholder="Type the question in English">${escapeHtml(engQ || '')}</textarea>
+                    </div>
+                    <div>
+                        <label>Question (Hindi)</label>
+                        <textarea oninput="updateQuestionText(${idx}, 1, this.value)" placeholder="Type the question in Hindi (optional)">${escapeHtml(hinQ || '')}</textarea>
+                    </div>
+                </div>
+                ${optsHtml}
+            </div>`;
+    }).join('');
+}
+
+function escapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function escapeAttr(str) {
+    return escapeHtml(str).replace(/"/g, '&quot;');
+}
+
+/* ================= EDIT ACTIONS ================= */
+function updateQuestionText(idx, langIdx, value) {
+    questions[idx][2 + langIdx] = value;
+}
+function updateOption(idx, optIdx, langIdx, value) {
+    if (!questions[idx][4 + optIdx]) questions[idx][4 + optIdx] = ['', ''];
+    questions[idx][4 + optIdx][langIdx] = value;
+}
+function setCorrect(idx, optionNumber) {
+    questions[idx][1] = optionNumber;
+    renderQuestions();
+}
+function deleteQuestion(idx) {
+    if (!confirm(`Delete Question ${idx + 1}? This cannot be undone until you leave without saving.`)) return;
+    questions.splice(idx, 1);
+    renumberQuestions();
+    renderQuestions();
+}
+function moveQuestion(idx, dir) {
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= questions.length) return;
+    const tmp = questions[idx];
+    questions[idx] = questions[newIdx];
+    questions[newIdx] = tmp;
+    renumberQuestions();
+    renderQuestions();
+}
+function addNewQuestion() {
+    const nextNum = questions.length + 1;
+    questions.push([nextNum, 1, '', '', ['', ''], ['', ''], ['', ''], ['', '']]);
+    renderQuestions();
+    setTimeout(() => {
+        const el = document.getElementById(`qcard-${questions.length - 1}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+}
+function renumberQuestions() {
+    questions.forEach((q, i) => { q[0] = i + 1; });
+}
+
+/* ================= SAVE BACK TO GITHUB ================= */
+async function saveToGithub() {
+    if (!currentFile) return;
+
+    // Basic validation
+    for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        if (!q[2] || !q[2].trim()) {
+            alert(`Question ${i + 1} is missing its English question text.`);
+            return;
+        }
+        for (let o = 0; o < 4; o++) {
+            if (!q[4 + o] || !q[4 + o][0] || !q[4 + o][0].trim()) {
+                alert(`Question ${i + 1}, Option ${['A','B','C','D'][o]} is missing its English text.`);
+                return;
+            }
+        }
+    }
+
+    renumberQuestions();
+
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.innerText = 'Saving…';
+    showStatus('loadStatus', 'Saving changes to GitHub…', 'info');
+
+    try {
+        const s = getSettings();
+        const loc = locateArrayLiteral(currentFile.content, 'questionData');
+        const newArrayText = JSON.stringify(questions);
+        let newContent = currentFile.content.slice(0, loc.start) + newArrayText + currentFile.content.slice(loc.end + 1);
+
+        // Keep TOTAL_QUESTIONS constant in sync if present
+        newContent = newContent.replace(
+            /const\s+TOTAL_QUESTIONS\s*=\s*\d+/,
+            `const TOTAL_QUESTIONS = ${questions.length}`
+        );
+
+        const res = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(currentFile.path)}`, {
+            method: 'PUT',
+            headers: { ...ghHeaders(s.token), 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: `Update questions in ${currentFile.path} via Question Editing tool`,
+                content: utf8ToBase64(newContent),
+                sha: currentFile.sha,
+                branch: s.branch
+            })
+        });
+
+        if (!res.ok) {
+            const errBody = await res.json().catch(() => ({}));
+            throw new Error(errBody.message || `GitHub responded with status ${res.status}`);
+        }
+
+        const result = await res.json();
+        currentFile.content = newContent;
+        currentFile.sha = result.content.sha;
+
+        showStatus('loadStatus', '✅ Saved successfully! Changes are now live on GitHub Pages (may take a minute to reflect).', 'ok');
+    } catch (e) {
+        showStatus('loadStatus', 'Failed to save: ' + e.message, 'err');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = '💾 Save Changes to GitHub';
+    }
+}
+
+window.onload = () => {
+    loadSettings();
+    if (localStorage.getItem('qeOwner') && localStorage.getItem('qeToken')) {
+        saveSettingsAndLoadFiles();
+    }
+};
+</script>
+</body>
+</html>
