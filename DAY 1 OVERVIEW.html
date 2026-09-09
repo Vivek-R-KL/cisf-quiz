@@ -286,7 +286,7 @@ username: urlParams.get('username') || safeStorage.get('currentUsername') || 'N/
 studentName: urlParams.get('studentName') || safeStorage.get('currentStudent') || userName || 'Trainee',
 designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || 'Trainee',
 section: urlParams.get('section') || safeStorage.get('studentSectionContext') || 'basic',
-quizName: "DAY 1 (OVERVIEW OF CIVIL AVIATION)", 
+quizName: "DAY 1 PAPER 2", 
 score: `${savedAnswers.filter((ans, idx) => ans && ans.toString() === questionData[idx][1].toString()).length}/${TOTAL_QUESTIONS}`,
 timestamp: new Date().toLocaleString()
 };
@@ -785,7 +785,7 @@ studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
 username: urlParams.get('username') || safeStorage.get('currentUsername') || "trainee",
 studentSection: urlParams.get('section') || safeStorage.get('studentSectionContext') || "SCREENER",
 designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || "Trainee",
-quizName: "DAY 1 (OVERVIEW OF CIVIL AVIATION)",
+quizName: "DAY 1 PAPER 2",
 score: finalScoreString,
 tabSwitchCount: tabSwitchCount,
 timestamp: new Date().toLocaleString()
