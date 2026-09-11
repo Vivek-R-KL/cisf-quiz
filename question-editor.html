@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Question Editing - CISF ASTI Delhi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
     :root {
         --bg-main: #f4f6f9;
@@ -249,10 +250,13 @@
 <!-- FILE PICKER -->
 <div class="card" id="filePickerCard" style="display:none;">
     <h3>2. Choose Question Paper</h3>
-    <div style="display: flex; gap: 8px;">
-        <select id="fileSelect" style="margin-bottom:0;"></select>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <select id="fileSelect" style="margin-bottom:0; flex:1; min-width:180px;"></select>
         <button class="btn-primary" onclick="loadSelectedFile()" style="white-space:nowrap;">Open Paper</button>
+        <button class="btn-tool" onclick="copySelectedFile()" style="white-space:nowrap; flex:none;">📋 Copy as New Paper</button>
+        <button class="btn-danger" onclick="deleteQuizPaper()" style="white-space:nowrap; flex:none;">🗑️ Delete Quiz Paper</button>
     </div>
+    <small class="hint">To create a brand-new quiz paper, pick an existing paper above to use as the template, then click "Copy as New Paper" — you'll be asked for a new file name and whether to start with no questions. "Delete Quiz Paper" permanently removes the selected paper from GitHub.</small>
     <div id="loadStatus"></div>
 </div>
 
@@ -290,7 +294,14 @@
 <!-- QUESTION EDITOR -->
 <div class="card" id="editorCard" style="display:none;">
     <h3 id="editorTitle">3. Edit Questions</h3>
-    <small class="hint">Click bubble (A, B, C, D) to set correct answer. Use "Paste Options" to paste 4 options copied from Excel, and "Translate" to auto-fill Hindi from the English text.</small>
+    <small class="hint">Click bubble (A, B, C, D) to set correct answer. Use "Paste Options" to paste 4 options copied from Excel, "Translate" to auto-fill Hindi for one question, "Import Questions from Excel" to bulk-load English questions from the template file, and "Translate All to Hindi" to fill in every missing Hindi field at once.</small>
+    <div class="q-tools" style="margin-bottom:10px; flex-wrap: wrap;">
+        <button class="btn-tool" onclick="document.getElementById('excelFileInput').click()">📥 Import Questions from Excel</button>
+        <button class="btn-tool" id="translateAllBtn" onclick="translateAllQuestions()">🌐 Translate All to Hindi</button>
+        <button class="btn-tool" onclick="exportQuestionsToExcel()">📤 Export to Excel</button>
+        <button class="btn-danger" style="flex:1; padding: 6px 10px; font-size:12px;" onclick="deleteAllQuestions()">🗑️ Delete All Questions</button>
+    </div>
+    <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(event)">
     <div id="questionsWrap"></div>
     <button id="addQuestionFab" onclick="addNewQuestion()">➕ Add New Question</button>
 </div>
@@ -607,14 +618,43 @@ async function pasteOptions(idx) {
     }
 }
 
-/* Free machine translation (English -> Hindi) using Google's public translate endpoint. */
-async function translateText(text, targetLang = 'hi') {
-    if (!text || !text.trim()) return '';
+/* Free machine translation (English -> Hindi). Tries Google's public endpoint first;
+   if that's blocked by the browser (CORS / network — common on localhost dev servers
+   like 127.0.0.1:5500), it automatically falls back to the MyMemory Translation API,
+   which sends proper CORS headers and works reliably from any origin. */
+async function translateViaGoogle(text, targetLang) {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Translation service returned status ${res.status}`);
+    if (!res.ok) throw new Error(`Google Translate status ${res.status}`);
     const data = await res.json();
-    return data[0].map(chunk => chunk[0]).join('');
+    const out = data[0].map(chunk => chunk[0]).join('');
+    if (!out.trim()) throw new Error('Google Translate returned empty result');
+    return out;
+}
+
+async function translateViaMyMemory(text, targetLang) {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`MyMemory status ${res.status}`);
+    const data = await res.json();
+    const translated = data.responseData && data.responseData.translatedText;
+    if (!translated || /mymemory warning|invalid|error/i.test(translated)) {
+        throw new Error((data.responseDetails || 'MyMemory translation unavailable').toString());
+    }
+    return translated;
+}
+
+async function translateText(text, targetLang = 'hi') {
+    if (!text || !text.trim()) return '';
+    try {
+        return await translateViaGoogle(text, targetLang);
+    } catch (googleErr) {
+        try {
+            return await translateViaMyMemory(text, targetLang);
+        } catch (myMemoryErr) {
+            throw new Error(`Both translation services failed (${googleErr.message}; ${myMemoryErr.message}).`);
+        }
+    }
 }
 
 /* Translate the English question + options of one question card into Hindi. */
@@ -652,11 +692,358 @@ async function translateQuestion(idx) {
     }
 }
 
+/* ================= COPY / CREATE NEW QUIZ PAPER ================= */
+/* Uses whichever paper is selected in the dropdown as a template, and creates
+   a brand-new file on GitHub with the same working quiz engine/HTML — either
+   keeping its questions (exact duplicate) or starting blank (for a new paper
+   you'll fill via typing or the Excel importer). */
+async function copySelectedFile() {
+    const s = getSettings();
+    const sourcePath = document.getElementById('fileSelect').value;
+    if (!sourcePath) {
+        alert('Select a quiz paper from the list first — it will be used as the template to copy.');
+        return;
+    }
+
+    const suggested = sourcePath.replace(/\.html$/i, '') + '-copy.html';
+    let newPath = prompt(`Create a new quiz paper by copying:\n${sourcePath}\n\nEnter a file name for the new paper (must end in .html):`, suggested);
+    if (!newPath) return;
+    newPath = newPath.trim();
+    if (!newPath) return;
+    if (!/\.html$/i.test(newPath)) newPath += '.html';
+
+    const startBlank = confirm(
+        'Start the new paper with NO questions, so you can add fresh ones (e.g. import from Excel)?\n\n' +
+        'OK = Start blank\nCancel = Keep a copy of all existing questions from the source paper'
+    );
+
+    showStatus('loadStatus', `Copying ${sourcePath} → ${newPath}…`, 'info');
+    try {
+        const getRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(sourcePath)}?ref=${encodeURIComponent(s.branch)}`, {
+            headers: ghHeaders(s.token)
+        });
+        if (!getRes.ok) throw new Error(`Could not read source file (status ${getRes.status})`);
+        const sourceData = await getRes.json();
+        let newContent = base64ToUtf8(sourceData.content);
+
+        if (startBlank) {
+            const loc = locateArrayLiteral(newContent, 'questionData');
+            newContent = newContent.slice(0, loc.start) + '[]' + newContent.slice(loc.end + 1);
+        }
+
+        // Check whether the destination file name is already taken.
+        let existingSha = null;
+        const checkRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(newPath)}?ref=${encodeURIComponent(s.branch)}`, {
+            headers: ghHeaders(s.token)
+        });
+        if (checkRes.ok) {
+            const existing = await checkRes.json();
+            if (!confirm(`A file named "${newPath}" already exists. Overwrite it?`)) {
+                showStatus('loadStatus', 'Copy cancelled — that file name is already taken.', 'err');
+                return;
+            }
+            existingSha = existing.sha;
+        }
+
+        const putBody = {
+            message: `Create ${newPath} (copied from ${sourcePath}) via Question Editor`,
+            content: utf8ToBase64(newContent),
+            branch: s.branch
+        };
+        if (existingSha) putBody.sha = existingSha;
+
+        const putRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(newPath)}`, {
+            method: 'PUT',
+            headers: { ...ghHeaders(s.token), 'Content-Type': 'application/json' },
+            body: JSON.stringify(putBody)
+        });
+        if (!putRes.ok) {
+            const errBody = await putRes.json().catch(() => ({}));
+            throw new Error(errBody.message || `GitHub status ${putRes.status}`);
+        }
+
+        showStatus('loadStatus', `✅ Created "${newPath}". Loading it now…`, 'ok');
+        await saveSettingsAndLoadFiles();
+        const select = document.getElementById('fileSelect');
+        select.value = newPath;
+        await loadSelectedFile();
+    } catch (e) {
+        showStatus('loadStatus', 'Could not copy paper: ' + e.message, 'err');
+    }
+}
+
+/* ================= IMPORT ENGLISH QUESTIONS FROM EXCEL ================= */
+/* Matches columns by header text (not fixed position), so it tolerates the
+   QUESTION_TEMPLATE.xlsx header wording. Hindi columns are optional — any
+   left blank (or missing) can be filled later with "Translate All to Hindi". */
+function resolveCorrectIndex(val, optsEnglish) {
+    const raw = String(val === undefined || val === null ? '' : val).trim();
+    if (!raw) return null;
+    if (/^[A-Da-d]$/.test(raw)) return raw.toUpperCase().charCodeAt(0) - 64;
+    if (/^[1-4]$/.test(raw)) return parseInt(raw, 10);
+    const idx = optsEnglish.findIndex(o => o && o.toLowerCase() === raw.toLowerCase());
+    return idx !== -1 ? idx + 1 : null;
+}
+
+async function handleExcelFile(event) {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    if (typeof XLSX === 'undefined') {
+        alert('The Excel reader failed to load (no internet access to the CDN?). Reload the page and try again.');
+        return;
+    }
+
+    try {
+        const data = await file.arrayBuffer();
+        const wb = XLSX.read(data, { type: 'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+        if (rows.length < 2) throw new Error('No question rows found below the header row.');
+
+        const headers = rows[0].map(h => String(h || ''));
+        const col = (tokens) => {
+            for (let i = 0; i < headers.length; i++) {
+                const h = headers[i].toLowerCase();
+                if (tokens.every(t => h.includes(t))) return i;
+            }
+            return -1;
+        };
+
+        const cEngQ = col(['question', 'english']);
+        const cHinQ = col(['question', 'hindi']);
+        const cAns = col(['answer']);
+
+        const optEng = [], optHin = [];
+        for (let n = 1; n <= 4; n++) {
+            let eIdx = -1, hIdx = -1;
+            for (let i = 0; i < headers.length; i++) {
+                const h = headers[i].toLowerCase();
+                if (h.includes('option') && h.includes(String(n))) {
+                    if (h.includes('hindi')) hIdx = i; else eIdx = i;
+                }
+            }
+            optEng.push(eIdx); optHin.push(hIdx);
+        }
+
+        if (cEngQ === -1 || optEng.some(i => i === -1)) {
+            throw new Error('Could not find the expected English question/option columns. Please use the headers from QUESTION_TEMPLATE.xlsx.');
+        }
+
+        const dataRows = rows.slice(1).filter(r => r.some(c => String(c).trim() !== ''));
+        let unmatchedAnswers = 0;
+        const startNum = questions.length + 1;
+        const imported = dataRows.map((r, i) => {
+            const engQ = String(r[cEngQ] || '').trim();
+            const hinQ = cHinQ !== -1 ? String(r[cHinQ] || '').trim() : '';
+            const optsEnglish = optEng.map(idx => String(r[idx] || '').trim());
+            const optsHindi = optHin.map(idx => idx !== -1 ? String(r[idx] || '').trim() : '');
+            const rawAns = cAns !== -1 ? r[cAns] : '';
+            let correct = resolveCorrectIndex(rawAns, optsEnglish);
+            if (correct === null) { correct = 1; unmatchedAnswers++; }
+            return [
+                startNum + i, correct, engQ, hinQ,
+                [optsEnglish[0], optsHindi[0]],
+                [optsEnglish[1], optsHindi[1]],
+                [optsEnglish[2], optsHindi[2]],
+                [optsEnglish[3], optsHindi[3]]
+            ];
+        });
+
+        const mode = questions.length > 0
+            ? confirm(`Add ${imported.length} imported question(s) to the ${questions.length} already in this paper?\n\nOK = Append\nCancel = Replace all existing questions`)
+            : true;
+
+        questions = mode ? questions.concat(imported) : imported;
+        renumberQuestions();
+        renderQuestions();
+
+        let msg = `Imported ${imported.length} question(s) from Excel.`;
+        if (unmatchedAnswers > 0) msg += ` ${unmatchedAnswers} correct-answer value(s) could not be matched and were defaulted to Option A — please check them.`;
+        showStatus('loadStatus', msg, unmatchedAnswers > 0 ? 'info' : 'ok');
+    } catch (e) {
+        alert('Could not import Excel file: ' + e.message);
+    }
+}
+
+/* ================= TRANSLATE ALL MISSING HINDI FIELDS ================= */
+/* Only fills in Hindi text that is currently empty — existing Hindi text
+   (typed manually or already translated) is left untouched.
+   Speed: instead of translating one question fully before starting the next
+   (which is what made this slow on large papers), every missing field across
+   every question is queued up front and a small pool of workers pulls from
+   that queue in parallel — so several translation requests are in flight at
+   once instead of one at a time. */
+async function translateAllQuestions() {
+    if (!questions.length) { alert('No questions to translate.'); return; }
+    const btn = document.getElementById('translateAllBtn');
+    if (btn) btn.disabled = true;
+
+    const tasks = [];
+    questions.forEach(q => {
+        if ((!q[3] || !q[3].trim()) && q[2] && q[2].trim()) {
+            tasks.push({ set: v => { q[3] = v; }, text: q[2] });
+        }
+        for (let oi = 0; oi < 4; oi++) {
+            if (!q[4 + oi]) q[4 + oi] = ['', ''];
+            const opt = q[4 + oi];
+            if ((!opt[1] || !opt[1].trim()) && opt[0] && opt[0].trim()) {
+                tasks.push({ set: v => { opt[1] = v; }, text: opt[0] });
+            }
+        }
+    });
+
+    if (tasks.length === 0) {
+        if (btn) { btn.disabled = false; btn.innerText = '🌐 Translate All to Hindi'; }
+        showStatus('loadStatus', 'Nothing to translate — every question already has Hindi text.', 'ok');
+        return;
+    }
+
+    const totalTasks = tasks.length;
+    const CONCURRENCY = 6; // parallel translation requests in flight at once
+    let translatedFields = 0, errorFields = 0, completed = 0;
+
+    async function worker() {
+        while (tasks.length) {
+            const task = tasks.shift();
+            try {
+                const result = await translateText(task.text);
+                if (result) { task.set(result); translatedFields++; }
+            } catch (e) {
+                errorFields++;
+            }
+            completed++;
+            if (btn) btn.innerText = `Translating ${completed}/${totalTasks}…`;
+        }
+    }
+
+    const pool = Array.from({ length: Math.min(CONCURRENCY, totalTasks) }, () => worker());
+    await Promise.all(pool);
+
+    renderQuestions();
+    if (btn) { btn.disabled = false; btn.innerText = '🌐 Translate All to Hindi'; }
+
+    let msg = `Translated ${translatedFields} missing Hindi field(s).`;
+    if (errorFields > 0) msg += ` ${errorFields} field(s) failed to translate — check your connection and retry, or translate them individually.`;
+    showStatus('loadStatus', msg, errorFields > 0 ? 'info' : 'ok');
+}
+
 function deleteQuestion(idx) {
     if (!confirm(`Delete Question ${idx + 1}?`)) return;
     questions.splice(idx, 1);
     renumberQuestions();
     renderQuestions();
+}
+
+/* Delete ALL questions in the currently open paper, in one click.
+   Does not touch GitHub until "Save Changes to GitHub" is clicked. */
+function deleteAllQuestions() {
+    if (!questions.length) { alert('There are no questions to delete.'); return; }
+    if (!confirm(`Delete ALL ${questions.length} question(s) in this paper?\n\nThis cannot be undone once you save. Click "Save Changes to GitHub" afterwards to make it permanent.`)) return;
+    questions = [];
+    renderQuestions();
+    showStatus('loadStatus', 'All questions deleted from this paper. Click "Save Changes to GitHub" to make it permanent.', 'info');
+}
+
+/* ================= EXPORT QUESTIONS TO EXCEL ================= */
+/* Downloads the current paper's questions as an .xlsx file, using the same
+   column layout expected by the Excel importer (so the file can be re-imported). */
+function exportQuestionsToExcel() {
+    if (!questions.length) { alert('There are no questions to export.'); return; }
+    if (typeof XLSX === 'undefined') {
+        alert('The Excel writer failed to load (no internet access to the CDN?). Reload the page and try again.');
+        return;
+    }
+
+    const letters = ['A', 'B', 'C', 'D'];
+    const headers = [
+        'Question (English)', 'Question (Hindi)',
+        'Option 1 (English)', 'Option 1 (Hindi)',
+        'Option 2 (English)', 'Option 2 (Hindi)',
+        'Option 3 (English)', 'Option 3 (Hindi)',
+        'Option 4 (English)', 'Option 4 (Hindi)',
+        'Correct Answer'
+    ];
+
+    const rows = questions.map(q => {
+        const [, correct, engQ, hinQ, o1, o2, o3, o4] = q;
+        const opts = [o1, o2, o3, o4];
+        const row = [engQ || '', hinQ || ''];
+        opts.forEach(opt => {
+            row.push((opt && opt[0]) || '');
+            row.push((opt && opt[1]) || '');
+        });
+        row.push(letters[(correct || 1) - 1] || 'A');
+        return row;
+    });
+
+    const wsData = [headers, ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [
+        { wch: 40 }, { wch: 40 },
+        { wch: 22 }, { wch: 22 },
+        { wch: 22 }, { wch: 22 },
+        { wch: 22 }, { wch: 22 },
+        { wch: 22 }, { wch: 22 },
+        { wch: 14 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Questions');
+
+    const baseName = currentFile ? currentFile.path.replace(/\.html$/i, '').split('/').pop() : 'quiz-questions';
+    XLSX.writeFile(wb, `${baseName}-questions.xlsx`);
+    showStatus('loadStatus', `Exported ${questions.length} question(s) to Excel.`, 'ok');
+}
+
+/* ================= DELETE QUIZ PAPER (GITHUB FILE) ================= */
+/* Permanently deletes the selected quiz paper file from the GitHub repo. */
+async function deleteQuizPaper() {
+    const s = getSettings();
+    const path = document.getElementById('fileSelect').value;
+    if (!path) {
+        alert('Select a quiz paper from the list first.');
+        return;
+    }
+    if (!confirm(`Permanently delete the quiz paper "${path}" from GitHub?\n\nThis cannot be undone.`)) return;
+    if (!confirm(`Are you absolutely sure? Type OK to confirm deleting "${path}".`)) return;
+
+    showStatus('loadStatus', `Deleting ${path}…`, 'info');
+    try {
+        const getRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(s.branch)}`, {
+            headers: ghHeaders(s.token)
+        });
+        if (!getRes.ok) throw new Error(`Could not find file to delete (status ${getRes.status})`);
+        const fileData = await getRes.json();
+
+        const delRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(path)}`, {
+            method: 'DELETE',
+            headers: { ...ghHeaders(s.token), 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: `Delete ${path} via Question Editor`,
+                sha: fileData.sha,
+                branch: s.branch
+            })
+        });
+        if (!delRes.ok) {
+            const errBody = await delRes.json().catch(() => ({}));
+            throw new Error(errBody.message || `GitHub status ${delRes.status}`);
+        }
+
+        // If the deleted paper was open in the editor, close the editor.
+        if (currentFile && currentFile.path === path) {
+            currentFile = null;
+            questions = [];
+            document.getElementById('editorCard').style.display = 'none';
+            document.getElementById('quizConfigCard').style.display = 'none';
+            document.getElementById('bottomBar').style.display = 'none';
+        }
+
+        showStatus('loadStatus', `✅ Deleted "${path}".`, 'ok');
+        await saveSettingsAndLoadFiles();
+    } catch (e) {
+        showStatus('loadStatus', 'Could not delete paper: ' + e.message, 'err');
+    }
 }
 function moveQuestion(idx, dir) {
     const newIdx = idx + dir;
