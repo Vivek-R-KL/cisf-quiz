@@ -459,6 +459,28 @@ function parseQuizConfig(content) {
     document.getElementById('cfgMaxLocks').value = quizConfig.maxLocks;
 }
 
+/* Parses quiz content already in memory (from a GET or a just-completed PUT)
+   and opens it in the editor — no extra GitHub round-trip needed when we
+   already have the file's content and sha in hand. */
+function openPaperFromContent(path, sha, content) {
+    parseQuizConfig(content);
+
+    const loc = locateArrayLiteral(content, 'questionData');
+    const arrayText = content.slice(loc.start, loc.end + 1);
+
+    let parsed = Function('"use strict"; return (' + arrayText + ');')();
+    if (!Array.isArray(parsed)) throw new Error('Invalid question format.');
+
+    currentFile = { path, sha, content };
+    questions = parsed.map(q => Array.isArray(q) ? q.slice() : q);
+
+    document.getElementById('editorTitle').innerText = `3. Edit Questions — ${path}`;
+    renderQuestions();
+    document.getElementById('quizConfigCard').style.display = 'block';
+    document.getElementById('editorCard').style.display = 'block';
+    document.getElementById('bottomBar').style.display = 'flex';
+}
+
 async function loadSelectedFile() {
     const s = getSettings();
     const path = document.getElementById('fileSelect').value;
@@ -478,26 +500,12 @@ async function loadSelectedFile() {
         const fileData = await res.json();
         const content = base64ToUtf8(fileData.content);
 
-        parseQuizConfig(content);
-
-        const loc = locateArrayLiteral(content, 'questionData');
-        const arrayText = content.slice(loc.start, loc.end + 1);
-
-        let parsed = Function('"use strict"; return (' + arrayText + ');')();
-        if (!Array.isArray(parsed)) throw new Error('Invalid question format.');
-
-        currentFile = { path, sha: fileData.sha, content };
-        questions = parsed.map(q => Array.isArray(q) ? q.slice() : q);
-
-        document.getElementById('editorTitle').innerText = `3. Edit Questions — ${path}`;
-        renderQuestions();
-        document.getElementById('quizConfigCard').style.display = 'block';
-        document.getElementById('editorCard').style.display = 'block';
-        document.getElementById('bottomBar').style.display = 'flex';
+        openPaperFromContent(path, fileData.sha, content);
         showStatus('loadStatus', `Loaded ${questions.length} questions successfully.`, 'ok');
     } catch (e) {
         showStatus('loadStatus', 'Could not open file: ' + e.message, 'err');
     }
+
 }
 
 /* ================= RENDERING (SIDE-BY-SIDE SIDE LAYOUT) ================= */
@@ -761,12 +769,28 @@ async function copySelectedFile() {
             const errBody = await putRes.json().catch(() => ({}));
             throw new Error(errBody.message || `GitHub status ${putRes.status}`);
         }
+        const putResult = await putRes.json();
 
-        showStatus('loadStatus', `✅ Created "${newPath}". Loading it now…`, 'ok');
-        await saveSettingsAndLoadFiles();
+        // Add the new file to the dropdown locally (keeping it sorted) instead of
+        // re-fetching the whole repo's file tree, and open it straight from the
+        // content we already have in memory instead of fetching it again — this
+        // is what was making "Loading it now…" feel slow after creating a paper.
         const select = document.getElementById('fileSelect');
+        if (!existingSha) {
+            const opt = document.createElement('option');
+            opt.value = newPath;
+            opt.textContent = newPath;
+            const existingOpts = Array.from(select.options);
+            const insertBefore = existingOpts.find(o => o.value.localeCompare(newPath) > 0);
+            select.insertBefore(opt, insertBefore || null);
+        }
         select.value = newPath;
-        await loadSelectedFile();
+
+        document.getElementById('editorCard').style.display = 'none';
+        document.getElementById('quizConfigCard').style.display = 'none';
+        document.getElementById('bottomBar').style.display = 'none';
+        openPaperFromContent(newPath, putResult.content.sha, newContent);
+        showStatus('loadStatus', `✅ Created "${newPath}" and loaded ${questions.length} question(s).`, 'ok');
     } catch (e) {
         showStatus('loadStatus', 'Could not copy paper: ' + e.message, 'err');
     }
