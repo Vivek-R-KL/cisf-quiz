@@ -135,6 +135,18 @@
        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPwPhD5WTBPut3gC0LYF_wq1gXZ14O5z78yukoKs1-RQTy4N9YwvSF0axQLHzcUjon/exec"; 
        const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk"; 
 
+// Fetch with a hard timeout - prevents the UI from hanging indefinitely
+// if Apps Script queues the request instead of responding or erroring.
+async function fetchWithTimeout(url, options, timeoutMs = 8000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 async function loginStudent() {
     const usernameInput = document.getElementById('studentUser').value.trim();
     const passwordInput = document.getElementById('studentPass').value.trim();
@@ -177,8 +189,9 @@ async function loginStudent() {
 
     while (attempt < maxRetries) {
         attempt++;
+        loginBtn.innerText = attempt === 1 ? "Authenticating... Please wait" : `Retrying... (attempt ${attempt}/${maxRetries})`;
         try {
-            let res = await fetch(APPS_SCRIPT_URL, { 
+            let res = await fetchWithTimeout(APPS_SCRIPT_URL, { 
                 method: "POST", 
                 body: JSON.stringify({ 
                     action: "verifyUser", 
@@ -186,7 +199,7 @@ async function loginStudent() {
                     username: usernameInput, 
                     password: passwordInput 
                 }) 
-            });
+            }, 8000);
 
             if (!res.ok) throw new Error("Server response error");
 
@@ -242,6 +255,31 @@ async function loginStudent() {
             body: payload
         }).catch(() => {});
     }
+})();
+
+// Prefetch dashboard data (quizzes/materials/forms/instructions) as soon as the
+// login page opens, while the student is still typing credentials. This is the
+// SAME payload every student needs (it's filtered by section later on the
+// dashboard page, not per-user here) - so fetching it early means it's already
+// sitting in localStorage by the time login finishes, and student-dashboard.html
+// renders it instantly instead of waiting on a fresh network call.
+// Silent + best-effort: if it fails, the dashboard page's own retry logic still
+// covers it, so there's no harm in this one not working.
+(function prefetchDashboardData() {
+    const PREFETCH_THROTTLE_MS = 5 * 60 * 1000; // once every 5 minutes per browser
+    const lastPrefetch = parseInt(localStorage.getItem('lastDashboardPrefetch') || '0', 10);
+    if (Date.now() - lastPrefetch < PREFETCH_THROTTLE_MS) return;
+    localStorage.setItem('lastDashboardPrefetch', Date.now().toString());
+
+    fetchWithTimeout(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "loadDashboardData", spreadsheetId: SPREADSHEET_ID })
+    }, 8000)
+    .then(res => res.ok ? res.json() : Promise.reject(new Error("Server response error")))
+    .then(data => {
+        if (data) localStorage.setItem('cached_dashboard_data', JSON.stringify(data));
+    })
+    .catch(() => {}); // Silent - dashboard page will retry on its own if this misses
 })();
 
 // Register Service Worker for PWA capabilities
