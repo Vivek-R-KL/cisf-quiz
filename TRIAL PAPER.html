@@ -275,7 +275,7 @@ username: urlParams.get('username') || safeStorage.get('currentUsername') || 'N/
 studentName: urlParams.get('studentName') || safeStorage.get('currentStudent') || userName || 'Trainee',
 designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || 'Trainee',
 section: urlParams.get('section') || safeStorage.get('studentSectionContext') || 'basic',
-quizName: "TRIAL", 
+quizName: "SCREENER X RAY PAPER 4", 
 score: `${savedAnswers.filter((ans, idx) => ans && ans.toString() === questionData[idx][1].toString()).length}/${TOTAL_QUESTIONS}`,
 timestamp: new Date().toLocaleString()
 };
@@ -774,7 +774,7 @@ studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
 username: urlParams.get('username') || safeStorage.get('currentUsername') || "trainee",
 studentSection: urlParams.get('section') || safeStorage.get('studentSectionContext') || "SCREENER",
 designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || "Trainee",
-quizName: "TRIAL",
+quizName: "SCREENER X RAY PAPER 4",
 score: finalScoreString,
 tabSwitchCount: tabSwitchCount,
 timestamp: new Date().toLocaleString()
