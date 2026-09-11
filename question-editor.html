@@ -86,6 +86,17 @@
     .btn-danger:hover { background: var(--accent-red-hover); }
     .btn-mini { background: #e5e7eb; color: var(--text-primary); padding: 4px 8px; font-size: 12px; }
     .btn-mini:hover { background: #d1d5db; }
+    .btn-clear { background: #fff; color: var(--accent-red); border: 1px solid var(--accent-red); padding: 4px 10px; font-size: 12px; }
+    .btn-clear:hover { background: #fef2f2; }
+    .btn-tool { background: #fff; color: var(--accent-blue); border: 1px solid var(--accent-blue); padding: 6px 10px; font-size: 12px; flex: 1; }
+    .btn-tool:hover { background: #eef4f9; }
+    .btn-tool:disabled { color: #9ca3af; border-color: #d1d5db; cursor: not-allowed; background: #f9fafb; }
+
+    input[readonly], input:disabled {
+        background: #eef0f3 !important;
+        color: var(--text-muted) !important;
+        cursor: not-allowed;
+    }
 
     #status, #loadStatus, #connectStatus { font-size: 12px; margin-top: 6px; padding: 6px 10px; border-radius: 4px; display: none; }
     .ok { display: block !important; background: #d1fae5; color: #065f46; }
@@ -169,6 +180,8 @@
     .opt-block.correct .correct-toggle { color: #047857; }
     .correct-toggle input { width: auto; margin: 0; }
 
+    .q-tools { display: flex; gap: 8px; margin-top: 8px; }
+
     .empty-state { text-align: center; color: var(--text-muted); padding: 20px 10px; }
 
     .bottom-bar {
@@ -210,19 +223,19 @@
 <!-- CONNECTION SETTINGS -->
 <div class="card">
     <h3>1. Connect to GitHub</h3>
-    <small class="hint">Connect your repository to load and modify quiz papers.</small>
+    <small class="hint">Repository is fixed to Vivek-R-KL/cisf-quiz (main). Just paste your access token below.</small>
     <div class="settings-grid">
         <div>
             <label>GitHub Username / Organization</label>
-            <input type="text" id="ghOwner" placeholder="e.g. vivekr">
+            <input type="text" id="ghOwner" readonly disabled>
         </div>
         <div>
             <label>Repository Name</label>
-            <input type="text" id="ghRepo" placeholder="e.g. cisf-asti-quiz">
+            <input type="text" id="ghRepo" readonly disabled>
         </div>
         <div>
             <label>Branch</label>
-            <input type="text" id="ghBranch" placeholder="main" value="main">
+            <input type="text" id="ghBranch" readonly disabled>
         </div>
         <div>
             <label>Access Token</label>
@@ -277,7 +290,7 @@
 <!-- QUESTION EDITOR -->
 <div class="card" id="editorCard" style="display:none;">
     <h3 id="editorTitle">3. Edit Questions</h3>
-    <small class="hint">Click bubble (A, B, C, D) to set correct answer. Questions and options are aligned side-by-side (English | Hindi).</small>
+    <small class="hint">Click bubble (A, B, C, D) to set correct answer. Use "Paste Options" to paste 4 options copied from Excel, and "Translate" to auto-fill Hindi from the English text.</small>
     <div id="questionsWrap"></div>
     <button id="addQuestionFab" onclick="addNewQuestion()">➕ Add New Question</button>
 </div>
@@ -289,17 +302,22 @@
 
 <script>
 /* ================= SETTINGS ================= */
+// Repository is permanently fixed — only the access token is user-editable.
+const FIXED_OWNER = 'Vivek-R-KL';
+const FIXED_REPO = 'cisf-quiz';
+const FIXED_BRANCH = 'main';
+
 function loadSettings() {
-    document.getElementById('ghOwner').value = localStorage.getItem('qeOwner') || '';
-    document.getElementById('ghRepo').value = localStorage.getItem('qeRepo') || '';
-    document.getElementById('ghBranch').value = localStorage.getItem('qeBranch') || 'main';
+    document.getElementById('ghOwner').value = FIXED_OWNER;
+    document.getElementById('ghRepo').value = FIXED_REPO;
+    document.getElementById('ghBranch').value = FIXED_BRANCH;
     document.getElementById('ghToken').value = localStorage.getItem('qeToken') || '';
 }
 function getSettings() {
     return {
-        owner: document.getElementById('ghOwner').value.trim(),
-        repo: document.getElementById('ghRepo').value.trim(),
-        branch: document.getElementById('ghBranch').value.trim() || 'main',
+        owner: FIXED_OWNER,
+        repo: FIXED_REPO,
+        branch: FIXED_BRANCH,
         token: document.getElementById('ghToken').value.trim()
     };
 }
@@ -325,13 +343,10 @@ const EXCLUDED_FILES = new Set([
 
 async function saveSettingsAndLoadFiles() {
     const s = getSettings();
-    if (!s.owner || !s.repo || !s.token) {
-        showStatus('connectStatus', 'Please fill in Username, Repository and Access Token.', 'err');
+    if (!s.token) {
+        showStatus('connectStatus', 'Please paste your GitHub Access Token.', 'err');
         return;
     }
-    localStorage.setItem('qeOwner', s.owner);
-    localStorage.setItem('qeRepo', s.repo);
-    localStorage.setItem('qeBranch', s.branch);
     localStorage.setItem('qeToken', s.token);
 
     showStatus('connectStatus', 'Connecting to GitHub…', 'info');
@@ -514,9 +529,10 @@ function renderQuestions() {
                 <div class="q-top">
                     <span class="q-num">Q${idx + 1}</span>
                     <div class="q-actions">
+                        <button class="btn-clear" onclick="clearQuestion(${idx})">Clear</button>
+                        <button class="btn-danger" onclick="deleteQuestion(${idx})">Delete</button>
                         <button class="btn-mini" onclick="moveQuestion(${idx}, -1)">⬆️</button>
                         <button class="btn-mini" onclick="moveQuestion(${idx}, 1)">⬇️</button>
-                        <button class="btn-danger" onclick="deleteQuestion(${idx})">🗑️</button>
                     </div>
                 </div>
                 <div class="side-by-side">
@@ -532,6 +548,10 @@ function renderQuestions() {
                 <div class="opt-grid">
                     ${optsHtml}
                 </div>
+                <div class="q-tools">
+                    <button class="btn-tool" id="pasteBtn-${idx}" onclick="pasteOptions(${idx})">📋 Paste Options</button>
+                    <button class="btn-tool" id="translateBtn-${idx}" onclick="translateQuestion(${idx})">🌐 Translate</button>
+                </div>
             </div>`;
     }).join('');
 }
@@ -546,6 +566,92 @@ function updateOption(idx, optIdx, langIdx, value) {
     questions[idx][4 + optIdx][langIdx] = value;
 }
 function setCorrect(idx, optionNumber) { questions[idx][1] = optionNumber; renderQuestions(); }
+
+/* Clear a single question's text and options (keeps its position/number) */
+function clearQuestion(idx) {
+    if (!confirm(`Clear all text in Question ${idx + 1}? This cannot be undone.`)) return;
+    const num = questions[idx][0];
+    questions[idx] = [num, 1, '', '', ['', ''], ['', ''], ['', ''], ['', '']];
+    renderQuestions();
+}
+
+/* Paste 4 options copied from Excel (clipboard) straight into a question's option fields.
+   Supports a single column (English only) or two columns (English + Hindi, tab-separated). */
+async function pasteOptions(idx) {
+    const btn = document.getElementById(`pasteBtn-${idx}`);
+    try {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+            throw new Error('Clipboard access is not available in this browser. Try Chrome/Edge over HTTPS.');
+        }
+        const text = await navigator.clipboard.readText();
+        if (!text || !text.trim()) throw new Error('Clipboard is empty. Copy the 4 options from Excel first.');
+
+        const rows = text.replace(/\r/g, '').split('\n').filter(r => r.trim() !== '');
+        if (rows.length === 0) throw new Error('No option rows found on clipboard.');
+
+        for (let i = 0; i < 4; i++) {
+            if (!rows[i]) continue;
+            const cols = rows[i].split('\t');
+            if (!questions[idx][4 + i]) questions[idx][4 + i] = ['', ''];
+            questions[idx][4 + i][0] = (cols[0] || '').trim();
+            if (cols.length > 1) {
+                questions[idx][4 + i][1] = (cols[1] || '').trim();
+            }
+        }
+        renderQuestions();
+        showStatus('loadStatus', `Pasted ${Math.min(rows.length, 4)} option(s) into Question ${idx + 1}.`, 'ok');
+    } catch (e) {
+        alert('Could not paste options: ' + e.message);
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+/* Free machine translation (English -> Hindi) using Google's public translate endpoint. */
+async function translateText(text, targetLang = 'hi') {
+    if (!text || !text.trim()) return '';
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Translation service returned status ${res.status}`);
+    const data = await res.json();
+    return data[0].map(chunk => chunk[0]).join('');
+}
+
+/* Translate the English question + options of one question card into Hindi. */
+async function translateQuestion(idx) {
+    const btn = document.getElementById(`translateBtn-${idx}`);
+    const q = questions[idx];
+    const engQ = q[2] || '';
+    const engOpts = [0, 1, 2, 3].map(i => (q[4 + i] && q[4 + i][0]) || '');
+
+    if (!engQ.trim() && engOpts.every(o => !o.trim())) {
+        alert('Type the English question and options first, then click Translate.');
+        return;
+    }
+
+    if (btn) { btn.disabled = true; btn.innerText = 'Translating…'; }
+    try {
+        const [hq, h1, h2, h3, h4] = await Promise.all([
+            translateText(engQ),
+            translateText(engOpts[0]),
+            translateText(engOpts[1]),
+            translateText(engOpts[2]),
+            translateText(engOpts[3])
+        ]);
+        if (hq) q[3] = hq;
+        [h1, h2, h3, h4].forEach((h, i) => {
+            if (!h) return;
+            if (!q[4 + i]) q[4 + i] = ['', ''];
+            q[4 + i][1] = h;
+        });
+        renderQuestions();
+        showStatus('loadStatus', `Translated Question ${idx + 1} to Hindi.`, 'ok');
+    } catch (e) {
+        alert('Translation failed: ' + e.message + '\n\nThis can happen due to network/CORS restrictions — you can type the Hindi text manually instead.');
+        if (btn) { btn.disabled = false; btn.innerText = '🌐 Translate'; }
+    }
+}
+
 function deleteQuestion(idx) {
     if (!confirm(`Delete Question ${idx + 1}?`)) return;
     questions.splice(idx, 1);
@@ -638,7 +744,7 @@ async function saveToGithub() {
 
 window.onload = () => {
     loadSettings();
-    if (localStorage.getItem('qeOwner') && localStorage.getItem('qeToken')) {
+    if (localStorage.getItem('qeToken')) {
         saveSettingsAndLoadFiles();
     }
 };

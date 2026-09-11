@@ -518,11 +518,20 @@
           </select>
         </div>
 
-        <div>
-          <label for="subBatchFilter">Filter By Batch: </label>
-          <select id="subBatchFilter" onchange="applyBatchFilter()">
-            <option value="ALL">All Batches</option>
-          </select>
+        <div style="position: relative;">
+          <label>Filter By Batch: </label>
+          <button type="button" id="subBatchFilterToggle" class="btn-download" style="background: #7f8c8d; padding: 8px 14px; font-size: 13px;" onclick="toggleSubBatchDropdown(event)">
+            All Batches ▾
+          </button>
+          <div id="subBatchDropdownPanel" style="display: none; position: absolute; top: 100%; left: 0; z-index: 200; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-top: 4px; min-width: 230px; max-height: 240px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.18);">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: bold; padding: 5px 4px; border-bottom: 1px solid #eee; margin-bottom: 6px; cursor: pointer;">
+              <input type="checkbox" id="subBatchAllOption" checked onchange="onSubBatchAllToggle(this)"> All Batches
+            </label>
+            <div id="subBatchCheckboxList"></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="button" class="btn-download" style="background: linear-gradient(135deg, #16a085 0%, #117a65 100%); padding: 6px 14px; font-size: 12px;" onclick="closeSubBatchDropdown()">Done</button>
+            </div>
+          </div>
         </div>
 
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -530,7 +539,7 @@
             📊 Bar Chart Report Download PDF
           </button>
 
-          <button class="btn-download" style="background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);" onclick="downloadBatchPerformancePdf()">
+          <button class="btn-download" style="background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);" onclick="openPerformanceQuizSelectionModal()">
             📄 Download Performance Report (PDF)
           </button>
           
@@ -578,6 +587,33 @@
       <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
         <button class="btn-download" style="background: #34495e;" onclick="closeUserSelectionModal()">Cancel</button>
         <button class="btn-download" style="background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);" onclick="generateSelectedUsersBarChartPdf()">
+          📄 Generate & Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ PAPER SELECTION MODAL FOR PERFORMANCE REPORT PDF -->
+  <div class="modal-overlay" id="performanceQuizSelectionModal" style="z-index: 3000;">
+    <div class="modal-content" style="max-width: 550px; background: #ffffff; padding: 24px; max-height: 90vh; overflow-y: auto;">
+      <h3 style="color: var(--primary-red); margin-top: 0; text-align: center;">Select Quiz Papers to Include</h3>
+      <p style="font-size: 14px; color: var(--text-light); text-align: center; margin-bottom: 15px;">
+        Only the results of the quiz papers selected below will appear in the downloaded Performance Report.
+      </p>
+
+      <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <label style="font-weight: bold; cursor: pointer;">
+          <input type="checkbox" id="selectAllQuizzes" onchange="toggleSelectAllQuizzes(this)"> Select All Quiz Papers
+        </label>
+        <span id="selectedQuizCountLabel" style="font-size: 13px; font-weight: bold; color: var(--primary-red);">0 Selected</span>
+      </div>
+
+      <div id="quizCheckboxList" style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; background: #fafafa;">
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+        <button class="btn-download" style="background: #34495e;" onclick="closePerformanceQuizSelectionModal()">Cancel</button>
+        <button class="btn-download" style="background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);" onclick="downloadBatchPerformancePdf()">
           📄 Generate & Download PDF
         </button>
       </div>
@@ -865,36 +901,96 @@
     }
 
     function populateSubBatchDropdown() {
-      const filterSelect = document.getElementById('subBatchFilter');
-      filterSelect.innerHTML = '<option value="ALL">All Batches</option>';
+      const listContainer = document.getElementById('subBatchCheckboxList');
+      listContainer.innerHTML = '';
+      document.getElementById('subBatchAllOption').checked = true;
 
-      if (batchColumnIndex === -1) return;
+      if (batchColumnIndex !== -1) {
+        const uniqueBatches = new Set();
+        globalReportRows.forEach(row => {
+          const val = row[batchColumnIndex];
+          if (val && val.toString().trim() !== '') {
+            uniqueBatches.add(val.toString().trim());
+          }
+        });
 
-      const uniqueBatches = new Set();
-      globalReportRows.forEach(row => {
-        const val = row[batchColumnIndex];
-        if (val && val.toString().trim() !== '') {
-          uniqueBatches.add(val.toString().trim());
-        }
-      });
+        Array.from(uniqueBatches).sort().forEach(batchName => {
+          const label = document.createElement('label');
+          label.style.cssText = 'display: flex; align-items: center; gap: 6px; padding: 4px; cursor: pointer; font-size: 13px;';
+          label.innerHTML = `<input type="checkbox" class="sub-batch-checkbox" value="${batchName}" onchange="onSubBatchOptionToggle()"> ${batchName}`;
+          listContainer.appendChild(label);
+        });
+      }
 
-      Array.from(uniqueBatches).sort().forEach(batchName => {
-        const opt = document.createElement('option');
-        opt.value = batchName;
-        opt.textContent = batchName;
-        filterSelect.appendChild(opt);
-      });
+      updateSubBatchFilterLabel();
+    }
+
+    function toggleSubBatchDropdown(evt) {
+      if (evt) evt.stopPropagation();
+      const panel = document.getElementById('subBatchDropdownPanel');
+      panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function closeSubBatchDropdown() {
+      document.getElementById('subBatchDropdownPanel').style.display = 'none';
+    }
+
+    document.addEventListener('click', function(evt) {
+      const panel = document.getElementById('subBatchDropdownPanel');
+      const toggleBtn = document.getElementById('subBatchFilterToggle');
+      if (panel && panel.style.display === 'block' && !panel.contains(evt.target) && evt.target !== toggleBtn) {
+        panel.style.display = 'none';
+      }
+    });
+
+    function onSubBatchAllToggle(masterCheckbox) {
+      if (masterCheckbox.checked) {
+        document.querySelectorAll('.sub-batch-checkbox').forEach(cb => cb.checked = false);
+      }
+      applyBatchFilter();
+    }
+
+    function onSubBatchOptionToggle() {
+      const anyChecked = Array.from(document.querySelectorAll('.sub-batch-checkbox')).some(cb => cb.checked);
+      document.getElementById('subBatchAllOption').checked = !anyChecked;
+      applyBatchFilter();
+    }
+
+    function getSelectedSubBatches() {
+      const allOption = document.getElementById('subBatchAllOption');
+      const selected = Array.from(document.querySelectorAll('.sub-batch-checkbox:checked')).map(cb => cb.value);
+      if (!allOption || allOption.checked || selected.length === 0) return ['ALL'];
+      return selected;
+    }
+
+    function getSelectedSubBatchLabel() {
+      const selected = getSelectedSubBatches();
+      return selected[0] === 'ALL' ? 'All Batches' : selected.join(', ');
+    }
+
+    function updateSubBatchFilterLabel() {
+      const toggleBtn = document.getElementById('subBatchFilterToggle');
+      if (!toggleBtn) return;
+      const selected = getSelectedSubBatches();
+      if (selected[0] === 'ALL') {
+        toggleBtn.innerHTML = 'All Batches ▾';
+      } else if (selected.length === 1) {
+        toggleBtn.innerHTML = `${selected[0]} ▾`;
+      } else {
+        toggleBtn.innerHTML = `${selected.length} Batches Selected ▾`;
+      }
     }
 
     function applyBatchFilter() {
-      const selectedSubBatch = document.getElementById('subBatchFilter').value;
+      const selectedBatches = getSelectedSubBatches();
+      updateSubBatchFilterLabel();
 
-      if (selectedSubBatch === 'ALL' || batchColumnIndex === -1) {
+      if (selectedBatches[0] === 'ALL' || batchColumnIndex === -1) {
         filteredReportRows = globalReportRows;
       } else {
         filteredReportRows = globalReportRows.filter(row => {
           const val = row[batchColumnIndex];
-          return val && val.toString().trim() === selectedSubBatch;
+          return val && selectedBatches.includes(val.toString().trim());
         });
       }
 
@@ -1002,6 +1098,64 @@
     function updateSelectedUserCount() {
       const selected = document.querySelectorAll('.user-select-checkbox:checked').length;
       document.getElementById('selectedCountLabel').innerText = `${selected} Selected`;
+    }
+
+    /* --- QUIZ PAPER SELECTION FOR PERFORMANCE REPORT PDF --- */
+
+    function openPerformanceQuizSelectionModal() {
+      if (!filteredReportRows || filteredReportRows.length === 0) {
+        alert("No batch data available to download.");
+        return;
+      }
+
+      const quizListContainer = document.getElementById('quizCheckboxList');
+      quizListContainer.innerHTML = '';
+      document.getElementById('selectAllQuizzes').checked = true;
+
+      const quizStartColIndex = 14;
+      let anyQuiz = false;
+      for (let i = quizStartColIndex; i < globalReportHeaders.length; i++) {
+        const h = globalReportHeaders[i];
+        if (h && h.trim() !== '') {
+          anyQuiz = true;
+          const qDiv = document.createElement('div');
+          qDiv.style.padding = '6px 4px';
+          qDiv.style.borderBottom = '1px solid #eee';
+          qDiv.innerHTML = `
+            <label style="cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; width: 100%;">
+              <input type="checkbox" class="quiz-select-checkbox" value="${i}" checked onchange="updateSelectedQuizCount()">
+              <span>${h.trim()}</span>
+            </label>
+          `;
+          quizListContainer.appendChild(qDiv);
+        }
+      }
+
+      if (!anyQuiz) {
+        alert("No quiz paper results found in the current batch report.");
+        return;
+      }
+
+      updateSelectedQuizCount();
+      document.getElementById('performanceQuizSelectionModal').style.display = 'flex';
+    }
+
+    function closePerformanceQuizSelectionModal() {
+      document.getElementById('performanceQuizSelectionModal').style.display = 'none';
+    }
+
+    function toggleSelectAllQuizzes(masterCheckbox) {
+      const checkboxes = document.querySelectorAll('.quiz-select-checkbox');
+      checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+      updateSelectedQuizCount();
+    }
+
+    function updateSelectedQuizCount() {
+      const total = document.querySelectorAll('.quiz-select-checkbox').length;
+      const selected = document.querySelectorAll('.quiz-select-checkbox:checked').length;
+      document.getElementById('selectedQuizCountLabel').innerText = `${selected} / ${total} Selected`;
+      const masterCb = document.getElementById('selectAllQuizzes');
+      if (masterCb) masterCb.checked = (total > 0 && selected === total);
     }
 
     async function renderOffscreenBarChart(labels, dataValues, width, height) {
@@ -1426,19 +1580,28 @@
         return;
       }
 
+      const selectedQuizIndexes = Array.from(document.querySelectorAll('.quiz-select-checkbox:checked'))
+        .map(cb => parseInt(cb.value, 10));
+
+      if (selectedQuizIndexes.length === 0) {
+        alert("Please select at least one quiz paper to include in the report.");
+        return;
+      }
+
+      closePerformanceQuizSelectionModal();
+
       const usernameIdx = globalReportHeaders.findIndex(h => h && (h.toLowerCase().includes('user') || h.toLowerCase().includes('id')));
       const desigIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('desig'));
       const nameIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'name' || (h.toLowerCase().includes('name') && !h.toLowerCase().includes('user')));
       const coyIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('coy'));
 
-      const quizStartColIndex = 14;
       const quizCols = [];
-      for (let i = quizStartColIndex; i < globalReportHeaders.length; i++) {
+      selectedQuizIndexes.sort((a, b) => a - b).forEach(i => {
         const h = globalReportHeaders[i];
         if (h && h.trim() !== '') {
           quizCols.push({ index: i, name: h.trim() });
         }
-      }
+      });
 
       if (quizCols.length === 0) {
         alert("No quiz paper results found in the current batch report.");
@@ -1453,7 +1616,7 @@
 
       const selectedBatch = document.getElementById('batchSelector').value;
       const sectionText = selectedBatch === "2" ? "Screener Certification" : "Basic Avsec";
-      const selectedSubBatch = document.getElementById('subBatchFilter').value;
+      const selectedSubBatch = getSelectedSubBatchLabel();
 
       const rowStatsRaw = filteredReportRows.map(row => {
         let sum = 0, count = 0;
