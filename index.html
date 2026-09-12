@@ -173,7 +173,35 @@ async function loginStudent() {
                 localStorage.setItem('currentUsername', parsed.username);
                 localStorage.setItem('currentDesignation', parsed.designation);
                 localStorage.setItem('studentSectionContext', (parsed.section || 'basic').toLowerCase());
+
+                // Navigate immediately - the student should never wait on this.
                 window.location.href = "student-dashboard.html";
+
+                // Re-check this login against the live Users sheet in the background.
+                // { keepalive: true } lets the request finish even though we've already
+                // navigated away. This can't stop the page we just opened (the
+                // dashboard's own check on load handles an already-open session), but
+                // it clears the stale cached credentials here so that if this account
+                // was removed/changed, the NEXT login attempt on this device won't be
+                // able to use the fast path again and will be forced through the
+                // real server check.
+                fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    keepalive: true,
+                    body: JSON.stringify({
+                        action: "verifyUser",
+                        spreadsheetId: SPREADSHEET_ID,
+                        username: usernameInput,
+                        password: passwordInput
+                    })
+                }).then(res => res.ok ? res.json() : null)
+                  .then(result => {
+                      if (result && result.status !== "success") {
+                          localStorage.removeItem('user_profile_' + usernameInput.toLowerCase());
+                      }
+                  })
+                  .catch(() => {}); // best-effort only - never block or alarm on a network blip here
+
                 return;
             }
         } catch(e) {}
