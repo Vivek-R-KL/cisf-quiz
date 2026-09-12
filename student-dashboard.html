@@ -68,58 +68,24 @@
 </div>
 
 <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu9RI0D3vPXQ4K0nD_xn8XIggQsH9Osn8_VEVLknWw79wtsGUyvjXHnaZy4LZUvhIU/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPag9VS5W8mKbuTXGT0V-xDrgauCRRNn6WIgJDIjF2htPt1_5I9_7lFv9DwjxD_64Z/exec";
     const SPREADSHEET_ID = localStorage.getItem('globalSpreadsheetId') || "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
     const userSection = (localStorage.getItem('studentSectionContext') || 'basic').toLowerCase();
 
-    window.onload = () => {
-        document.getElementById('sName').innerText = localStorage.getItem('currentStudent') || "Trainee";
-        document.getElementById('sMeta').innerText = `Designation: ${localStorage.getItem('currentDesignation') || 'N/A'} | Section: ${userSection.toUpperCase()}`;
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('sName').innerText =
+            localStorage.getItem('currentStudent') || "Trainee";
+        document.getElementById('sMeta').innerText =
+            `Designation: ${localStorage.getItem('currentDesignation') || 'N/A'} | Section: ${userSection.toUpperCase()}`;
+
+        // Render immediately from cache / one server request.
         loadDashboardContent();
-        revalidateSession(); // runs in parallel, never blocks the dashboard from rendering
-    };
 
-    // Confirms this student is still a valid, current user on the Users sheet.
-    // Runs quietly in the background on every dashboard load (including an
-    // already-open session that's just been left on this device) so that a
-    // removed/changed account stops working promptly instead of only at the
-    // next fresh login. Only acts on an explicit "invalid" answer from the
-    // server - a timeout or network error is ignored so a flaky connection
-    // never wrongly logs a student out mid-exam.
-    async function revalidateSession() {
-        try {
-            const username = localStorage.getItem('currentUsername');
-            if (!username) return;
+    });
 
-            const cachedProfile = localStorage.getItem('user_profile_' + username.toLowerCase());
-            if (!cachedProfile) return;
-
-            const parsed = JSON.parse(cachedProfile);
-            if (!parsed || !parsed.password) return;
-
-            const res = await fetchWithTimeout(APPS_SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "verifyUser",
-                    spreadsheetId: SPREADSHEET_ID,
-                    username: username,
-                    password: parsed.password
-                })
-            }, 8000);
-
-            if (!res.ok) return; // server hiccup - stay logged in, try again next load
-
-            const result = await res.json();
-            if (result && result.status !== "success") {
-                // The account was removed, or its password/details changed.
-                alert("Your access to this portal has been revoked or updated. Please contact your administrator.");
-                localStorage.clear();
-                window.location.href = "index.html";
-            }
-        } catch (e) {
-            // Network error/timeout - fail open, don't disrupt an active session over this.
-        }
-    }
+    // Session validation is intentionally not performed during dashboard startup.
+    // This avoids a second server request competing with dashboard loading.
+    // Authentication is performed by the login endpoint before entering this page.
 
     // Fetch with a hard timeout - prevents the UI from hanging indefinitely
     // if Apps Script queues the request instead of responding or erroring.
@@ -133,49 +99,65 @@
         }
     }
 
-    async function apiCall(data) {
+    async function apiCall(data, timeoutMs = 15000) {
         data.spreadsheetId = SPREADSHEET_ID;
-        let res = await fetchWithTimeout(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(data) }, 8000);
+
+        const res = await fetchWithTimeout(APPS_SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(data)
+        }, timeoutMs);
+
         if (!res.ok) throw new Error("Server response error");
         return await res.json();
     }
 
     const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    // Retries loadDashboardData up to maxRetries times with increasing backoff,
-    // same pattern already used by loginStudent() for verifyUser.
-    async function apiCallWithRetry(data, maxRetries = 3) {
+    async function apiCallWithRetry(data, maxRetries = 2) {
         let attempt = 0;
+
         while (attempt < maxRetries) {
             attempt++;
+
             try {
                 return await apiCall(data);
             } catch (err) {
                 if (attempt >= maxRetries) throw err;
-                await delay(1000 * attempt); // 1s, 2s, ...
+
+                // Jitter avoids a synchronized retry wave when many students
+                // reconnect together.
+                await delay(500 + Math.floor(Math.random() * 1000));
             }
         }
     }
 
     async function loadDashboardContent() {
-        // 1. Instant render from local cache if available
         const cachedDashboard = localStorage.getItem('cached_dashboard_data');
+
+        // 1. Show old data immediately if this browser has it.
         if (cachedDashboard) {
             try {
                 renderDashboardUI(JSON.parse(cachedDashboard));
-            } catch(e) {}
+            } catch (e) {
+                console.warn("Invalid local dashboard cache:", e);
+            }
         }
 
-        // 2. Fetch fresh data, retrying on failure instead of giving up silently
+        // 2. Fetch ONE server-side dashboard cache payload.
         try {
-            let data = await apiCallWithRetry({ action: "loadDashboardData" });
-            if (data) {
+            const data = await apiCallWithRetry(
+                { action: "loadDashboardData" },
+                2
+            );
+
+            if (data && data.status !== "error") {
                 localStorage.setItem('cached_dashboard_data', JSON.stringify(data));
                 renderDashboardUI(data);
             }
         } catch (err) {
-            console.error("Dashboard network fetch failed after retries", err);
-            // Only show the error state if we had nothing cached to fall back on.
+            console.error("Dashboard network fetch failed:", err);
+
             if (!cachedDashboard) {
                 showDashboardLoadError();
             }
