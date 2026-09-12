@@ -132,7 +132,7 @@
     <footer>created and developed by Vivek R ,ALL RIGHTS RESERVED 2026</footer>
 
     <script>
-       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPwPhD5WTBPut3gC0LYF_wq1gXZ14O5z78yukoKs1-RQTy4N9YwvSF0axQLHzcUjon/exec"; 
+       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu9RI0D3vPXQ4K0nD_xn8XIggQsH9Osn8_VEVLknWw79wtsGUyvjXHnaZy4LZUvhIU/exec"; 
        const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk"; 
 
 // Fetch with a hard timeout - prevents the UI from hanging indefinitely
@@ -237,49 +237,34 @@ async function loginStudent() {
     loginBtn.innerText = "Access Dashboard";
 }
 
-// Warm up Google Apps Script Cache upon opening index.html
-(function warmUpBackendCache() {
-    const WARM_THROTTLE_MS = 20 * 60 * 1000; // once every 20 minutes per browser
-    const lastWarm = parseInt(localStorage.getItem('lastWarmupPing') || '0', 10);
-    if (Date.now() - lastWarm < WARM_THROTTLE_MS) return;
+// Warm the server-side cache AND prefetch dashboard content in ONE request.
+//
+// The old version fired two separate POSTs on every page load (a "warmup"
+// ping plus a full "loadDashboardData" fetch). Those ran as two competing
+// Apps Script executions that both needed to read/populate the same
+// server-side cache, and then a student clicking "Access Dashboard" a few
+// seconds later added a THIRD execution (verifyUser) on top of those two.
+// With no other students around, that alone was often enough to make a
+// single login feel stuck for a long time. Doing it as one request removes
+// that self-inflicted congestion, and it will matter far more once 200
+// students are opening this page around the same time.
+(function warmUpAndPrefetch() {
+    const THROTTLE_MS = 5 * 60 * 1000; // once every 5 minutes per browser
+    const lastRun = parseInt(localStorage.getItem('lastWarmupPing') || '0', 10);
+    if (Date.now() - lastRun < THROTTLE_MS) return;
     localStorage.setItem('lastWarmupPing', Date.now().toString());
-
-    const payload = JSON.stringify({ action: "warmup", spreadsheetId: SPREADSHEET_ID });
-
-    if (navigator.sendBeacon) {
-        navigator.sendBeacon(APPS_SCRIPT_URL, payload);
-    } else {
-        fetch(APPS_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: payload
-        }).catch(() => {});
-    }
-})();
-
-// Prefetch dashboard data (quizzes/materials/forms/instructions) as soon as the
-// login page opens, while the student is still typing credentials. This is the
-// SAME payload every student needs (it's filtered by section later on the
-// dashboard page, not per-user here) - so fetching it early means it's already
-// sitting in localStorage by the time login finishes, and student-dashboard.html
-// renders it instantly instead of waiting on a fresh network call.
-// Silent + best-effort: if it fails, the dashboard page's own retry logic still
-// covers it, so there's no harm in this one not working.
-(function prefetchDashboardData() {
-    const PREFETCH_THROTTLE_MS = 5 * 60 * 1000; // once every 5 minutes per browser
-    const lastPrefetch = parseInt(localStorage.getItem('lastDashboardPrefetch') || '0', 10);
-    if (Date.now() - lastPrefetch < PREFETCH_THROTTLE_MS) return;
-    localStorage.setItem('lastDashboardPrefetch', Date.now().toString());
 
     fetchWithTimeout(APPS_SCRIPT_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "loadDashboardData", spreadsheetId: SPREADSHEET_ID })
+        body: JSON.stringify({ action: "warmup", spreadsheetId: SPREADSHEET_ID })
     }, 8000)
     .then(res => res.ok ? res.json() : Promise.reject(new Error("Server response error")))
     .then(data => {
-        if (data) localStorage.setItem('cached_dashboard_data', JSON.stringify(data));
+        if (data && data.status === "success") {
+            localStorage.setItem('cached_dashboard_data', JSON.stringify(data));
+        }
     })
-    .catch(() => {}); // Silent - dashboard page will retry on its own if this misses
+    .catch(() => {}); // Silent + best-effort - the dashboard page's own retry logic still covers a miss
 })();
 
 // Register Service Worker for PWA capabilities

@@ -378,7 +378,7 @@
 </div>
 
 <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPwPhD5WTBPut3gC0LYF_wq1gXZ14O5z78yukoKs1-RQTy4N9YwvSF0axQLHzcUjon/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu9RI0D3vPXQ4K0nD_xn8XIggQsH9Osn8_VEVLknWw79wtsGUyvjXHnaZy4LZUvhIU/exec";
     let SPREADSHEET_ID = localStorage.getItem('globalSpreadsheetId') || "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
     let activeSection = 'basic';
 
@@ -555,7 +555,7 @@
             try {
                 await apiCall({ action: "saveData", key: "Quizzes", data: cachedQuizzes });
             } catch(e) {
-                alert("saved changes to cloud server.");
+                alert("Failed to save changes to cloud server.");
             }
         }
     }
