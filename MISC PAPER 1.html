@@ -186,7 +186,7 @@ e.preventDefault();
 ASTI Delhi Quiz Examination
 </footer>
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPwPhD5WTBPut3gC0LYF_wq1gXZ14O5z78yukoKs1-RQTy4N9YwvSF0axQLHzcUjon/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPag9VS5W8mKbuTXGT0V-xDrgauCRRNn6WIgJDIjF2htPt1_5I9_7lFv9DwjxD_64Z/exec";
 const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
 const ADMIN_UNLOCK_PASSWORD = "igiasti123";
 const TOTAL_QUESTIONS = 60;
@@ -286,7 +286,7 @@ username: urlParams.get('username') || safeStorage.get('currentUsername') || 'N/
 studentName: urlParams.get('studentName') || safeStorage.get('currentStudent') || userName || 'Trainee',
 designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || 'Trainee',
 section: urlParams.get('section') || safeStorage.get('studentSectionContext') || 'basic',
-quizName: "MISC PAPER 1 (18.05.26)", 
+quizName: "DAY 5 PAPER 1", 
 score: `${savedAnswers.filter((ans, idx) => ans && ans.toString() === questionData[idx][1].toString()).length}/${TOTAL_QUESTIONS}`,
 timestamp: new Date().toLocaleString()
 };
@@ -788,7 +788,7 @@ studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
 username: urlParams.get('username') || safeStorage.get('currentUsername') || "trainee",
 studentSection: urlParams.get('section') || safeStorage.get('studentSectionContext') || "SCREENER",
 designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || "Trainee",
-quizName: "MISC PAPER 1 (18.05.26)",
+quizName: "DAY 5 PAPER 1",
 score: finalScoreString,
 tabSwitchCount: tabSwitchCount,
 timestamp: new Date().toLocaleString()
