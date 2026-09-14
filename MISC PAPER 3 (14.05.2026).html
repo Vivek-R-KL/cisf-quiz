@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>ASTI Delhi – DAY 4 PAPER 2 (60 Questions | 35 Min)</title>
+<title>ASTI Delhi – MISC PAPER 3 (14.05.2026) (60 Questions | 35 Min)</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
@@ -117,7 +117,7 @@ e.preventDefault();
 </div>
 <div class="header" style="display: none;" id="main-header">
 <div class="test-title">
-<h3 style="font-size: 1.5em;">DAY 4 PAPER 2</h3>
+<h3 style="font-size: 1.5em;">MISC PAPER 3 (14.05.2026)</h3>
 <div class="institute-logo">ASTI Delhi</div>
 </div>
 <div class="user-info">
@@ -189,7 +189,7 @@ ASTI Delhi Quiz Examination
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA8k8DAsFchK0uDGeQxQralPXW6mM54ytlROXgqwgs2idRbRpjc2nS1SaYiT_t7py9/exec";
 const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
 const ADMIN_UNLOCK_PASSWORD = "igiasti123";
-const TOTAL_QUESTIONS = 60;
+const TOTAL_QUESTIONS = 0;
 const TOTAL_TIME_SECONDS = 35 * 60; 
 const questionData = [];
 // Shuffle the question order every time the quiz is loaded/started.
@@ -286,7 +286,7 @@ username: urlParams.get('username') || safeStorage.get('currentUsername') || 'N/
 studentName: urlParams.get('studentName') || safeStorage.get('currentStudent') || userName || 'Trainee',
 designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || 'Trainee',
 section: urlParams.get('section') || safeStorage.get('studentSectionContext') || 'basic',
-quizName: "DAY 4 PAPER 2", 
+quizName: "MISC PAPER 3 (14.05.2026)", 
 score: `${savedAnswers.filter((ans, idx) => ans && ans.toString() === questionData[idx][1].toString()).length}/${TOTAL_QUESTIONS}`,
 timestamp: new Date().toLocaleString()
 };
@@ -788,7 +788,7 @@ studentName: userName || safeStorage.get('currentStudent') || "Trainee User",
 username: urlParams.get('username') || safeStorage.get('currentUsername') || "trainee",
 studentSection: urlParams.get('section') || safeStorage.get('studentSectionContext') || "SCREENER",
 designation: urlParams.get('designation') || safeStorage.get('currentDesignation') || "Trainee",
-quizName: "DAY 4 PAPER 2",
+quizName: "MISC PAPER 3 (14.05.2026)",
 score: finalScoreString,
 tabSwitchCount: tabSwitchCount,
 timestamp: new Date().toLocaleString()
@@ -877,7 +877,7 @@ innerBox.innerHTML = `
 <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
 <tr>
 <td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>
-<td style="padding: 6px 0;">DAY 4 PAPER 2</td>
+<td style="padding: 6px 0;">MISC PAPER 3 (14.05.2026)</td>
 </tr>
 <tr>
 <td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>
