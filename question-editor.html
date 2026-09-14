@@ -446,8 +446,12 @@ function parseQuizConfig(content) {
     const lockMatch = content.match(/const\s+MAX_LOCKS\s*=\s*(\d+)/);
     quizConfig.maxLocks = lockMatch ? parseInt(lockMatch[1]) : 4;
 
-    // Quiz title from HTML title tag or header
-    const nameMatch = content.match(/<title>ASTI Delhi – ([^(]+)/) || content.match(/quizName:\s*"([^"]+)"/);
+    // Quiz title — read from the quizName variable first (the field this
+    // editor actually keeps in sync on save), falling back to the <title>
+    // tag only for older files that don't have quizName yet. Reading from
+    // <title> first used to cause the "old name comes back after reopening"
+    // bug, because Save Changes never used to update the <title> tag.
+    const nameMatch = content.match(/quizName:\s*"([^"]+)"/) || content.match(/<title>ASTI Delhi – ([^(]+)/);
     quizConfig.name = nameMatch ? nameMatch[1].trim() : 'Quiz';
 
     // Populate UI
@@ -1123,6 +1127,20 @@ async function saveToGithub() {
         newContent = newContent.replace(/const\s+MAX_WARNINGS\s*=\s*\d+/, `const MAX_WARNINGS = ${quizConfig.maxWarnings}`);
         newContent = newContent.replace(/const\s+MAX_LOCKS\s*=\s*\d+/, `const MAX_LOCKS = ${quizConfig.maxLocks}`);
         newContent = newContent.replace(/quizName:\s*"[^"]*"/g, `quizName: "${quizConfig.name}"`);
+
+        // 2b. Update every OTHER place the quiz name is hardcoded in the paper's
+        // own HTML/JS, which quizName: alone never touched. This is why the old
+        // name kept "coming back" after reopening: the editor was reading the
+        // display name back out of the <title> tag, which this save never wrote to.
+        //   - the browser tab <title> (keeps the "(N Questions | M Min)" suffix as-is)
+        newContent = newContent.replace(/(<title>ASTI Delhi – )([^(]+)(\()/,
+            (m, pre, mid, post) => pre + quizConfig.name + ' ' + post);
+        //   - the visible on-screen header (.test-title h3)
+        newContent = newContent.replace(/(<div class="test-title">\s*<h3[^>]*>)([^<]*)(<\/h3>)/,
+            (m, pre, mid, post) => pre + quizConfig.name + post);
+        //   - the "Quiz Title:" row in the downloadable PDF performance summary
+        newContent = newContent.replace(/(Quiz Title:<\/td>\s*<td[^>]*>)([^<]*)(<\/td>)/,
+            (m, pre, mid, post) => pre + quizConfig.name + post);
 
         const res = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(currentFile.path)}`, {
             method: 'PUT',
