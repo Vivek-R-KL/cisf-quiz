@@ -68,9 +68,17 @@
 </div>
 
 <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4qoytR5JOm7uLmk8w01k3Mbfk9GhuVzG4iAh8QzRgT4xG1SCcan6fu2qabmAOyqIf/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4R4aRKMII9y_tPZRFYHzXlEIKr_8nuANsmPZ_KYSJ-HM17wadgQzIzxnvzD8iT9dG/exec";
     const SPREADSHEET_ID = localStorage.getItem('globalSpreadsheetId') || "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
     const userSection = (localStorage.getItem('studentSectionContext') || 'basic').toLowerCase();
+    const sessionToken = localStorage.getItem('currentSessionToken') || '';
+    const HEARTBEAT_INTERVAL_MS = 25000; // stays comfortably under the server's 90s timeout
+
+    // What the monitor should currently show for this student. Defaults to
+    // "Dashboard"; launchQuiz() switches it to "Quiz: <title>" and returning
+    // to this tab switches it back.
+    let currentActivity = "Dashboard";
+    let heartbeatTimer = null;
 
     window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sName').innerText =
@@ -81,11 +89,55 @@
         // Render immediately from cache / one server request.
         loadDashboardContent();
 
+        startHeartbeat();
     });
 
-    // Session validation is intentionally not performed during dashboard startup.
-    // This avoids a second server request competing with dashboard loading.
-    // Authentication is performed by the login endpoint before entering this page.
+    // Coming back to this tab (e.g. after finishing/closing a quiz tab)
+    // reverts the reported activity back to "Dashboard".
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && currentActivity !== 'Dashboard') {
+            currentActivity = 'Dashboard';
+            sendHeartbeat();
+        }
+    });
+
+    function startHeartbeat() {
+        if (!localStorage.getItem('currentUsername') || !sessionToken) {
+            // No session to track (e.g. this page was opened without logging
+            // in through index.html first) - nothing to police here.
+            return;
+        }
+        sendHeartbeat();
+        heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
+    }
+
+    async function sendHeartbeat() {
+        const username = localStorage.getItem('currentUsername');
+        if (!username || !sessionToken) return;
+
+        try {
+            const result = await apiCall({
+                action: "heartbeat",
+                username: username,
+                sessionToken: sessionToken,
+                activity: currentActivity
+            }, 8000);
+
+            if (result && result.status === "invalid_session") {
+                handleKickedOut();
+            }
+        } catch (err) {
+            // Network hiccup - not fatal, the next heartbeat tick just tries again.
+            console.warn("Heartbeat failed:", err);
+        }
+    }
+
+    function handleKickedOut() {
+        if (heartbeatTimer) clearInterval(heartbeatTimer);
+        localStorage.clear();
+        alert("You have been logged out because this account was used to log in on another device.");
+        window.location.href = "index.html";
+    }
 
     // Fetch with a hard timeout - prevents the UI from hanging indefinitely
     // if Apps Script queues the request instead of responding or erroring.
@@ -224,12 +276,31 @@ function renderDashboardUI(data) {
         const studentName = encodeURIComponent(localStorage.getItem('currentStudent') || '');
         const designation = encodeURIComponent(localStorage.getItem('currentDesignation') || '');
         const section = encodeURIComponent(localStorage.getItem('studentSectionContext') || '');
+        const token = encodeURIComponent(sessionToken || '');
 
-        const fullUrl = `${url}?username=${username}&studentName=${studentName}&designation=${designation}&section=${section}`;
+        // Reported to the monitor immediately, without waiting for the next
+        // heartbeat tick, so "Start Test" shows up as attempting a quiz right away.
+        currentActivity = `Quiz: ${title}`;
+        sendHeartbeat();
+
+        // sessionToken is passed through so a quiz page CAN forward it back on
+        // submitScore for the single-device check - it's ignored if the quiz
+        // page doesn't use it.
+        const fullUrl = `${url}?username=${username}&studentName=${studentName}&designation=${designation}&section=${section}&sessionToken=${token}`;
         window.open(fullUrl, "_blank");
     }
 
     function logout() {
+        const username = localStorage.getItem('currentUsername');
+        if (heartbeatTimer) clearInterval(heartbeatTimer);
+
+        // Best-effort - clears the session server-side so the monitor shows
+        // "Not Logged In" immediately instead of waiting for the timeout.
+        // Logout proceeds either way.
+        if (username && sessionToken) {
+            apiCall({ action: "logout", username: username, sessionToken: sessionToken }, 5000).catch(() => {});
+        }
+
         localStorage.clear();
         window.location.href = "index.html";
     }

@@ -132,7 +132,7 @@
     <footer>created and developed by Vivek R ,ALL RIGHTS RESERVED 2026</footer>
 
     <script>
-       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4qoytR5JOm7uLmk8w01k3Mbfk9GhuVzG4iAh8QzRgT4xG1SCcan6fu2qabmAOyqIf/exec"; 
+       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4R4aRKMII9y_tPZRFYHzXlEIKr_8nuANsmPZ_KYSJ-HM17wadgQzIzxnvzD8iT9dG/exec"; 
        const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk"; 
 
 // Fetch with a hard timeout - prevents the UI from hanging indefinitely
@@ -170,10 +170,16 @@ async function loginStudent() {
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({
-                    action: "verifyUser",
+                    // Combined action: checks the password AND fetches the
+                    // dashboard content in the SAME request, so the dashboard
+                    // page has no second server round-trip to wait on.
+                    action: "verifyUserAndLoadDashboard",
                     spreadsheetId: SPREADSHEET_ID,
                     username: usernameInput,
-                    password: passwordInput
+                    password: passwordInput,
+                    // Sent purely so the admin monitor can show "which device" -
+                    // it plays no role in authentication itself.
+                    deviceInfo: (navigator.userAgent || "").substring(0, 60)
                 })
             }, 15000);
 
@@ -182,6 +188,11 @@ async function loginStudent() {
             const result = await res.json();
 
             if (result.status === "success") {
+                // One student = one active device. Logging in here immediately
+                // invalidates any other device already logged in as this user;
+                // this token is how the dashboard proves it's still that
+                // session on every subsequent request.
+                localStorage.setItem('currentSessionToken', result.sessionToken || '');
                 localStorage.setItem('currentStudent', result.profile.name);
                 localStorage.setItem('currentUsername', result.profile.username);
                 localStorage.setItem('currentDesignation', result.profile.designation);
@@ -190,7 +201,13 @@ async function loginStudent() {
                     (result.profile.section || 'basic').toLowerCase()
                 );
 
-                // Dashboard will read its own single cached payload.
+                // Pre-fill the dashboard's own cache with what we just got back,
+                // so student-dashboard.html can render immediately instead of
+                // making its own loadDashboardData request first.
+                if (result.dashboard) {
+                    localStorage.setItem('cached_dashboard_data', JSON.stringify(result.dashboard));
+                }
+
                 window.location.replace("student-dashboard.html");
                 return;
             }
