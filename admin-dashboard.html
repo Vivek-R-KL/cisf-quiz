@@ -406,20 +406,86 @@
 
     async function apiCall(data) {
         data.spreadsheetId = SPREADSHEET_ID;
-        let res = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
-        return await res.json();
+
+        // Apps Script occasionally hangs on a cold instance instead of erroring
+        // out. Without a timeout, fetch() just waits indefinitely and the admin
+        // panel looks permanently stuck with no feedback. 25s is generous but
+        // finite, and it lets us at least tell the admin something is wrong.
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+        try {
+            let res = await fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify(data),
+                signal: controller.signal
+            });
+            return await res.json();
+        } catch (e) {
+            if (e.name === "AbortError") {
+                throw new Error("Request timed out after 25 seconds. The server may be under heavy load.");
+            }
+            throw e;
+        } finally {
+            clearTimeout(timeoutId);
+        }
     }
 
     async function loadAllData() {
-        let users = await apiCall({ action: "loadData", key: "Users" });
-        cachedQuizzes = (await apiCall({ action: "loadData", key: "Quizzes" })) || [];
-        let materials = await apiCall({ action: "loadData", key: "Materials" });
-        let forms = await apiCall({ action: "loadData", key: "Forms" });
+        // Fire the Users call and the combined dashboard call (Quizzes/Materials/
+        // Forms/Instructions in ONE cached read) IN PARALLEL instead of one after
+        // another. Sequential awaits meant total load time was the SUM of every
+        // call; in parallel it's roughly the time of the SLOWEST one.
+        let usersResult, dashboardResult;
+        const [usersOutcome, dashboardOutcome] = await Promise.allSettled([
+            apiCall({ action: "loadData", key: "Users" }),
+            apiCall({ action: "loadDashboardData" })
+        ]);
 
-        renderUserList((users || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection));
+        // allSettled (instead of Promise.all) so one failing call doesn't hide
+        // whether the OTHER call also failed, and so we can show the real
+        // underlying error message (CORS, bad JSON from the server, timeout,
+        // etc.) instead of a generic "could not reach server" that hides it.
+        if (usersOutcome.status === "rejected") {
+            console.error("Users call failed:", usersOutcome.reason);
+            alert("Failed to load Users: " + (usersOutcome.reason && usersOutcome.reason.message ? usersOutcome.reason.message : usersOutcome.reason));
+        } else {
+            usersResult = usersOutcome.value;
+        }
+
+        if (dashboardOutcome.status === "rejected") {
+            console.error("Dashboard call failed:", dashboardOutcome.reason);
+            alert("Failed to load dashboard data: " + (dashboardOutcome.reason && dashboardOutcome.reason.message ? dashboardOutcome.reason.message : dashboardOutcome.reason));
+        } else {
+            dashboardResult = dashboardOutcome.value;
+        }
+
+        if (usersOutcome.status === "rejected" && dashboardOutcome.status === "rejected") {
+            return;
+        }
+
+        // The server can legitimately return {status:"error"/"busy", message:...}
+        // instead of the expected array/object (e.g. cache lock timeout on a cold
+        // cache). Without checking for that, a .filter()/.map() call below would
+        // throw silently and the lists would just never render. Surface it instead.
+        if (usersResult && usersResult.status === "error") {
+            alert("Failed to load users: " + (usersResult.message || "Unknown error") + ". Please retry.");
+            usersResult = [];
+        }
+        if (dashboardResult && dashboardResult.status === "error") {
+            alert("Failed to load dashboard data: " + (dashboardResult.message || "Unknown error") + ". Please retry.");
+            dashboardResult = { quizzes: [], materials: [], forms: [] };
+        }
+
+        let users = Array.isArray(usersResult) ? usersResult : [];
+        cachedQuizzes = (dashboardResult && dashboardResult.quizzes) || [];
+        let materials = (dashboardResult && dashboardResult.materials) || [];
+        let forms = (dashboardResult && dashboardResult.forms) || [];
+
+        renderUserList(users.filter(x => (x.section || 'basic').toLowerCase() === activeSection));
         renderQuizList();
-        renderList('materialList', (materials || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'title', 'materialId', deleteMaterial);
-        renderList('formList', (forms || []).filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'formTitle', 'formId', deleteForm);
+        renderList('materialList', materials.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'title', 'materialId', deleteMaterial);
+        renderList('formList', forms.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'formTitle', 'formId', deleteForm);
     }
 
     /* INSTANTLY RENDER QUIZZES FROM LOCAL CACHE */
