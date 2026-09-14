@@ -177,7 +177,7 @@ async function loginStudent() {
                     spreadsheetId: SPREADSHEET_ID,
                     username: usernameInput,
                     password: passwordInput,
-                    // Sent purely so the admin monitor can show "which device" -
+                    // Stored with the session for reference only -
                     // it plays no role in authentication itself.
                     deviceInfo: (navigator.userAgent || "").substring(0, 60)
                 })

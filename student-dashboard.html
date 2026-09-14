@@ -232,9 +232,8 @@ function renderDashboardUI(data) {
     function logout() {
         const username = localStorage.getItem('currentUsername');
 
-        // Best-effort - clears the session server-side so the monitor shows
-        // "Not Logged In" immediately instead of waiting for the timeout.
-        // Logout proceeds either way.
+        // Best-effort - clears the session server-side immediately instead
+        // of waiting for it to expire. Logout proceeds either way.
         if (username && sessionToken) {
             apiCall({ action: "logout", username: username, sessionToken: sessionToken }, 5000).catch(() => {});
         }
