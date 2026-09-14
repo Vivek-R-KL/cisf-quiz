@@ -384,6 +384,9 @@
 
     // Local cache to keep state fast in memory
     let cachedQuizzes = [];
+    let cachedUsers = [];
+    let cachedMaterials = [];
+    let cachedForms = [];
 
     window.onload = () => {
         document.getElementById('globalSpreadsheetId').value = SPREADSHEET_ID;
@@ -401,7 +404,15 @@
         document.getElementById('btn-basic').classList.toggle('active', sec === 'basic');
         document.getElementById('btn-screener').classList.toggle('active', sec === 'screener');
         document.getElementById('userSectionLabel').innerText = sec.toUpperCase();
-        loadAllData();
+
+        // Switching sections is just re-filtering data we already have in memory
+        // (cachedUsers/cachedQuizzes/cachedMaterials/cachedForms hold BOTH
+        // sections). It should never need a network call. Previously this called
+        // loadAllData() again, which re-hit the server (including the slow/flaky
+        // Users call) on every single toggle — if that call timed out, the
+        // section you switched to looked like it "didn't load," even though
+        // nothing about switching itself needs the network.
+        renderAllSections();
     }
 
     async function apiCall(data) {
@@ -477,15 +488,26 @@
             dashboardResult = { quizzes: [], materials: [], forms: [] };
         }
 
-        let users = Array.isArray(usersResult) ? usersResult : [];
-        cachedQuizzes = (dashboardResult && dashboardResult.quizzes) || [];
-        let materials = (dashboardResult && dashboardResult.materials) || [];
-        let forms = (dashboardResult && dashboardResult.forms) || [];
+        // Only overwrite each cache on a genuine success. If a call failed, keep
+        // whatever we last successfully loaded rather than wiping the screen to
+        // empty — a failed refresh shouldn't erase data that was already showing.
+        if (Array.isArray(usersResult)) cachedUsers = usersResult;
+        if (dashboardResult && Array.isArray(dashboardResult.quizzes)) cachedQuizzes = dashboardResult.quizzes;
+        if (dashboardResult && Array.isArray(dashboardResult.materials)) cachedMaterials = dashboardResult.materials;
+        if (dashboardResult && Array.isArray(dashboardResult.forms)) cachedForms = dashboardResult.forms;
 
-        renderUserList(users.filter(x => (x.section || 'basic').toLowerCase() === activeSection));
+        renderAllSections();
+    }
+
+    /* RE-RENDER ALL FOUR LISTS FOR THE CURRENTLY ACTIVE SECTION, FROM CACHE ONLY.
+       No network calls here — this is what switchSection() calls, so toggling
+       between Basic AVSEC and Screener is instant and never depends on the
+       server being reachable at that moment. */
+    function renderAllSections() {
+        renderUserList(cachedUsers.filter(x => (x.section || 'basic').toLowerCase() === activeSection));
         renderQuizList();
-        renderList('materialList', materials.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'title', 'materialId', deleteMaterial);
-        renderList('formList', forms.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'formTitle', 'formId', deleteForm);
+        renderList('materialList', cachedMaterials.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'title', 'materialId', deleteMaterial);
+        renderList('formList', cachedForms.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'formTitle', 'formId', deleteForm);
     }
 
     /* INSTANTLY RENDER QUIZZES FROM LOCAL CACHE */
