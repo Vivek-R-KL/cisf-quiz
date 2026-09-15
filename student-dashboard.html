@@ -112,6 +112,22 @@
 
     const delay = ms => new Promise(res => setTimeout(res, ms));
 
+    // Turns any of Drive's "Share" link shapes into a direct-download link,
+    // so students land on a download instead of Drive's in-browser preview.
+    // Mirrors extractDriveFileId() in the Apps Script backend.
+    function toDirectDownloadUrl(driveUrl) {
+        if (!driveUrl) return driveUrl;
+        let fileId = null;
+        let m = driveUrl.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
+        if (m) fileId = m[1];
+        if (!fileId) {
+            m = driveUrl.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+            if (m) fileId = m[1];
+        }
+        return fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : driveUrl;
+    }
+
+
     async function apiCallWithRetry(data, maxRetries = 2) {
         let attempt = 0;
 
@@ -204,7 +220,7 @@ function renderDashboardUI(data) {
             <div><strong>${m.title}</strong></div>
             <div class="item-actions">
                 <a href="reader.html?title=${encodeURIComponent(m.title || '')}&driveUrl=${encodeURIComponent(m.driveUrl || '')}" target="_blank" class="btn btn-reader">📖 Read Online</a>
-                <a href="${m.driveUrl}" target="_blank" class="btn" style="background:#10b981;">Open and Download</a>
+                <a href="${toDirectDownloadUrl(m.driveUrl)}" class="btn" style="background:#10b981;">⬇ Direct Download</a>
             </div>
         </div>`);
 

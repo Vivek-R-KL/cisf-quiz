@@ -71,6 +71,23 @@
     }
     .pill-btn:hover { background: rgba(255,255,255,0.22); }
 
+    /* ---------- How-to banner ---------- */
+    .howto-banner {
+        display: flex; align-items: center; justify-content: center; gap: 14px;
+        background: #eef6ff; border-bottom: 1px solid #cfe0ee;
+        color: var(--navy-deep); font-family: 'Inter', sans-serif;
+        font-size: 13.5px; line-height: 1.5;
+        padding: 10px 18px; text-align: center;
+    }
+    .howto-banner strong { color: var(--navy); }
+    .howto-banner button {
+        background: transparent; border: none; color: var(--muted);
+        font-size: 15px; cursor: pointer; flex-shrink: 0; line-height: 1;
+        padding: 2px 4px;
+    }
+    .howto-banner button:hover { color: var(--ink); }
+    @media (max-width: 640px) { .howto-banner { font-size: 12.5px; padding: 9px 14px; } }
+
     /* ---------- Reading column ---------- */
     .page-wrap { display: flex; justify-content: center; padding: 40px 20px 120px; }
     .doc-meta {
@@ -240,7 +257,7 @@
     #googleAssistantPanel {
         position: absolute; display: none; z-index: 200;
         flex-direction: column;
-        width: 320px; max-width: calc(100vw - 20px); height: 320px;
+        width: 320px; max-width: calc(100vw - 20px); height: 190px;
         background: #fff; color: var(--ink);
         border-radius: 14px; overflow: hidden;
         box-shadow: 0 12px 32px rgba(0,0,0,0.28);
@@ -351,6 +368,11 @@
     </div>
 </div>
 
+<div class="howto-banner" id="howtoBanner">
+    <span>💡 <strong>Tip:</strong> Select any text on the page — a small menu lets you <strong>Translate</strong> it into your language or <strong>Ask Google</strong> about it.</span>
+    <button type="button" id="howtoDismiss" aria-label="Dismiss tip" title="Dismiss">✕</button>
+</div>
+
 <div class="page-wrap">
     <div id="statusBox" class="status-box">
         <div class="spinner"></div>
@@ -412,8 +434,8 @@
         <div class="ga-msg-assistant">
             <span class="ga-avatar"></span>
             <div class="ga-bubble">
-                <div class="ga-answer ga-loading" id="gaAnswer">Thinking…</div>
-                <a class="ga-search-link" id="gaSearchLink" href="#" target="_blank" rel="noopener">🔍 See full results on Google</a>
+                <div class="ga-answer" id="gaAnswer">Ask Google about this?</div>
+                <a class="ga-search-link" id="gaSearchLink" href="#" target="_blank" rel="noopener">🔍 Ask Google</a>
             </div>
         </div>
     </div>
@@ -435,6 +457,16 @@ const sessionToken = localStorage.getItem('currentSessionToken') || '';
 
 document.getElementById('topTitle').innerText = materialTitle;
 document.getElementById('downloadOriginal').href = driveUrl;
+
+// The how-to tip only needs to be seen once — remembered per device.
+const howtoBanner = document.getElementById('howtoBanner');
+if (localStorage.getItem('readerHowtoDismissed') === '1') {
+    howtoBanner.style.display = 'none';
+}
+document.getElementById('howtoDismiss').addEventListener('click', () => {
+    howtoBanner.style.display = 'none';
+    localStorage.setItem('readerHowtoDismissed', '1');
+});
 
 function showStatus(html) {
     const box = document.getElementById('statusBox');
@@ -760,10 +792,12 @@ async function renderPdf(base64, fileName) {
 // (that's why the embedded results were showing "couldn't load inline"),
 // and there's no public, key-free Google Assistant API for outside
 // websites. So the assistant panel fetches a short quick-answer summary
-// from a free, CORS-enabled lookup service and shows it as the
-// assistant's chat reply — instant and reliable — while "See full
-// results on Google" always opens the real, full Google search in a new
-// tab.
+// Google actively blocks its own pages from being framed by other sites
+// (that's why embedded results never worked here), and there's no
+// public, key-free Google Assistant API for outside websites. Rather
+// than fake an in-page answer, this panel just asks plainly whether to
+// search Google for the selected text — "Ask Google" always opens the
+// real, full Google search in a new tab.
 const gaPanel = document.getElementById('googleAssistantPanel');
 const gaAnswer = document.getElementById('gaAnswer');
 const gaUserMsg = document.getElementById('gaUserMsg');
@@ -781,8 +815,6 @@ const tpOriginal = document.getElementById('tpOriginal');
 const tpTranslated = document.getElementById('tpTranslated');
 const tpCloseBtn = document.getElementById('tpCloseBtn');
 
-let lastGaQuery = '';
-let gaFetchToken = 0;
 let pendingSelectionText = '';
 let pendingSelectionRange = null;
 let pendingSelectionRect = null; // captured once, at selection time — see note below
@@ -850,51 +882,20 @@ function hideTranslatePopup() {
 
 function hideGaPanel() {
     gaPanel.style.display = 'none';
-    lastGaQuery = '';
-    gaFetchToken++; // invalidate any in-flight lookup
     unlockInteractionPageIfIdle();
 }
 
-// Free, key-free, CORS-enabled instant-answer lookup.
-async function fetchQuickAnswer(text) {
-    const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(text)}&format=json&no_redirect=1&no_html=1&skip_disambig=1`;
-    const res = await fetchWithTimeout(url, {}, 8000);
-    if (!res.ok) throw new Error('Lookup failed: ' + res.status);
-    const data = await res.json();
-    const abstract = (data.AbstractText || data.Definition || '').trim();
-    if (abstract) return abstract;
-    const related = (data.RelatedTopics || []).find(t => t && t.Text);
-    return related ? related.Text : '';
-}
-
-async function showGoogleAssistantFor(text, rect) {
+// No lookup, no "thinking" delay — just fills in the search link for the
+// selected text and shows the panel immediately.
+function showGoogleAssistantFor(text, rect) {
     const query = encodeURIComponent(text);
     gaUserMsg.textContent = text.length > 200 ? text.slice(0, 200) + '…' : text;
     gaOpenNewTab.href = `https://www.google.com/search?q=${query}`;
     gaSearchLink.href = `https://www.google.com/search?q=${query}`;
 
-    positionFloatingBox(gaPanel, rect, 320, 320);
+    positionFloatingBox(gaPanel, rect, 320, 190);
     gaPanel.style.display = 'flex';
     document.getElementById('gaChatBody').scrollTop = 0;
-
-    if (text === lastGaQuery) return;
-    lastGaQuery = text;
-
-    const myToken = ++gaFetchToken;
-    gaAnswer.textContent = 'Thinking…';
-    gaAnswer.classList.add('ga-loading');
-
-    try {
-        const summary = await fetchQuickAnswer(text);
-        if (myToken !== gaFetchToken) return; // a newer selection came in meanwhile
-        gaAnswer.classList.remove('ga-loading');
-        gaAnswer.textContent = summary || 'No quick summary found for this — tap below for full results.';
-    } catch (err) {
-        if (myToken !== gaFetchToken) return;
-        console.error('Quick-answer lookup failed:', err);
-        gaAnswer.classList.remove('ga-loading');
-        gaAnswer.textContent = "Couldn't fetch a quick summary — tap below to search on Google.";
-    }
 }
 
 // Translates just the selected snippet (not the whole page) and shows it
