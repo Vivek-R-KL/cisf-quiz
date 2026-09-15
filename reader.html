@@ -505,16 +505,20 @@ async function loadMaterial() {
         return;
     }
 
-    // Large scanned PDFs take a while to fetch/base64-decode over a slow
-    // connection. Instead of the fetch silently sitting there and looking
-    // frozen, update the status message after a few seconds so the
-    // student knows it's still working, not stuck.
+    // Large scanned PDFs still take a while to fetch over a slow connection.
+    // Instead of the fetch silently sitting there and looking frozen, update
+    // the status message after a few seconds so the student knows it's
+    // still working, not stuck.
     const slowNoteTimer = setTimeout(() => {
         const p = document.querySelector('#statusBox p');
         if (p) p.textContent = "This material is taking a little longer than usual — still fetching it, please wait.";
     }, 7000);
 
     try {
+        // This call is now cheap and fast: Apps Script only checks the
+        // session and reads the file's metadata, it no longer downloads or
+        // base64-encodes the PDF itself — so the old 45s allowance (for a
+        // whole-file transfer through Apps Script) is no longer needed here.
         const res = await fetchWithTimeout(APPS_SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -525,7 +529,7 @@ async function loadMaterial() {
                 username: username,
                 sessionToken: sessionToken
             })
-        }, 45000);
+        }, 15000);
 
         if (!res.ok) throw new Error("Server response error");
         const result = await res.json();
@@ -537,7 +541,21 @@ async function loadMaterial() {
             return;
         }
 
-        await renderPdf(result.base64, result.fileName || materialTitle);
+        // The actual PDF bytes now come straight from Google's Drive API
+        // using the short-lived access token Apps Script handed back —
+        // this is the part that used to be slow (Apps Script downloading,
+        // base64-encoding and JSON-wrapping the whole file before the
+        // browser saw a single byte). Drive's own plain download links
+        // don't send CORS headers, but this authenticated API endpoint does.
+        const driveRes = await fetchWithTimeout(
+            `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(result.fileId)}?alt=media`,
+            { headers: { Authorization: `Bearer ${result.accessToken}` } },
+            45000
+        );
+        if (!driveRes.ok) throw new Error("Drive fetch failed: " + driveRes.status);
+        const pdfBytes = new Uint8Array(await driveRes.arrayBuffer());
+
+        await renderPdf(pdfBytes, result.fileName || materialTitle);
 
     } catch (err) {
         console.error("Material load failed:", err);
@@ -546,13 +564,6 @@ async function loadMaterial() {
     } finally {
         clearTimeout(slowNoteTimer);
     }
-}
-
-function base64ToUint8Array(base64) {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return bytes;
 }
 
 // Builds the invisible, selectable text layer ourselves rather than
@@ -728,8 +739,7 @@ function handlePageIntersection(entries) {
     });
 }
 
-async function renderPdf(base64, fileName) {
-    const data = base64ToUint8Array(base64);
+async function renderPdf(data, fileName) {
     const pdf = await pdfjsLib.getDocument({ data }).promise;
 
     const nativeEl = document.getElementById('nativeView');
