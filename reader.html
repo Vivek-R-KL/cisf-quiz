@@ -101,6 +101,7 @@
         box-shadow: 0 4px 18px rgba(0,0,0,0.16), 0 1px 4px rgba(0,0,0,0.08);
         border: 1px solid var(--paper-edge);
         line-height: 0;
+        overflow: hidden;
     }
     .pdf-page-shell canvas { display: block; }
     .pdf-page-caption {
@@ -109,6 +110,34 @@
     }
     .pdf-progress-note {
         color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; text-align: center;
+    }
+    /* ---------- Lazy-loaded page placeholder ---------- */
+    /* Pages far from the viewport sit as a cheap skeleton (no canvas, no
+       text layer) until they scroll near view, and go back to this once
+       they scroll far away again. This is what keeps a 50+ page document
+       from rendering every page (and holding every page's canvas in
+       memory) all at once — the thing that used to make the reader hang
+       or crash, especially on phones. */
+    .pdf-page-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(100deg, #f4f2ec 30%, #ece9e0 50%, #f4f2ec 70%);
+        background-size: 200% 100%;
+        animation: skeleton-sheen 1.6s ease-in-out infinite;
+    }
+    @keyframes skeleton-sheen { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .pdf-page-placeholder span {
+        font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--muted); font-weight: 600;
+    }
+    .pdf-page-error {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Inter', sans-serif; font-size: 12.5px; color: #b91c1c; text-align: center;
+        padding: 12px;
+    }
+    .pdf-load-note {
+        color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; text-align: center;
+        margin: -6px 0 4px;
     }
     /* Standard pdf.js text layer: transparent text positioned exactly
        over each glyph on the canvas, so dragging a selection over the
@@ -444,6 +473,15 @@ async function loadMaterial() {
         return;
     }
 
+    // Large scanned PDFs take a while to fetch/base64-decode over a slow
+    // connection. Instead of the fetch silently sitting there and looking
+    // frozen, update the status message after a few seconds so the
+    // student knows it's still working, not stuck.
+    const slowNoteTimer = setTimeout(() => {
+        const p = document.querySelector('#statusBox p');
+        if (p) p.textContent = "This material is taking a little longer than usual — still fetching it, please wait.";
+    }, 7000);
+
     try {
         const res = await fetchWithTimeout(APPS_SCRIPT_URL, {
             method: "POST",
@@ -455,7 +493,7 @@ async function loadMaterial() {
                 username: username,
                 sessionToken: sessionToken
             })
-        }, 25000);
+        }, 45000);
 
         if (!res.ok) throw new Error("Server response error");
         const result = await res.json();
@@ -473,6 +511,8 @@ async function loadMaterial() {
         console.error("Material load failed:", err);
         showStatus(`<h3>Couldn't reach the server</h3><p>The connection was slow or interrupted.</p>
             <button class="btn-solid" onclick="location.reload()">Retry</button>`);
+    } finally {
+        clearTimeout(slowNoteTimer);
     }
 }
 
@@ -542,21 +582,42 @@ function buildManualTextLayer(textContent, viewport, container, cssScale) {
 // Assistant lookup) even though what they're looking at is a picture of
 // the page, not HTML text.
 //
-// The canvas is rendered at devicePixelRatio for a crisp, non-blurry
-// result, then sized back down with CSS to the width it should actually
-// occupy on screen — the standard pdf.js approach.
-async function renderNativePage(pdf, pageNum, wrapEl, beforeEl) {
-    const page = await pdf.getPage(pageNum);
-    const unscaledViewport = page.getViewport({ scale: 1 });
-    const targetWidth = Math.min(wrapEl.clientWidth || 860, 880);
-    const cssScale = targetWidth / unscaledViewport.width;
-    const viewport = page.getViewport({ scale: cssScale });
-    const outputScale = window.devicePixelRatio || 1;
+// The canvas is rendered at devicePixelRatio (capped at 2x — going higher
+// roughly doubles memory per extra step for a visual difference nobody
+// can see) for a crisp, non-blurry result, then sized back down with CSS
+// to the width it should actually occupy on screen.
 
-    const pageShell = document.createElement('div');
-    pageShell.className = 'pdf-page-shell';
-    pageShell.style.width = Math.floor(viewport.width) + 'px';
-    pageShell.style.height = Math.floor(viewport.height) + 'px';
+// --- VIRTUALIZED PAGE RENDERING ---
+// Rendering every page up front (the old approach) meant a 30–50 page
+// study material had every single page's canvas + text layer sitting in
+// memory simultaneously before the student could read anything — on a
+// budget phone that's easily what was making the reader hang, stall
+// partway through, or crash outright on the bigger PDFs.
+//
+// Instead: every page starts as a cheap placeholder (correctly sized, so
+// scrolling/scrollbar behave exactly as if all pages were already there).
+// An IntersectionObserver renders a page's real canvas+text layer only
+// once it scrolls near the viewport, and tears it back down to a
+// placeholder once it scrolls far away again — so only a handful of
+// pages are ever actually in memory at once, no matter how long the
+// document is. The very first page(s) render immediately since they
+// start inside the observer's margin.
+let pageStates = [];
+let pageObserver = null;
+
+function pageInnerHTML_loading(pageNum) {
+    return `<span>Page ${pageNum}</span>`;
+}
+
+async function renderPage(state) {
+    if (state.rendered || state.rendering) return;
+    state.rendering = true;
+
+    const { page, viewport, cssScale, innerEl, pageNum } = state;
+    const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+
+    innerEl.innerHTML = '';
+    innerEl.classList.remove('pdf-page-placeholder');
 
     const canvas = document.createElement('canvas');
     canvas.width = Math.floor(viewport.width * outputScale);
@@ -565,29 +626,74 @@ async function renderNativePage(pdf, pageNum, wrapEl, beforeEl) {
     canvas.style.height = Math.floor(viewport.height) + 'px';
     const ctx = canvas.getContext('2d');
     const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
-    pageShell.appendChild(canvas);
+    innerEl.appendChild(canvas);
 
     const textLayerDiv = document.createElement('div');
     textLayerDiv.className = 'textLayer';
     textLayerDiv.style.width = Math.floor(viewport.width) + 'px';
     textLayerDiv.style.height = Math.floor(viewport.height) + 'px';
-    pageShell.appendChild(textLayerDiv);
-
-    wrapEl.insertBefore(pageShell, beforeEl);
-
-    await page.render({ canvasContext: ctx, viewport, transform }).promise;
+    innerEl.appendChild(textLayerDiv);
 
     try {
-        const textContent = await page.getTextContent();
-        buildManualTextLayer(textContent, viewport, textLayerDiv, cssScale);
+        const renderTask = page.render({ canvasContext: ctx, viewport, transform });
+        state.renderTask = renderTask;
+        await renderTask.promise;
+
+        try {
+            const textContent = await page.getTextContent();
+            buildManualTextLayer(textContent, viewport, textLayerDiv, cssScale);
+        } catch (textErr) {
+            console.error('Text layer failed for page ' + pageNum + ' — the page still displays, just without text selection there:', textErr);
+        }
+
+        state.rendered = true;
     } catch (err) {
-        console.error('Text layer failed for page ' + pageNum + ' — the page still displays, just without text selection there:', err);
+        // A cancelled render (page scrolled away mid-render) is expected
+        // and not an error worth showing — just leave it unrendered so it
+        // tries again if the student scrolls back.
+        if (err && err.name === 'RenderingCancelledException') {
+            innerEl.classList.add('pdf-page-placeholder');
+            innerEl.innerHTML = pageInnerHTML_loading(pageNum);
+        } else {
+            console.error('Failed to render page ' + pageNum + ':', err);
+            innerEl.innerHTML = `<div class="pdf-page-error">Couldn't render page ${pageNum}. Try scrolling away and back, or use the original PDF.</div>`;
+        }
+    } finally {
+        state.rendering = false;
+        state.renderTask = null;
+    }
+}
+
+function unloadPage(state) {
+    if (!state.rendered) return;
+
+    // Never tear down a page mid-interaction: either its text is still
+    // selected, or it's the page a Translate/Assistant popup is open for.
+    if (state.shellEl && state.shellEl === activeInteractionShell) return;
+    const sel = window.getSelection();
+    if (sel && sel.anchorNode && state.innerEl.contains(sel.anchorNode)) return;
+
+    if (state.renderTask && state.renderTask.cancel) {
+        try { state.renderTask.cancel(); } catch (e) {}
     }
 
-    const caption = document.createElement('div');
-    caption.className = 'pdf-page-caption';
-    caption.textContent = `Page ${pageNum} of ${pdf.numPages}`;
-    wrapEl.insertBefore(caption, beforeEl);
+    state.innerEl.innerHTML = pageInnerHTML_loading(state.pageNum);
+    state.innerEl.classList.add('pdf-page-placeholder');
+    state.rendered = false;
+}
+
+function handlePageIntersection(entries) {
+    entries.forEach(entry => {
+        const pageNum = parseInt(entry.target.dataset.pageNum, 10);
+        const state = pageStates[pageNum - 1];
+        if (!state) return;
+
+        if (entry.isIntersecting) {
+            renderPage(state);
+        } else {
+            unloadPage(state);
+        }
+    });
 }
 
 async function renderPdf(base64, fileName) {
@@ -595,28 +701,58 @@ async function renderPdf(base64, fileName) {
     const pdf = await pdfjsLib.getDocument({ data }).promise;
 
     const nativeEl = document.getElementById('nativeView');
-
     nativeEl.innerHTML = `<div class="pdf-doc-header">
         <h1 class="doc-title">${materialTitle}</h1>
         <p class="doc-meta">${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} · Original PDF</p>
     </div>`;
+    if (pdf.numPages > 6) {
+        const note = document.createElement('p');
+        note.className = 'pdf-load-note';
+        note.textContent = 'Pages load as you scroll to keep things fast.';
+        nativeEl.appendChild(note);
+    }
 
-    // Reveal the shell immediately and fill it in page by page, instead
-    // of making the student stare at a spinner until every page (which
-    // can be 20+) has finished rendering.
     document.getElementById('statusBox').style.display = 'none';
     nativeEl.style.display = 'flex';
 
-    const progressNote = document.createElement('p');
-    progressNote.className = 'pdf-progress-note';
-    nativeEl.appendChild(progressNote);
+    const targetWidth = Math.min(nativeEl.clientWidth || 860, 880);
+    pageStates = [];
+    pageObserver = new IntersectionObserver(handlePageIntersection, {
+        root: null,
+        rootMargin: '900px 0px', // render a bit before it's visible, unload once well past that
+        threshold: 0
+    });
 
+    // Reading page metadata (dimensions) is cheap — it does not render or
+    // decode page content — so doing this up front for every page is fine
+    // even for a long document, and lets every placeholder be exactly the
+    // right size from the start (no layout jump as pages load in).
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        progressNote.textContent = pdf.numPages > 1 ? `Rendering page ${pageNum} of ${pdf.numPages}…` : 'Rendering…';
-        await renderNativePage(pdf, pageNum, nativeEl, progressNote);
-    }
+        const page = await pdf.getPage(pageNum);
+        const unscaledViewport = page.getViewport({ scale: 1 });
+        const cssScale = targetWidth / unscaledViewport.width;
+        const viewport = page.getViewport({ scale: cssScale });
 
-    progressNote.remove();
+        const shell = document.createElement('div');
+        shell.className = 'pdf-page-shell';
+        shell.style.width = Math.floor(viewport.width) + 'px';
+        shell.style.height = Math.floor(viewport.height) + 'px';
+        shell.dataset.pageNum = pageNum;
+
+        const inner = document.createElement('div');
+        inner.className = 'pdf-page-placeholder';
+        inner.innerHTML = pageInnerHTML_loading(pageNum);
+        shell.appendChild(inner);
+        nativeEl.appendChild(shell);
+
+        const caption = document.createElement('div');
+        caption.className = 'pdf-page-caption';
+        caption.textContent = `Page ${pageNum} of ${pdf.numPages}`;
+        nativeEl.appendChild(caption);
+
+        pageStates.push({ pageNum, page, viewport, cssScale, innerEl: inner, shellEl: shell, rendered: false, rendering: false, renderTask: null });
+        pageObserver.observe(shell);
+    }
 }
 
 /* ---------- Text selection → choose Translate or Google Assistant ---------- */
@@ -649,12 +785,39 @@ let lastGaQuery = '';
 let gaFetchToken = 0;
 let pendingSelectionText = '';
 let pendingSelectionRange = null;
+let pendingSelectionRect = null; // captured once, at selection time — see note below
+// The page a selection/translate/assistant interaction is currently
+// happening on. The lazy-loading in renderPdf() will unload a page's
+// canvas once it scrolls away, which would otherwise be able to yank the
+// DOM out from under an open Translate/Assistant popup for that exact
+// selection (breaking positioning, or worse). Anything that has this
+// page "locked" keeps it rendered until the interaction is done.
+let activeInteractionShell = null;
+
+function lockInteractionPage(range) {
+    let node = range ? range.commonAncestorContainer : null;
+    while (node && node.nodeType !== 1) node = node.parentNode;
+    activeInteractionShell = node && node.closest ? node.closest('.pdf-page-shell') : null;
+}
+
+function unlockInteractionPageIfIdle() {
+    const anyOpen = selectionToolbar.style.display !== 'none'
+        || translatePopup.style.display !== 'none'
+        || gaPanel.style.display !== 'none';
+    if (!anyOpen) activeInteractionShell = null;
+}
 
 // Shared positioning for any of the three floating boxes (toolbar, GA
 // panel, translate popup) — placed just below the selected text, or
-// above it if there isn't room below.
-function positionFloatingBox(el, range, boxWidth, boxHeight) {
-    const rect = range.getBoundingClientRect();
+// above it if there isn't room below. Takes a plain rect (captured once,
+// via getBoundingClientRect(), at the moment text was selected) rather
+// than a live Range: by the time the student taps "Translate" the
+// underlying page may have been re-rendered or (with the lazy-loading
+// above) briefly unloaded, and re-measuring a Range against changed DOM
+// can silently collapse to a 0×0 rect — which is what made the popup
+// used to sometimes open off-screen or in the top-left corner, looking
+// exactly like "nothing happened" when it had actually fetched fine.
+function positionFloatingBox(el, rect, boxWidth, boxHeight) {
     const margin = 10;
 
     let left = rect.left + window.scrollX + rect.width / 2 - boxWidth / 2;
@@ -670,23 +833,26 @@ function positionFloatingBox(el, range, boxWidth, boxHeight) {
     el.style.top = `${top}px`;
 }
 
-function showSelectionToolbar(range) {
-    positionFloatingBox(selectionToolbar, range, 210, 44);
+function showSelectionToolbar(rect) {
+    positionFloatingBox(selectionToolbar, rect, 210, 44);
     selectionToolbar.style.display = 'flex';
 }
 
 function hideSelectionToolbar() {
     selectionToolbar.style.display = 'none';
+    unlockInteractionPageIfIdle();
 }
 
 function hideTranslatePopup() {
     translatePopup.style.display = 'none';
+    unlockInteractionPageIfIdle();
 }
 
 function hideGaPanel() {
     gaPanel.style.display = 'none';
     lastGaQuery = '';
     gaFetchToken++; // invalidate any in-flight lookup
+    unlockInteractionPageIfIdle();
 }
 
 // Free, key-free, CORS-enabled instant-answer lookup.
@@ -701,13 +867,13 @@ async function fetchQuickAnswer(text) {
     return related ? related.Text : '';
 }
 
-async function showGoogleAssistantFor(text, range) {
+async function showGoogleAssistantFor(text, rect) {
     const query = encodeURIComponent(text);
     gaUserMsg.textContent = text.length > 200 ? text.slice(0, 200) + '…' : text;
     gaOpenNewTab.href = `https://www.google.com/search?q=${query}`;
     gaSearchLink.href = `https://www.google.com/search?q=${query}`;
 
-    positionFloatingBox(gaPanel, range, 320, 320);
+    positionFloatingBox(gaPanel, rect, 320, 320);
     gaPanel.style.display = 'flex';
     document.getElementById('gaChatBody').scrollTop = 0;
 
@@ -747,27 +913,27 @@ async function runSnippetTranslation() {
     } catch (err) {
         if (myText !== pendingSelectionText) return;
         console.error('Snippet translation failed:', err);
-        tpTranslated.textContent = "Couldn't translate this selection — try again.";
+        tpTranslated.textContent = "Couldn't translate this selection right now — check your connection and try again.";
     } finally {
         if (myText === pendingSelectionText) tpTranslated.classList.remove('tp-loading');
     }
 }
 
 toolbarTranslateBtn.addEventListener('click', () => {
-    if (!pendingSelectionRange) return;
+    if (!pendingSelectionRect) return;
     hideSelectionToolbar();
 
     tpOriginal.textContent = pendingSelectionText;
 
-    positionFloatingBox(translatePopup, pendingSelectionRange, 300, 220);
+    positionFloatingBox(translatePopup, pendingSelectionRect, 300, 220);
     translatePopup.style.display = 'flex';
     runSnippetTranslation();
 });
 
 toolbarAssistantBtn.addEventListener('click', () => {
-    if (!pendingSelectionRange) return;
+    if (!pendingSelectionRect) return;
     hideSelectionToolbar();
-    showGoogleAssistantFor(pendingSelectionText, pendingSelectionRange);
+    showGoogleAssistantFor(pendingSelectionText, pendingSelectionRect);
 });
 
 tpLangSelect.addEventListener('change', runSnippetTranslation);
@@ -789,7 +955,9 @@ function evaluateSelection() {
 
     pendingSelectionText = text;
     pendingSelectionRange = selection.getRangeAt(0).cloneRange();
-    showSelectionToolbar(pendingSelectionRange);
+    pendingSelectionRect = pendingSelectionRange.getBoundingClientRect();
+    lockInteractionPage(pendingSelectionRange);
+    showSelectionToolbar(pendingSelectionRect);
 }
 
 function handleSelectionChange(e) {
@@ -837,6 +1005,44 @@ function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 // Translating one node's exact text per request is what keeps every piece
 // correct; each call also retries a couple of times on failure so a single
 // dropped request doesn't leave that sentence in English.
+async function translateViaGoogle(text, targetLang, retries) {
+    let lastErr;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+            const res = await fetchWithTimeout(url, {}, 10000);
+            if (!res.ok) throw new Error('Translate request failed: ' + res.status);
+            const data = await res.json();
+            const translated = (data[0] || []).map(seg => seg[0]).join('');
+            if (!translated) throw new Error('Empty translation result');
+            return translated;
+        } catch (err) {
+            lastErr = err;
+            if (attempt < retries) await sleep(400 * (attempt + 1));
+        }
+    }
+    throw lastErr;
+}
+
+// Fallback used only if Google's endpoint fails outright (this specific
+// hosting origin can get blocked by Google's CORS/abuse checks on that
+// endpoint, which is the most common reason "Translate" would silently
+// stop working even though the button and popup look fine). MyMemory is
+// a separate, genuinely CORS-open translation API — not as strong on the
+// rarer regional languages, but it means a failed Google call doesn't
+// leave the student with nothing.
+async function translateViaMyMemory(text, targetLang) {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+    const res = await fetchWithTimeout(url, {}, 10000);
+    if (!res.ok) throw new Error('MyMemory request failed: ' + res.status);
+    const data = await res.json();
+    const translated = data && data.responseData && data.responseData.translatedText;
+    if (!translated || /MYMEMORY WARNING/i.test(translated)) {
+        throw new Error('MyMemory could not translate this language pair');
+    }
+    return translated;
+}
+
 async function translateOne(text, targetLang, retries = 2) {
     const cacheKey = `${targetLang}::${text}`;
     if (translationCache[cacheKey]) return translationCache[cacheKey];
@@ -850,19 +1056,19 @@ async function translateOne(text, targetLang, retries = 2) {
     if (pendingTranslations[cacheKey]) return pendingTranslations[cacheKey];
 
     const promise = (async () => {
-        for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const translated = await translateViaGoogle(text, targetLang, retries);
+            translationCache[cacheKey] = translated;
+            return translated;
+        } catch (primaryErr) {
+            console.warn('Google translate failed, trying fallback provider:', primaryErr);
             try {
-                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-                const res = await fetchWithTimeout(url, {}, 10000);
-                if (!res.ok) throw new Error('Translate request failed: ' + res.status);
-                const data = await res.json();
-                const translated = (data[0] || []).map(seg => seg[0]).join('');
-                if (!translated) throw new Error('Empty translation result');
+                const translated = await translateViaMyMemory(text, targetLang);
                 translationCache[cacheKey] = translated;
                 return translated;
-            } catch (err) {
-                if (attempt === retries) throw err;
-                await sleep(400 * (attempt + 1));
+            } catch (fallbackErr) {
+                console.error('Fallback translate also failed:', fallbackErr);
+                throw primaryErr;
             }
         }
     })();

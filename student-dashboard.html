@@ -14,8 +14,10 @@
         .section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
         .card { background: var(--card); border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .card h3 { margin-top: 0; color: var(--brand); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #f8fafc; padding-bottom: 10px; }
-        .action-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px; }
+        .action-item { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px; }
+        .item-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 5px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 13px; }
+        .btn-reader { background: #0b3c5d; }
         .btn-logout { background: #ef4444; }
         footer { text-align: center; margin-top: 40px; padding: 20px 0; color: #64748b; font-size: 14px; border-top: 1px solid #cbd5e1; }
     </style>
@@ -200,7 +202,10 @@ function renderDashboardUI(data) {
     renderItems('materialContainer', (data.materials || []).filter(m => (m.section || 'basic').toLowerCase() === userSection), m => `
         <div class="action-item">
             <div><strong>${m.title}</strong></div>
-            <a href="${m.driveUrl}" target="_blank" class="btn" style="background:#10b981;">Open and Download</a>
+            <div class="item-actions">
+                <a href="reader.html?title=${encodeURIComponent(m.title || '')}&driveUrl=${encodeURIComponent(m.driveUrl || '')}" target="_blank" class="btn btn-reader">📖 Read Online</a>
+                <a href="${m.driveUrl}" target="_blank" class="btn" style="background:#10b981;">Open and Download</a>
+            </div>
         </div>`);
 
     // Render Forms
