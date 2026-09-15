@@ -73,42 +73,9 @@
 
     /* ---------- Reading column ---------- */
     .page-wrap { display: flex; justify-content: center; padding: 40px 20px 120px; }
-    .reader {
-        width: 100%; max-width: 680px;
-        font-family: 'Source Serif 4', var(--indic-fonts), serif;
-        font-size: 19px; line-height: 1.75;
-        color: var(--ink);
-    }
-    .reader h1.doc-title {
-        font-size: 30px; font-weight: 700; line-height: 1.25;
-        margin: 0 0 6px 0; color: var(--navy-deep);
-    }
     .doc-meta {
         font-family: 'Inter', sans-serif; font-size: 13px; color: var(--muted);
         margin: 0 0 40px 0; padding-bottom: 24px; border-bottom: 1px solid var(--paper-edge);
-    }
-    .reader h2.section-heading {
-        font-size: 24px; font-weight: 700; color: var(--navy-deep);
-        margin: 44px 0 14px 0; line-height: 1.3;
-    }
-    .reader p { margin: 0 0 22px 0; }
-    .reader ul.tight-list { margin: 0 0 30px 0; padding-left: 24px; }
-    .reader ul.tight-list li { margin-bottom: 10px; }
-    .reader table.extracted-table {
-        width: 100%; border-collapse: collapse; margin: 8px 0 32px 0;
-        font-family: 'Inter', var(--indic-fonts), sans-serif; font-size: 15px; line-height: 1.5;
-    }
-    .reader table.extracted-table td {
-        border: 1px solid var(--paper-edge); padding: 8px 12px; vertical-align: top;
-        white-space: pre-line;
-    }
-    .reader ::selection { background: rgba(212,172,13,0.35); }
-    .page-divider {
-        display: flex; align-items: center; gap: 10px;
-        margin: 36px 0; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 12px;
-    }
-    .page-divider::before, .page-divider::after {
-        content: ""; flex: 1; height: 1px; background: var(--paper-edge);
     }
 
     /* ---------- Native PDF view: real rendered pages ---------- */
@@ -155,6 +122,8 @@
     .textLayer span, .textLayer br {
         color: transparent; position: absolute; white-space: pre;
         cursor: text; transform-origin: 0% 0%;
+        -webkit-user-select: text; -moz-user-select: text; user-select: text;
+        -webkit-touch-callout: default;
     }
     .textLayer ::selection { background: rgba(11, 60, 93, 0.35); }
     .textLayer .endOfContent {
@@ -337,9 +306,7 @@
 
     @media (max-width: 640px) {
         .material-title { display: none; }
-        .reader { font-size: 17px; }
-        .reader h1.doc-title { font-size: 24px; }
-        .reader h2.section-heading { font-size: 20px; }
+        .pdf-native-wrap h1.doc-title { font-size: 22px; }
     }
 </style>
 </head>
@@ -351,30 +318,6 @@
         <p class="material-title" id="topTitle">Study Material</p>
     </div>
     <div class="right">
-        <select class="pill-btn" id="translateSelect" disabled title="Translate English text on this page">
-            <option value="en">🌐 Translate</option>
-            <option value="hi">Hindi (हिंदी)</option>
-            <option value="as">Assamese (অসমীয়া)</option>
-            <option value="bn">Bengali (বাংলা)</option>
-            <option value="bho">Bhojpuri (भोजपुरी)</option>
-            <option value="doi">Dogri (डोगरी)</option>
-            <option value="gu">Gujarati (ગુજરાતી)</option>
-            <option value="gom">Konkani (कोंकणी)</option>
-            <option value="kn">Kannada (ಕನ್ನಡ)</option>
-            <option value="ks">Kashmiri (کٲشُر)</option>
-            <option value="mai">Maithili (मैथिली)</option>
-            <option value="ml">Malayalam (മലയാളം)</option>
-            <option value="mni-Mtei">Manipuri (মৈতৈলোন্)</option>
-            <option value="mr">Marathi (मराठी)</option>
-            <option value="ne">Nepali (नेपाली)</option>
-            <option value="or">Odia (ଓଡ଼ିଆ)</option>
-            <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
-            <option value="sa">Sanskrit (संस्कृतम्)</option>
-            <option value="sd">Sindhi (سنڌي)</option>
-            <option value="ta">Tamil (தமிழ்)</option>
-            <option value="te">Telugu (తెలుగు)</option>
-            <option value="ur">Urdu (اردو)</option>
-        </select>
         <a class="pill-btn" id="downloadOriginal" href="#" target="_blank" rel="noopener">⬇ Original PDF</a>
     </div>
 </div>
@@ -386,7 +329,6 @@
         <p>Fetching and preparing this document for reading.</p>
     </div>
     <div id="nativeView" class="pdf-native-wrap" style="display:none;"></div>
-    <div id="reader" class="reader" style="display:none;"></div>
 </div>
 
 <div id="selectionToolbar">
@@ -469,7 +411,6 @@ function showStatus(html) {
     const box = document.getElementById('statusBox');
     box.style.display = 'block';
     box.innerHTML = html;
-    document.getElementById('reader').style.display = 'none';
     document.getElementById('nativeView').style.display = 'none';
 }
 
@@ -540,522 +481,6 @@ function base64ToUint8Array(base64) {
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return bytes;
-}
-
-// PDFs carry no real semantic structure — no <p>, <h2>, <ul>, or <table>
-// tags — just positioned glyphs. Everything below reconstructs that
-// structure from geometry: where each line sits, how wide it runs, whether
-// it's bold, and whether adjacent items sit close enough together to be
-// the same word versus separate table columns.
-
-// Word's own default bullet glyph (and a few common Wingdings/Symbol
-// variants) don't have a real Unicode mapping in most embedded PDF fonts,
-// so pdf.js extracts them as literal codepoints that render as a broken
-// "tofu" box (□) in-browser. We detect and strip these — plus the plain
-// Unicode bullet characters — from the front of a line, then draw our own
-// clean bullet via CSS instead.
-const BULLET_LEAD_RE = /^[\u2022\u2023\u25CF\u25AA\u25E6\u2043\u2219\u00B7\uFFFD\uE000-\uF8FF]+\s*/;
-
-function isBoldFontName(fontName, styles) {
-    if (!fontName) return false;
-    if (/bold/i.test(fontName)) return true;
-    const style = styles && styles[fontName];
-    return !!(style && style.fontFamily && /bold/i.test(style.fontFamily));
-}
-
-// Excludes two patterns that would otherwise slip past isMostlyUpperCase:
-// a Devanagari (or other non-Latin-script) sentence with only a short
-// embedded English acronym (stripping to non-Latin leaves just that
-// acronym, which reads as "100% uppercase" even though the actual line is
-// an ordinary sentence, not a heading), and short MCQ answer options like
-// "b) DG (BCAS)" or "D. BCAS" whose few Latin letters are almost all caps
-// by coincidence of what's being labeled, not because the line is a title.
-const NON_LATIN_SCRIPT_RE = /[\u0900-\u097F\u0600-\u06FF\u4E00-\u9FFF]/;
-const MCQ_OPTION_PREFIX_RE = /^[a-dA-D][.)]\s/;
-
-function isMostlyUpperCase(text) {
-    if (NON_LATIN_SCRIPT_RE.test(text) || MCQ_OPTION_PREFIX_RE.test(text)) return false;
-    const letters = text.replace(/[^A-Za-z]/g, '');
-    if (letters.length < 3) return false;
-    const upper = letters.replace(/[^A-Z]/g, '');
-    return upper.length / letters.length >= 0.85;
-}
-
-// Joins a run of items into one string, inserting a space only where the
-// horizontal gap between two items is actually big enough to be a real
-// word-break — NOT between every pair of items. PDFs frequently split a
-// single word into multiple items (e.g. a superscript "th" in "7th", or a
-// font/style change mid-word), and always inserting a space there is what
-// previously turned "April" into "A pril" and "7th" into "7 th".
-function buildCellText(items) {
-    let text = '';
-    let prevEndX = null;
-    let prevHeight = 10;
-    items.forEach(it => {
-        if (prevEndX !== null) {
-            const gap = it.x - prevEndX;
-            if (gap > prevHeight * 0.22) text += ' ';
-        }
-        text += it.str;
-        prevEndX = it.x + (it.width || 0);
-        prevHeight = it.height || prevHeight;
-    });
-    return text.replace(/\s+/g, ' ').trim();
-}
-
-// Colour is detected per line/cell as a single whole-block value, never
-// as sub-string runs. An earlier version tried to split text into
-// per-colour runs so a highlighted word could keep its colour inline —
-// but that meant a line's translatable text was no longer one DOM text
-// node, so each fragment got sent to Google Translate separately and
-// out of context, which is what produced garbled, disconnected
-// Devanagari (a matra split from its consonant, mid-word garbage).
-// Whole-block colour avoids that entirely: translation always sees one
-// complete string per line, exactly as before, and the colour is
-// applied as a style on the containing element instead of a span.
-//
-// A line only counts as "coloured" when most of its own ink agrees on
-// one distinct colour — a single stray glyph (anti-aliasing noise) is
-// not enough to flag a whole line, but a genuinely highlighted MCQ
-// option (coloured all the way through) reliably is.
-function lineColor(items) {
-    const meaningful = items.filter(it => it.str && it.str.trim());
-    if (meaningful.length === 0) return null;
-    const coloured = meaningful.filter(it => it.color);
-    if (coloured.length === 0 || coloured.length / meaningful.length < 0.5) return null;
-    const counts = {};
-    coloured.forEach(it => { counts[it.color] = (counts[it.color] || 0) + 1; });
-    let best = null, bestCount = 0;
-    Object.keys(counts).forEach(c => { if (counts[c] > bestCount) { bestCount = counts[c]; best = c; } });
-    return best;
-}
-
-// Splits one line's items into "cells" at exactly one index — used only
-// AFTER we already know which x-position is the real table column
-// boundary for this page (see groupTextIntoBlocks below).
-function sliceCells(items, splitIndex) {
-    return [buildCellText(items.slice(0, splitIndex)), buildCellText(items.slice(splitIndex))];
-}
-
-function sliceCellColors(items, splitIndex) {
-    return [lineColor(items.slice(0, splitIndex)), lineColor(items.slice(splitIndex))];
-}
-
-// Groups a page's raw text items into visual lines (by y-position), then
-// classifies each line as a table row, a continuation of the row above, a
-// bulleted item, a heading, or paragraph text.
-//
-// TABLES: a real table's left column has the exact same width on every
-// row, so if several lines share one large, unusually-wide gap at
-// (roughly) the same x position, that recurring position is almost
-// certainly a genuine column boundary — a one-off wide gap (e.g. the
-// small indent between a bullet glyph and its text) won't recur at that
-// same x across multiple lines, so it's excluded. Only lines whose gap
-// matches the page's confirmed boundary are split into two cells; this is
-// what stops a bullet's internal indent from being mistaken for a second
-// table column (which is what previously tore bullet sub-items out into
-// bogus extra table rows).
-//
-// A row's description almost always wraps across 2–3 physical PDF lines,
-// and those wrapped lines carry no left-column text of their own — so any
-// line that starts at/after the table's right-column x, immediately after
-// a table row with no big vertical gap, is folded back into that row's
-// last cell instead of becoming a stray paragraph outside the table.
-//
-// PARAGRAPHS (non-table pages): a line only continues the previous
-// paragraph if the previous line reached close to the page's usable text
-// width (meaning the sentence likely wrapped) AND there's no oversized
-// vertical gap — a page of short one-line entries (an abbreviation list)
-// has no wrapped lines at all, so each one stays on its own line.
-//
-// HEADINGS are detected two ways: a line whose text is notably taller
-// than the page's median line (a genuinely bigger font), OR a bold,
-// ALL-CAPS, non-bulleted line — this second case catches section titles
-// that use the SAME font size as body text but bold+caps to read as a
-// heading.
-function groupTextIntoBlocks(items, pageWidth, styles) {
-    const rawLines = [];
-    let current = null;
-
-    items.forEach(item => {
-        const y = Math.round(item.transform[5]);
-        const height = item.height || Math.abs(item.transform[3]) || 10;
-        const x = item.transform[4];
-        const width = item.width || 0;
-
-        if (!current || Math.abs(current.y - y) > height * 0.5) {
-            current = { y, height, items: [] };
-            rawLines.push(current);
-        }
-        if (item.str !== undefined) {
-            current.items.push({ str: item.str, x, width, height, fontName: item.fontName, color: item.color });
-        }
-    });
-
-    const lines = rawLines.map(l => {
-        const sorted = l.items.slice().sort((a, b) => a.x - b.x);
-        const nonEmpty = sorted.filter(it => it.str.trim() !== '');
-        if (nonEmpty.length === 0) return null;
-
-        const x0 = Math.min(...nonEmpty.map(it => it.x));
-        const xEnd = Math.max(...nonEmpty.map(it => it.x + it.width));
-        const bold = isBoldFontName(nonEmpty[0].fontName, styles);
-
-        // The single widest gap on this line, if it has more than one item
-        // — a candidate (not yet confirmed) table-column split point.
-        let biggestGap = null;
-        for (let k = 1; k < nonEmpty.length; k++) {
-            const prevEnd = nonEmpty[k - 1].x + nonEmpty[k - 1].width;
-            const size = nonEmpty[k].x - prevEnd;
-            if (!biggestGap || size > biggestGap.size) {
-                biggestGap = { startX: prevEnd, endX: nonEmpty[k].x, size, splitIndex: k };
-            }
-        }
-
-        const fullText = buildCellText(nonEmpty);
-        const color = lineColor(nonEmpty);
-        let bulletStripped = fullText;
-        let isBullet = false;
-        const bulletMatch = fullText.match(BULLET_LEAD_RE);
-        if (bulletMatch) {
-            isBullet = true;
-            bulletStripped = fullText.slice(bulletMatch[0].length).trim();
-        }
-
-        return { y: l.y, height: l.height, x0, width: xEnd - x0, bold, items: nonEmpty, fullText, bulletStripped, color, isBullet, biggestGap };
-    }).filter(Boolean);
-
-    if (lines.length === 0) return [];
-
-    const medianHeight = lines.map(l => l.height).sort((a, b) => a - b)[Math.floor(lines.length / 2)];
-    const leftMargin = Math.min(...lines.map(l => l.x0));
-    const usableWidth = Math.max((pageWidth || 0) - leftMargin * 2, (pageWidth || 0) * 0.5, 1);
-
-    // Confirm a real table column boundary, if this page has one. The
-    // qualifying gap is deliberately large (well beyond any bullet indent
-    // or double word-space) so only genuine multi-column table layouts
-    // trigger table detection. Clustering uses where the gap ENDS (i.e.
-    // where the second column's text starts) rather than where it starts,
-    // because a real table's second column sits at one fixed x on every
-    // row — the first column's own text length varies row to row (e.g.
-    // "Outcome" vs "23rd Jun, 1985"), so the gap's start position does NOT
-    // reliably repeat even though the row is a perfectly genuine table row.
-    const GAP_TOLERANCE = 14;
-    const gapCandidates = lines
-        .filter(l => l.biggestGap && l.biggestGap.size > Math.max(medianHeight * 3.5, 55))
-        .map(l => l.biggestGap);
-
-    let colBoundary = null;
-    if (gapCandidates.length >= 2) {
-        const buckets = {};
-        gapCandidates.forEach(g => {
-            const key = Math.round(g.endX / 8) * 8;
-            (buckets[key] = buckets[key] || []).push(g);
-        });
-        let bestKey = null, bestCount = 0;
-        Object.keys(buckets).forEach(k => {
-            if (buckets[k].length > bestCount) { bestCount = buckets[k].length; bestKey = k; }
-        });
-        if (bestCount >= 2) {
-            const group = buckets[bestKey];
-            colBoundary = {
-                startX: group.reduce((s, g) => s + g.startX, 0) / group.length,
-                endX: group.reduce((s, g) => s + g.endX, 0) / group.length
-            };
-        }
-    }
-
-    const blocks = [];
-    let paragraph = null;
-    let prevY = null;
-    let prevWasFull = false;
-    let lastTableRow = null;
-
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const gap = prevY === null ? 0 : Math.abs(prevY - line.y);
-        const bigGap = prevY !== null && gap > line.height * 1.9;
-
-        const matchesColBoundary = colBoundary && line.biggestGap &&
-            Math.abs(line.biggestGap.endX - colBoundary.endX) <= GAP_TOLERANCE;
-
-        if (matchesColBoundary) {
-            const rowBlock = {
-                type: 'tableRow',
-                cells: sliceCells(line.items, line.biggestGap.splitIndex),
-                cellColors: sliceCellColors(line.items, line.biggestGap.splitIndex)
-            };
-            blocks.push(rowBlock);
-            lastTableRow = rowBlock;
-            paragraph = null;
-            prevY = line.y;
-            prevWasFull = false;
-            continue;
-        }
-
-        const isTallHeading = line.height > medianHeight * 1.25;
-        // Bold-detection via font name/family is unreliable for many
-        // generated PDFs (e.g. Google Docs exports report every font as
-        // generic "sans-serif" with no bold marker at all, even for text
-        // that's visibly bold) — so a bold check can't be required here.
-        // A standalone, short, ALL-CAPS line is on its own a strong and
-        // safe signal for a section heading; checked against this
-        // document's actual content, no ordinary sentence collides with it.
-        const isCapsHeading = !line.isBullet && line.bulletStripped.length < 100 && isMostlyUpperCase(line.bulletStripped);
-
-        if (isTallHeading || isCapsHeading) {
-            lastTableRow = null;
-            paragraph = null;
-            blocks.push({ type: 'heading', text: line.bulletStripped, color: line.color });
-            prevY = line.y;
-            prevWasFull = false;
-            continue;
-        }
-
-        // Some rows in a table put the label and its content on the SAME
-        // line ("Outcome    Bomb Threat Contingency Plan...") but others
-        // put the content starting on the line right below the label
-        // instead — a formatting inconsistency in the source document
-        // itself, not something we can normalize away. Detect this: a
-        // short line that stays entirely inside the left/label column,
-        // immediately followed by a line that starts in the right column,
-        // is the start of a new row whose first line of content is simply
-        // one line down.
-        if (colBoundary && !line.isBullet && (line.x0 + line.width) < colBoundary.startX + GAP_TOLERANCE && i + 1 < lines.length) {
-            const next = lines[i + 1];
-            const nextIsRightCol = next.x0 >= colBoundary.endX - GAP_TOLERANCE;
-            const nextVerticalOk = Math.abs(next.y - line.y) < line.height * 2.8;
-            if (nextIsRightCol && nextVerticalOk) {
-                const rowBlock = { type: 'tableRow', cells: [line.bulletStripped, ''], cellColors: [line.color, null] };
-                blocks.push(rowBlock);
-                lastTableRow = rowBlock;
-                paragraph = null;
-                prevY = line.y;
-                prevWasFull = false;
-                continue;
-            }
-        }
-
-        // Fold a wrapped continuation (or an indented bullet sub-item) of
-        // the row above back into that row's last cell, rather than
-        // letting it fall out as a stray paragraph below the table. This
-        // uses a LOOSER vertical-gap allowance than bigGap above: Word/
-        // Docs commonly adds extra "space before" when a paragraph is
-        // followed by a bulleted sub-list (observed ~2.3x the normal
-        // line spacing here) — a real new table row is already caught by
-        // the column-match check above regardless of this gap, so
-        // loosening it only affects wrapped text and bullets, which is
-        // exactly what should still count as "same cell".
-        const bigGapForContinuation = prevY !== null && gap > line.height * 2.8;
-        if (lastTableRow && !bigGapForContinuation && colBoundary && line.x0 >= colBoundary.endX - GAP_TOLERANCE) {
-            const addition = line.isBullet ? ('• ' + line.bulletStripped) : line.fullText;
-            const cells = lastTableRow.cells;
-            cells[cells.length - 1] = (cells[cells.length - 1] + '\n' + addition).trim();
-            // Colour was already decided when the row's cell was first
-            // created; a wrapped continuation line doesn't change it.
-            prevY = line.y;
-            prevWasFull = false;
-            continue;
-        }
-
-        lastTableRow = null;
-
-        if (line.isBullet) {
-            paragraph = null;
-            blocks.push({ type: 'bullet', text: line.bulletStripped, color: line.color });
-        } else {
-            const isFull = line.width >= usableWidth * 0.82;
-            if (!paragraph || bigGap || !prevWasFull) {
-                paragraph = { type: 'p', text: line.bulletStripped, singleLine: true, color: line.color };
-                blocks.push(paragraph);
-            } else {
-                paragraph.text += ' ' + line.bulletStripped;
-                paragraph.singleLine = false;
-            }
-            prevWasFull = isFull;
-        }
-        prevY = line.y;
-    }
-
-    return blocks;
-}
-
-// Renders classified blocks into the page: consecutive table rows become
-// one <table>; consecutive bulleted lines (real bullets from the source,
-// OR 3+ short never-wrapped lines that all read like list entries even
-// without a visible bullet glyph) become one tight <ul>; everything else
-// renders as a heading or an ordinary paragraph. Each element's text is
-// always set with textContent — one complete string, exactly one DOM
-// text node — so translation always sees a whole coherent line/cell to
-// send to Google Translate, never a fragment. Colour, where detected, is
-// applied as a style on the element itself, never by splitting the text.
-function appendBlocksToReader(readerEl, blocks) {
-    let i = 0;
-    while (i < blocks.length) {
-        const block = blocks[i];
-
-        if (block.type === 'tableRow') {
-            const rows = [];
-            const rowsColors = [];
-            let j = i;
-            let maxCols = 0;
-            while (j < blocks.length && blocks[j].type === 'tableRow') {
-                rows.push(blocks[j].cells);
-                rowsColors.push(blocks[j].cellColors || []);
-                maxCols = Math.max(maxCols, blocks[j].cells.length);
-                j++;
-            }
-            const table = document.createElement('table');
-            table.className = 'extracted-table';
-            rows.forEach((cells, r) => {
-                const tr = document.createElement('tr');
-                for (let c = 0; c < maxCols; c++) {
-                    const td = document.createElement('td');
-                    td.textContent = cells[c] || '';
-                    const color = rowsColors[r] && rowsColors[r][c];
-                    if (color) td.style.color = color;
-                    tr.appendChild(td);
-                }
-                table.appendChild(tr);
-            });
-            readerEl.appendChild(table);
-            i = j;
-            continue;
-        }
-
-        if (block.type === 'bullet') {
-            const run = [];
-            let j = i;
-            while (j < blocks.length && blocks[j].type === 'bullet') {
-                run.push(blocks[j]);
-                j++;
-            }
-            const ul = document.createElement('ul');
-            ul.className = 'tight-list';
-            run.forEach(b => {
-                const li = document.createElement('li');
-                li.textContent = b.text;
-                if (b.color) li.style.color = b.color;
-                ul.appendChild(li);
-            });
-            readerEl.appendChild(ul);
-            i = j;
-            continue;
-        }
-
-        if (block.type === 'p' && block.singleLine) {
-            const run = [];
-            let j = i;
-            while (j < blocks.length && blocks[j].type === 'p' && blocks[j].singleLine) {
-                run.push(blocks[j]);
-                j++;
-            }
-            if (run.length >= 3) {
-                const ul = document.createElement('ul');
-                ul.className = 'tight-list';
-                run.forEach(b => {
-                    const li = document.createElement('li');
-                    li.textContent = b.text;
-                    if (b.color) li.style.color = b.color;
-                    ul.appendChild(li);
-                });
-                readerEl.appendChild(ul);
-                i = j;
-                continue;
-            }
-        }
-
-        const el = document.createElement(block.type === 'heading' ? 'h2' : 'p');
-        if (block.type === 'heading') el.className = 'section-heading';
-        el.textContent = block.text;
-        if (block.color) el.style.color = block.color;
-        readerEl.appendChild(el);
-        i++;
-    }
-}
-
-// Study PDFs for this exam often colour the correct MCQ option (green,
-// blue, etc.) differently from the other three. pdf.js's text layer has
-// no colour information at all, so the only way to recover it is to
-// actually render the page to an offscreen canvas and read back the
-// pixel colour under each piece of text — there's nothing to "parse",
-// the colour only exists as pixels once the page is drawn.
-//
-// For each text item we sample a few points across its glyph box and
-// keep whichever sample is furthest from the white page background —
-// that's almost always a pixel that landed on ink rather than on the
-// gap between two letters. Plain black/grey body text has low colour
-// saturation and is deliberately left alone (item.color stays unset)
-// so normal text renders exactly as it did before; only a distinctly
-// saturated colour (an actual highlight) gets tagged.
-async function annotateItemColors(page, textContent) {
-    if (!textContent.items.length) return;
-    const scale = 1.5;
-    const viewport = page.getViewport({ scale });
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.max(1, Math.ceil(viewport.width));
-    canvas.height = Math.max(1, Math.ceil(viewport.height));
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-    try {
-        await page.render({ canvasContext: ctx, viewport }).promise;
-    } catch (err) {
-        console.error('Could not render page for colour sampling — text will show without highlight colours:', err);
-        return;
-    }
-
-    let pixels;
-    try {
-        pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    } catch (err) {
-        console.error('Could not read rendered page pixels for colour sampling:', err);
-        return;
-    }
-
-    function pixelAt(px, py) {
-        px = Math.round(px); py = Math.round(py);
-        if (px < 0 || py < 0 || px >= canvas.width || py >= canvas.height) return null;
-        const idx = (py * canvas.width + px) * 4;
-        return [pixels[idx], pixels[idx + 1], pixels[idx + 2]];
-    }
-
-    // Anti-aliased edges of ordinary BLACK text produce pixels with
-    // small, unevenly-mixed RGB values purely from sub-pixel blending
-    // with the white page (e.g. r=10,g=4,b=7) — a *relative* saturation
-    // ratio treats that as "very saturated" even though it's visually
-    // black, which is what caused ordinary sentences to get misread as
-    // highlighted. Using an absolute channel spread plus a minimum
-    // brightness avoids that: genuine coloured ink is both reasonably
-    // bright and has a clearly unequal RGB mix, not just noisy at near-
-    // zero brightness. Requiring a MAJORITY of the sampled points to
-    // agree (not just the single most-colourful one) further guards
-    // against one stray edge pixel flagging a whole glyph.
-    const sampleFractions = [0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9];
-    const MIN_CHROMA = 40;
-    const MIN_BRIGHTNESS = 70;
-    textContent.items.forEach(item => {
-        if (!item.str || !item.str.trim()) return;
-        const x0 = item.transform[4];
-        const y0 = item.transform[5];
-        const w = item.width || 0;
-        const h = item.height || Math.abs(item.transform[3]) || 10;
-
-        const hits = [];
-        sampleFractions.forEach(f => {
-            const [vx, vy] = viewport.convertToViewportPoint(x0 + w * f, y0 + h * 0.4);
-            const rgb = pixelAt(vx, vy);
-            if (!rgb) return;
-            const [r, g, b] = rgb;
-            if (r > 235 && g > 235 && b > 235) return; // background paper, not ink
-            const max = Math.max(r, g, b), min = Math.min(r, g, b);
-            if (max - min < MIN_CHROMA || max < MIN_BRIGHTNESS) return; // black/grey ink or noise
-            hits.push({ r, g, b });
-        });
-
-        if (hits.length < Math.ceil(sampleFractions.length * 0.5)) return;
-        const sum = hits.reduce((acc, h) => ({ r: acc.r + h.r, g: acc.g + h.g, b: acc.b + h.b }), { r: 0, g: 0, b: 0 });
-        item.color = `rgb(${Math.round(sum.r / hits.length)}, ${Math.round(sum.g / hits.length)}, ${Math.round(sum.b / hits.length)})`;
-    });
 }
 
 // Builds the invisible, selectable text layer ourselves rather than
@@ -1170,25 +595,17 @@ async function renderPdf(base64, fileName) {
     const pdf = await pdfjsLib.getDocument({ data }).promise;
 
     const nativeEl = document.getElementById('nativeView');
-    const readerEl = document.getElementById('reader');
 
     nativeEl.innerHTML = `<div class="pdf-doc-header">
         <h1 class="doc-title">${materialTitle}</h1>
         <p class="doc-meta">${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} · Original PDF</p>
     </div>`;
-    readerEl.innerHTML = `<h1 class="doc-title">${materialTitle}</h1>
-        <p class="doc-meta">${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} · Translated text view</p>`;
 
-    // Reveal the native, real-PDF view immediately and fill it in page by
-    // page, instead of making the student stare at a spinner until every
-    // page (which can be 20+) has finished rendering. The reconstructed
-    // text view is built alongside it (hidden) purely so it's ready the
-    // instant the student picks a translation language — a rendered page
-    // is pixels, so translating a page has to happen on this text version,
-    // not on the picture of the page.
+    // Reveal the shell immediately and fill it in page by page, instead
+    // of making the student stare at a spinner until every page (which
+    // can be 20+) has finished rendering.
     document.getElementById('statusBox').style.display = 'none';
     nativeEl.style.display = 'flex';
-    readerEl.style.display = 'none';
 
     const progressNote = document.createElement('p');
     progressNote.className = 'pdf-progress-note';
@@ -1196,37 +613,10 @@ async function renderPdf(base64, fileName) {
 
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         progressNote.textContent = pdf.numPages > 1 ? `Rendering page ${pageNum} of ${pdf.numPages}…` : 'Rendering…';
-
         await renderNativePage(pdf, pageNum, nativeEl, progressNote);
-
-        const page = await pdf.getPage(pageNum);
-        const textContent = await page.getTextContent();
-        await annotateItemColors(page, textContent);
-        const pageWidth = page.view[2] - page.view[0];
-        const blocks = groupTextIntoBlocks(textContent.items, pageWidth, textContent.styles);
-
-        const pageContainer = document.createElement('div');
-        if (pageNum > 1) {
-            const divider = document.createElement('div');
-            divider.className = 'page-divider';
-            divider.textContent = `Page ${pageNum}`;
-            pageContainer.appendChild(divider);
-        }
-
-        if (blocks.length === 0) {
-            const note = document.createElement('p');
-            note.style.cssText = "color:var(--muted); font-family:'Inter',sans-serif; font-size:14px;";
-            note.textContent = '(No selectable text found on this page — it may be a scanned image.)';
-            pageContainer.appendChild(note);
-        } else {
-            appendBlocksToReader(pageContainer, blocks);
-        }
-
-        readerEl.appendChild(pageContainer);
     }
 
     progressNote.remove();
-    document.getElementById('translateSelect').disabled = false;
 }
 
 /* ---------- Text selection → choose Translate or Google Assistant ---------- */
@@ -1368,8 +758,6 @@ toolbarTranslateBtn.addEventListener('click', () => {
     hideSelectionToolbar();
 
     tpOriginal.textContent = pendingSelectionText;
-    const mainLang = document.getElementById('translateSelect').value;
-    if (mainLang !== 'en') tpLangSelect.value = mainLang;
 
     positionFloatingBox(translatePopup, pendingSelectionRange, 300, 220);
     translatePopup.style.display = 'flex';
@@ -1386,30 +774,44 @@ tpLangSelect.addEventListener('change', runSnippetTranslation);
 tpCloseBtn.addEventListener('click', hideTranslatePopup);
 gaCloseBtn.addEventListener('click', hideGaPanel);
 
-// Selecting text (in either the native PDF view or the translated text
-// view) shows a small toolbar to choose what to do with it, rather than
-// jumping straight into a lookup.
-document.addEventListener('mouseup', handleSelectionChange);
-document.addEventListener('touchend', handleSelectionChange);
+// Selecting text over the real PDF pages shows a small toolbar to choose
+// what to do with it, rather than jumping straight into a lookup.
+function evaluateSelection() {
+    const selection = window.getSelection();
+    const text = selection ? selection.toString().trim() : '';
+    if (!text) { hideSelectionToolbar(); return; }
+
+    const anchor = selection.anchorNode;
+    if (!anchor || !document.getElementById('nativeView').contains(anchor)) {
+        hideSelectionToolbar();
+        return;
+    }
+
+    pendingSelectionText = text;
+    pendingSelectionRange = selection.getRangeAt(0).cloneRange();
+    showSelectionToolbar(pendingSelectionRange);
+}
 
 function handleSelectionChange(e) {
     if (selectionToolbar.contains(e.target) || gaPanel.contains(e.target) || translatePopup.contains(e.target)) return;
-
-    setTimeout(() => {
-        const selection = window.getSelection();
-        const text = selection ? selection.toString().trim() : '';
-        if (!text) { hideSelectionToolbar(); return; }
-
-        const anchor = selection.anchorNode;
-        const inReader = document.getElementById('reader').contains(anchor);
-        const inNative = document.getElementById('nativeView').contains(anchor);
-        if (!inReader && !inNative) { hideSelectionToolbar(); return; }
-
-        pendingSelectionText = text;
-        pendingSelectionRange = selection.getRangeAt(0).cloneRange();
-        showSelectionToolbar(pendingSelectionRange);
-    }, 5);
+    setTimeout(evaluateSelection, 5);
 }
+
+document.addEventListener('mouseup', handleSelectionChange);
+document.addEventListener('touchend', handleSelectionChange);
+
+// On phones, dragging the native selection handles after a long-press
+// doesn't fire another touchend on the text itself (the handles are
+// native UI, not our DOM), so the toolbar never appeared there.
+// `selectionchange` fires as the selection is adjusted and is the
+// reliable signal on mobile — debounced so it doesn't reposition the
+// toolbar on every intermediate character while a handle is still being
+// dragged.
+let selectionChangeTimer = null;
+document.addEventListener('selectionchange', () => {
+    clearTimeout(selectionChangeTimer);
+    selectionChangeTimer = setTimeout(evaluateSelection, 220);
+});
 
 document.addEventListener('mousedown', (e) => {
     if (!gaPanel.contains(e.target)) hideGaPanel();
@@ -1417,69 +819,9 @@ document.addEventListener('mousedown', (e) => {
     if (!translatePopup.contains(e.target)) hideTranslatePopup();
 });
 
-/* ---------- Translate: English → Indian regional language ---------- */
-// The PDF may already contain Hindi (or other Indic-script) text set in a
-// Devanagari font — that text must be left exactly as-is. We only ever
-// translate text nodes that are in Latin script (English), never anything
-// that already contains Devanagari characters.
-const DEVANAGARI_RE = /[\u0900-\u097F]/;
-const LATIN_LETTER_RE = /[A-Za-z]/;
-
-let translatableNodes = null; // captured once, lazily: [{ node, original }]
+/* ---------- Translate a selected snippet ---------- */
 const translationCache = Object.create(null); // `${lang}::${text}` -> translated text
 const pendingTranslations = Object.create(null); // `${lang}::${text}` -> in-flight promise
-
-// Persist translations across page visits so re-opening the same material
-// (very common while revising) doesn't re-translate everything from
-// scratch every time. Keyed by material title + target language so
-// different documents don't collide.
-const CACHE_STORAGE_PREFIX = `translateCache::${materialTitle}::`;
-
-function loadPersistedCache(targetLang) {
-    try {
-        const raw = localStorage.getItem(CACHE_STORAGE_PREFIX + targetLang);
-        if (!raw) return;
-        const dict = JSON.parse(raw);
-        Object.keys(dict).forEach(text => {
-            translationCache[`${targetLang}::${text}`] = dict[text];
-        });
-    } catch (err) {
-        console.error('Could not load cached translations:', err);
-    }
-}
-
-function persistCache(targetLang) {
-    try {
-        const prefix = `${targetLang}::`;
-        const dict = {};
-        Object.keys(translationCache).forEach(key => {
-            if (key.startsWith(prefix)) dict[key.slice(prefix.length)] = translationCache[key];
-        });
-        localStorage.setItem(CACHE_STORAGE_PREFIX + targetLang, JSON.stringify(dict));
-    } catch (err) {
-        // Storage full or unavailable — translations still work for this
-        // session, they just won't be saved for next time.
-        console.error('Could not persist translation cache:', err);
-    }
-}
-
-function captureTranslatableNodes() {
-    if (translatableNodes) return translatableNodes;
-    translatableNodes = [];
-    const readerEl = document.getElementById('reader');
-    const walker = document.createTreeWalker(readerEl, NodeFilter.SHOW_TEXT, {
-        acceptNode(node) {
-            const text = node.nodeValue;
-            if (!text || !text.trim()) return NodeFilter.FILTER_REJECT;
-            return NodeFilter.FILTER_ACCEPT;
-        }
-    });
-    let n;
-    while ((n = walker.nextNode())) {
-        translatableNodes.push({ node: n, original: n.nodeValue });
-    }
-    return translatableNodes;
-}
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
@@ -1533,137 +875,6 @@ async function translateOne(text, targetLang, retries = 2) {
     }
 }
 
-// Runs jobs with a small worker pool instead of all at once, and leaves a
-// short gap between each request in a lane — this is what keeps Google's
-// free endpoint from throttling/blocking mid-page, which is what caused
-// only part of a page to come back translated before. shouldContinue lets
-// a background run stop early if the student picks a different language
-// (or reverts to English) while it's still working.
-async function runWithConcurrency(items, worker, limit, shouldContinue = () => true) {
-    let index = 0;
-    async function lane() {
-        while (index < items.length && shouldContinue()) {
-            const item = items[index++];
-            await worker(item);
-            await sleep(60);
-        }
-    }
-    await Promise.all(Array.from({ length: Math.min(limit, items.length) }, lane));
-}
-
-let translationGeneration = 0;
-
-async function translatePage(targetLang) {
-    const myGeneration = ++translationGeneration;
-    const select = document.getElementById('translateSelect');
-
-    if (targetLang === 'en') {
-        if (translatableNodes) {
-            translatableNodes.forEach(({ node, original }) => { node.nodeValue = original; });
-        }
-        return;
-    }
-
-    const nodes = captureTranslatableNodes();
-    // Skip anything that already contains Devanagari (i.e. Hindi already
-    // set in the PDF) and anything with no Latin letters to translate.
-    const jobs = nodes.filter(({ original }) => !DEVANAGARI_RE.test(original) && LATIN_LETTER_RE.test(original));
-
-    if (jobs.length === 0) {
-        showToast('Nothing in English to translate on this page.');
-        return;
-    }
-
-    // Translate what's currently on screen first, so the student sees
-    // results right away instead of waiting for the whole document —
-    // everything below/above the current scroll position is translated
-    // afterwards, in the background, without blocking the page.
-    const viewTop = window.scrollY - 500;
-    const viewBottom = window.scrollY + window.innerHeight + 500;
-    const visibleJobs = [];
-    const restJobs = [];
-    jobs.forEach(job => {
-        const el = job.node.parentElement;
-        const rect = el ? el.getBoundingClientRect() : null;
-        const top = rect ? rect.top + window.scrollY : 0;
-        const bottom = rect ? rect.bottom + window.scrollY : 0;
-        if (rect && bottom >= viewTop && top <= viewBottom) {
-            visibleJobs.push(job);
-        } else {
-            restJobs.push(job);
-        }
-    });
-
-    const total = jobs.length;
-    let done = 0;
-    let failed = 0;
-    const stillCurrent = () => translationGeneration === myGeneration;
-
-    async function runJobs(list) {
-        await runWithConcurrency(list, async ({ node, original }) => {
-            try {
-                const translated = await translateOne(original, targetLang);
-                if (stillCurrent()) node.nodeValue = translated;
-            } catch (err) {
-                failed++;
-                console.error('Failed to translate a piece of text:', original, err);
-            }
-            done++;
-            if (stillCurrent() && (done % 3 === 0 || done === total)) {
-                showToast(`Translating… ${done}/${total}`, 60000);
-            }
-        }, 6, stillCurrent);
-    }
-
-    loadPersistedCache(targetLang);
-    select.disabled = true;
-
-    if (visibleJobs.length > 0) {
-        showToast(`Translating visible text… 0/${visibleJobs.length}`, 60000);
-        await runJobs(visibleJobs);
-        persistCache(targetLang);
-    }
-
-    if (!stillCurrent()) return; // a different language was chosen meanwhile
-
-    select.disabled = false; // let the student keep reading while the rest finishes
-
-    if (restJobs.length === 0) {
-        showToast(failed > 0
-            ? `Translated ${total - failed} of ${total} parts — a few couldn't be reached.`
-            : 'Translation complete.');
-        return;
-    }
-
-    showToast('Visible text translated — translating the rest in the background…');
-    runJobs(restJobs).then(() => {
-        persistCache(targetLang);
-        if (!stillCurrent()) return;
-        showToast(failed > 0
-            ? `Translated ${total - failed} of ${total} parts — a few couldn't be reached.`
-            : 'Translation complete.');
-    });
-}
-
-document.getElementById('translateSelect').addEventListener('change', (e) => {
-    const lang = e.target.value;
-    const nativeEl = document.getElementById('nativeView');
-    const readerEl = document.getElementById('reader');
-
-    // English → show the real, pixel-perfect PDF pages. Any other
-    // language → a rendered page is just pixels, so switch to the
-    // text-reconstruction view, which is the only thing that can actually
-    // be translated and re-displayed.
-    if (lang === 'en') {
-        nativeEl.style.display = 'flex';
-        readerEl.style.display = 'none';
-    } else {
-        nativeEl.style.display = 'none';
-        readerEl.style.display = 'block';
-    }
-
-    translatePage(lang);
-});
 
 loadMaterial();
 </script>
