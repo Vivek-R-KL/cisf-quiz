@@ -2435,7 +2435,7 @@
 
         function handleFaceViolation(e, t) {
             const n = Date.now();
-            null === faceViolationStartTime && (faceViolationStartTime = n), faceOutOfBoundSeconds = (n - faceViolationStartTime) / 1e3, t && (t.style.color = "#dc3545", t.textContent = `⚠️ Warning: ${e} (${Math.ceil(5-faceOutOfBoundSeconds)}s remaining)`), faceOutOfBoundSeconds >= 5 && (faceOutOfBoundSeconds = 0, faceViolationStartTime = null, t && (t.textContent = "Locked: Face Violation"), registerTabSwitch())
+            null === faceViolationStartTime && (faceViolationStartTime = n), faceOutOfBoundSeconds = (n - faceViolationStartTime) / 1e3, t && (t.style.color = "#dc3545", t.textContent = `⚠️ Warning: ${e} (${Math.ceil(5-faceOutOfBoundSeconds)}s remaining)`), faceOutOfBoundSeconds >= 3 && (faceOutOfBoundSeconds = 0, faceViolationStartTime = null, t && (t.textContent = "Locked: Face Violation"), registerTabSwitch())
         }
 
         function resetFaceViolation(e) {
