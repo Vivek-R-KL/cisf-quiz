@@ -274,7 +274,10 @@
 
 <div class="header-bar">
     <h2>⚡ CISF ASTI DELHI - Admin Control Center</h2>
-    <input type="text" id="globalSpreadsheetId" placeholder="Spreadsheet ID..." style="width: 300px; margin: 0;" onchange="saveSheetId(this.value)">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="text" id="globalSpreadsheetId" placeholder="Spreadsheet ID..." style="width: 300px; margin: 0;" onchange="saveSheetId(this.value)">
+        <button type="button" onclick="openQuizGenerator()" style="width: auto; margin: 0; padding: 10px 16px; background: var(--accent-yellow); color: #ffffff; border: none; font-weight: bold; border-radius: 5px; white-space: nowrap;">🧩 Quiz Generator</button>
+    </div>
 </div>
 
 <!-- SECTION TAB SWITCHER -->
@@ -854,6 +857,10 @@
         let updated = forms.filter(f => f.formId !== id);
         await apiCall({ action: "saveData", key: "Forms", data: updated });
         loadAllData();
+    }
+
+    function openQuizGenerator() {
+        window.open('QUIZ_GENERATOR.html', '_blank');
     }
 
     function saveAndExitPortal() {
