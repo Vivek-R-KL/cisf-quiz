@@ -2269,10 +2269,6 @@
         async function submitTest() {
             if (isExamSubmitted) return;
             isExamSubmitted = !0, quizInProgress = !1, quizLocked = !1;
-            stopPersistentCameraStream();
-            const camPrev = document.getElementById("webcam-preview"),
-                camStatus = document.getElementById("face-status-text");
-            camPrev && (camPrev.srcObject = null), camStatus && (camStatus.style.color = "#6c757d", camStatus.textContent = "Camera Released");
             const e = document.getElementById("cheat-lock-overlay");
             e && (e.style.display = "none");
             const t = document.getElementById("main-header");
