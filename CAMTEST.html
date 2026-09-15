@@ -1119,6 +1119,7 @@
                 flex-wrap: wrap;
                 height: auto;
                 padding: 8px 10px;
+                padding-right: 92px;
                 position: relative
             }
 
@@ -1190,24 +1191,25 @@
             }
 
             #camera-monitor-widget {
-                width: 108px;
-                right: 8px;
-                padding: 5px;
+                width: 78px;
+                right: 6px;
+                padding: 3px;
                 z-index: 970
             }
 
             #camera-monitor-widget .cam-label {
-                font-size: .62em;
-                margin-bottom: 3px
+                font-size: .5em;
+                margin-bottom: 2px
             }
 
             #camera-monitor-widget video {
-                height: 78px
+                height: 54px
             }
 
             #camera-monitor-widget #face-status-text {
-                font-size: .58em;
-                margin-top: 2px
+                font-size: .46em;
+                margin-top: 1px;
+                line-height: 1.2
             }
 
             .option-label,
@@ -2063,11 +2065,7 @@
 
         function positionCameraWidget() {
             const e = document.getElementById("camera-monitor-widget");
-            if (!e) return;
-            if (window.innerWidth > 768) return void(e.style.top = "70px");
-            const t = document.querySelector(".header"),
-                n = t ? t.offsetHeight : 60;
-            e.style.top = n + 8 + "px"
+            e && (e.style.top = window.innerWidth > 768 ? "70px" : "6px")
         }
 
         function adjustMobileLayout() {
@@ -2343,6 +2341,10 @@
             e && (e.style.display = "none");
             const t = document.getElementById("main-header");
             t && t.style.setProperty("display", "none", "important"), controlPanel && controlPanel.style.setProperty("display", "none", "important"), clearInterval(timerInterval), document.querySelector(".zoom-controls").style.display = "none";
+            stopPersistentCameraStream(), cameraGranted = !1;
+            const camWidget = document.getElementById("camera-monitor-widget"),
+                camVideo = document.getElementById("webcam-preview");
+            camVideo && (camVideo.srcObject = null), camWidget && camWidget.style.setProperty("display", "none", "important");
             let n = 0,
                 o = 0,
                 a = 0,
