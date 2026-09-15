@@ -200,7 +200,10 @@ function renderDashboardUI(data) {
     renderItems('materialContainer', (data.materials || []).filter(m => (m.section || 'basic').toLowerCase() === userSection), m => `
         <div class="action-item">
             <div><strong>${m.title}</strong></div>
-            <a href="${m.driveUrl}" target="_blank" class="btn" style="background:#10b981;">Open and Download</a>
+            <div style="display:flex; gap:8px;">
+                <button class="btn" style="background:#7c3aed;" onclick="openMaterialReader('${encodeURIComponent(m.driveUrl)}', '${encodeURIComponent(m.title)}')">📖 Read</button>
+                <a href="${m.driveUrl}" target="_blank" class="btn" style="background:#10b981;">⬇ Download</a>
+            </div>
         </div>`);
 
     // Render Forms
@@ -213,6 +216,13 @@ function renderDashboardUI(data) {
     function renderItems(containerId, list, templateFn) {
         const container = document.getElementById(containerId);
         container.innerHTML = list.length ? list.map(templateFn).join('') : '<small>Nothing assigned yet.</small>';
+    }
+
+    function openMaterialReader(encodedDriveUrl, encodedTitle) {
+        // driveUrl/title are already percent-encoded by the caller; reader.html
+        // pulls username/sessionToken straight from localStorage itself, so
+        // they don't need to be passed through the URL here.
+        window.open(`reader.html?driveUrl=${encodedDriveUrl}&title=${encodedTitle}`, "_blank");
     }
 
     function launchQuiz(url, title) {
