@@ -288,6 +288,13 @@
             <label>Max Locks Before Auto-Submit</label>
             <input type="number" id="cfgMaxLocks" oninput="quizConfig.maxLocks = this.value">
         </div>
+        <div id="cfgCameraRow" style="display:none;">
+            <label>Camera Proctoring</label>
+            <label style="display:flex;align-items:center;gap:8px;font-weight:normal;text-transform:none;font-size:13px;color:var(--text-primary);cursor:pointer;margin-bottom:6px;">
+                <input type="checkbox" id="cfgCameraProctoring" style="width:auto;margin:0;" onchange="quizConfig.cameraProctoring = this.checked; document.getElementById('cfgCameraProctoringLabel').textContent = this.checked ? 'Enabled — camera required to start & is monitored throughout' : 'Disabled — no camera/face monitoring for this paper';">
+                <span id="cfgCameraProctoringLabel">Enabled</span>
+            </label>
+        </div>
     </div>
 </div>
 
@@ -424,7 +431,7 @@ function locateArrayLiteral(content, varName) {
 
 let currentFile = null;
 let questions = [];
-let quizConfig = { name: '', time: 45, password: '', appUrl: '', maxWarnings: 2, maxLocks: 4 };
+let quizConfig = { name: '', time: 45, password: '', appUrl: '', maxWarnings: 2, maxLocks: 4, cameraProctoring: true, hasCameraFeature: false };
 
 function parseQuizConfig(content) {
     const getMatch = (regex, defaultVal = '') => {
@@ -432,19 +439,33 @@ function parseQuizConfig(content) {
         return m ? m[1] : defaultVal;
     };
 
-    quizConfig.appUrl = getMatch(/const\s+APPS_SCRIPT_URL\s*=\s*"([^"]+)"/, '');
-    quizConfig.password = getMatch(/const\s+ADMIN_UNLOCK_PASSWORD\s*=\s*"([^"]+)"/, '');
-    
-    // Quiz duration time
-    const timeMatch = content.match(/const\s+TOTAL_TIME_SECONDS\s*=\s*(\d+)\s*\*\s*60/);
-    quizConfig.time = timeMatch ? parseInt(timeMatch[1]) : 45;
+    // NOTE: these no longer require a literal "const " right before the name.
+    // The newer camera-proctoring quiz papers declare several of these as
+    // comma-separated declarators in a single `const a = 1, b = 2, ...`
+    // statement, so only the very first name in the list is actually
+    // preceded by the word "const" in the source. Matching on the name
+    // itself (each of these is a unique identifier used nowhere else as an
+    // assignment target) works for both the old and new paper formats.
+    quizConfig.appUrl = getMatch(/APPS_SCRIPT_URL\s*=\s*"([^"]+)"/, '');
+    quizConfig.password = getMatch(/ADMIN_UNLOCK_PASSWORD\s*=\s*"([^"]+)"/, '');
+
+    // Quiz duration time — accepts either a plain seconds value (e.g. "2700")
+    // or an expression like "45 * 60".
+    const timeMatch = content.match(/TOTAL_TIME_SECONDS\s*=\s*(\d+)(?:\s*\*\s*(\d+))?/);
+    quizConfig.time = timeMatch ? Math.round((parseInt(timeMatch[1]) * (timeMatch[2] ? parseInt(timeMatch[2]) : 1)) / 60) : 45;
 
     // Autolock planner settings
-    const warnMatch = content.match(/const\s+MAX_WARNINGS\s*=\s*(\d+)/);
+    const warnMatch = content.match(/MAX_WARNINGS\s*=\s*(\d+)/);
     quizConfig.maxWarnings = warnMatch ? parseInt(warnMatch[1]) : 2;
 
-    const lockMatch = content.match(/const\s+MAX_LOCKS\s*=\s*(\d+)/);
+    const lockMatch = content.match(/MAX_LOCKS\s*=\s*(\d+)/);
     quizConfig.maxLocks = lockMatch ? parseInt(lockMatch[1]) : 4;
+
+    // Camera proctoring — only present in the newer quiz papers. Older
+    // papers without this constant at all simply don't get the toggle.
+    const camMatch = content.match(/CAMERA_PROCTORING_ENABLED\s*=\s*(true|false|!0|!1)/);
+    quizConfig.hasCameraFeature = !!camMatch;
+    quizConfig.cameraProctoring = camMatch ? (camMatch[1] === 'true' || camMatch[1] === '!0') : true;
 
     // Quiz title — read from the quizName variable first (the field this
     // editor actually keeps in sync on save), falling back to the <title>
@@ -461,6 +482,17 @@ function parseQuizConfig(content) {
     document.getElementById('cfgAppUrl').value = quizConfig.appUrl;
     document.getElementById('cfgMaxWarnings').value = quizConfig.maxWarnings;
     document.getElementById('cfgMaxLocks').value = quizConfig.maxLocks;
+
+    const camRow = document.getElementById('cfgCameraRow');
+    if (quizConfig.hasCameraFeature) {
+        camRow.style.display = 'block';
+        document.getElementById('cfgCameraProctoring').checked = quizConfig.cameraProctoring;
+        document.getElementById('cfgCameraProctoringLabel').textContent = quizConfig.cameraProctoring
+            ? 'Enabled — camera required to start & is monitored throughout'
+            : 'Disabled — no camera/face monitoring for this paper';
+    } else {
+        camRow.style.display = 'none';
+    }
 }
 
 /* Parses quiz content already in memory (from a GET or a just-completed PUT)
@@ -1120,13 +1152,22 @@ async function saveToGithub() {
         newContent = newContent.slice(0, loc.start) + JSON.stringify(questions) + newContent.slice(loc.end + 1);
 
         // 2. Update Quiz Metadata & Variables
-        newContent = newContent.replace(/const\s+TOTAL_QUESTIONS\s*=\s*\d+/, `const TOTAL_QUESTIONS = ${questions.length}`);
-        newContent = newContent.replace(/const\s+APPS_SCRIPT_URL\s*=\s*"[^"]*"/, `const APPS_SCRIPT_URL = "${quizConfig.appUrl}"`);
-        newContent = newContent.replace(/const\s+ADMIN_UNLOCK_PASSWORD\s*=\s*"[^"]*"/, `const ADMIN_UNLOCK_PASSWORD = "${quizConfig.password}"`);
-        newContent = newContent.replace(/const\s+TOTAL_TIME_SECONDS\s*=\s*\d+\s*\*\s*60/, `const TOTAL_TIME_SECONDS = ${quizConfig.time} * 60`);
-        newContent = newContent.replace(/const\s+MAX_WARNINGS\s*=\s*\d+/, `const MAX_WARNINGS = ${quizConfig.maxWarnings}`);
-        newContent = newContent.replace(/const\s+MAX_LOCKS\s*=\s*\d+/, `const MAX_LOCKS = ${quizConfig.maxLocks}`);
+        // These match on the identifier itself rather than requiring a
+        // literal "const " right before it, so they work whether the paper
+        // declares each constant on its own ("const NAME = value;") or as
+        // one of several comma-separated declarators in a single statement
+        // (the format used by the newer camera-proctoring papers, where
+        // only the first name in the list is actually preceded by "const").
+        newContent = newContent.replace(/TOTAL_QUESTIONS\s*=\s*\d+/, `TOTAL_QUESTIONS = ${questions.length}`);
+        newContent = newContent.replace(/APPS_SCRIPT_URL\s*=\s*"[^"]*"/, `APPS_SCRIPT_URL = "${quizConfig.appUrl}"`);
+        newContent = newContent.replace(/ADMIN_UNLOCK_PASSWORD\s*=\s*"[^"]*"/, `ADMIN_UNLOCK_PASSWORD = "${quizConfig.password}"`);
+        newContent = newContent.replace(/TOTAL_TIME_SECONDS\s*=\s*\d+(?:\s*\*\s*\d+)?/, `TOTAL_TIME_SECONDS = ${quizConfig.time * 60}`);
+        newContent = newContent.replace(/MAX_WARNINGS\s*=\s*\d+/, `MAX_WARNINGS = ${quizConfig.maxWarnings}`);
+        newContent = newContent.replace(/MAX_LOCKS\s*=\s*\d+/, `MAX_LOCKS = ${quizConfig.maxLocks}`);
         newContent = newContent.replace(/quizName:\s*"[^"]*"/g, `quizName: "${quizConfig.name}"`);
+        if (quizConfig.hasCameraFeature) {
+            newContent = newContent.replace(/CAMERA_PROCTORING_ENABLED\s*=\s*(?:true|false|!0|!1)/, `CAMERA_PROCTORING_ENABLED = ${quizConfig.cameraProctoring ? 'true' : 'false'}`);
+        }
 
         // 2b. Update every OTHER place the quiz name is hardcoded in the paper's
         // own HTML/JS, which quizName: alone never touched. This is why the old
@@ -1138,8 +1179,10 @@ async function saveToGithub() {
         //   - the visible on-screen header (.test-title h3)
         newContent = newContent.replace(/(<div class="test-title">\s*<h3[^>]*>)([^<]*)(<\/h3>)/,
             (m, pre, mid, post) => pre + quizConfig.name + post);
-        //   - the "Quiz Title:" row in the downloadable PDF performance summary
-        newContent = newContent.replace(/(Quiz Title:<\/td>\s*<td[^>]*>)([^<]*)(<\/td>)/,
+        //   - the "Quiz Title:" row in the downloadable PDF performance summary.
+        //     (?:\\n)? handles papers where this row lives inside a template
+        //     literal with a literal escaped "\n" instead of a real newline.
+        newContent = newContent.replace(/(Quiz Title:<\/td>(?:\\n)?\s*<td[^>]*>)([^<]*)(<\/td>)/,
             (m, pre, mid, post) => pre + quizConfig.name + post);
 
         const res = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(currentFile.path)}`, {
