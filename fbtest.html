@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes,viewport-fit=cover">
-    <title>ASTI Delhi – TEST (80 Questions | 45 Min)</title>
+    <title>ASTI Delhi – DAY 2 PAPER 2 (80 Questions | 45 Min)</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -1424,7 +1424,7 @@
     </div>
     <div class="header notranslate" style="display:none" id="main-header" translate="no">
         <div class="test-title">
-            <h3 style="font-size:1.5em">TEST</h3>
+            <h3 style="font-size:1.5em">DAY 2 PAPER 2</h3>
             <div class="institute-logo">ASTI Delhi</div>
         </div>
         <div class="user-info"><span id="header-user-name">Candidate: N/A</span> <span id="timer-display">45:00</span></div>
@@ -1499,13 +1499,447 @@
         <div id="camera-lost-box" style="margin-top:10px;display:none;flex-direction:column;align-items:center;gap:8px"><button type="button" id="camera-retry-lock-btn" onclick="attemptCameraRecovery()" style="padding:12px 30px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer">🔄 Retry Camera Access</button></div>
     </div>
     <footer class="notranslate" translate="no">ASTI Delhi Quiz Examination</footer>
+
+    <!-- ============================================================ -->
+    <!-- FIREBASE SETUP — connects this page to your Firebase project -->
+    <!-- ============================================================ -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+      import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDVupXGnzWupC923PMdj592aDUFSZgCe80",
+        authDomain: "asti-quiz.firebaseapp.com",
+        projectId: "asti-quiz",
+        storageBucket: "asti-quiz.firebasestorage.app",
+        messagingSenderId: "581313433547",
+        appId: "1:581313433547:web:a8fb873eeda09649df704e",
+        measurementId: "G-NCMHQXB5Q0"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // Other code on this page waits for this promise before saving a
+      // score, so we know Firebase has finished restoring the student's
+      // login session from the browser before we try to write anything.
+      window._fbAuthReady = new Promise((resolve) => {
+        onAuthStateChanged(auth, (user) => resolve(user));
+      });
+
+      window._fb = { db, collection, addDoc };
+    </script>
+
     <script>
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPwPhD5WTBPut3gC0LYF_wq1gXZ14O5z78yukoKs1-RQTy4N9YwvSF0axQLHzcUjon/exec",
             SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk",
             ADMIN_UNLOCK_PASSWORD = "igiasti123",
-            TOTAL_QUESTIONS = 60,
+            TOTAL_QUESTIONS = 80,
             TOTAL_TIME_SECONDS = 2700,
-            questionData = [[1,1,"Full form of X-BIS ? X-BIS का पूरा नाम क्या है?","Full form of X-BIS ? X-BIS का पूरा नाम क्या है?",["X-Ray Baggage Inspection System , X-रे बैगेज इंस्पेक्शन सिस्टम","एक्स - रे बैगेज इंस्पेक्शन सिस्टम , एक्स- रे बैगेज इंस्पेक्शन सिस्टम"],["X-Ray Baggage Introspection System एक्स-रे बैगेज आत्मनिरीक्षण प्रणाली","एक्स - रे बैगेज आत्मनिरीक्षण प्रणाली एक्स -रे बैगेज आत्मनिरीक्षण प्रणाली"],["X-Ray Baggage Inspection Source एक्स-रे बैगेज निरीक्षण स्रोत","एक्स - रे बैगेज इंस्पेक्शन सोर्स एक्स - रे बैगेज निरूपण स्त्रोत"],["X-BIS Baggage Inspection Software X-BIS सामान निरीक्षण सॉफ्टवेयर","एक्स - बीआईएस बैगेज इंस्पेक्शन सॉफ़्टवेयर एक्स- बीआईएस सामनी निरूपण सॉफ़्टवेयर"]],[2,3,"X-ray can not be___________ by means of lens or prism.\r\nलेंस या प्रिज्म के माध्यम से एक्स-रे ___________ नहीं हो सकते।","X-ray can not be___________ by means of lens or prism.\r\nलेंस या प्रिज्म के माध्यम से एक्स-रे ___________ नहीं हो सकते।",["Deformed / विकृत","विकृत /विकृत"],["Degraded/अपमानित","अपघटित/अपघटित"],["Deflected/हटाया हुआ","विक्षेपित/हटाना"],["Deflagrate/अवहेलना करना","Deflagrate/अवहेलना करना"]],[3,2,"Standard Unit of X Ray is ? एक्स-रे की मानक इकाई क्या है?","Standard Unit of X Ray is ? एक्स-रे की मानक इकाई क्या है?",["Gray","सलेटी"],["Roentgen रोएंटगन","रोएंटजेन रोएंटगन"],["Jule",""],["Sivert","Sivert"]],[4,3,"34.In how many colors do the X-BIS project images?\r\n34. X-BIS प्रोजेक्ट कितने रंगों में चित्र बनाता है?","34.In how many colors do the X-BIS project images?\r\n34. X-BIS प्रोजेक्ट कितने रंगों में चित्र बनाता है?",["One/एक","एक/एक"],["Two/दो","दो/दो"],["Three/तीन","थ्री/टीन"],["Four/चार","चार/चार"]],[5,4,"The standard unit for measuring the quantity of ionizing radiation is Roentgen denoted by “....”. /आयनकारी विकिरण की मात्रा मापने की मानक इकाई रोएंटजन है जिसे \"...” द्वारा दर्शाया जाता है।","The standard unit for measuring the quantity of ionizing radiation is Roentgen denoted by “....”. /आयनकारी विकिरण की मात्रा मापने की मानक इकाई रोएंटजन है जिसे \"...” द्वारा दर्शाया जाता है।",["X'","X"],["Y'","Y"],["W'","W"],["R'","R"]],[6,1,"In which one of the colors will copper detonator appear on the X-Ray moniter?\r\nएक्स-रे मॉनिटर पर कॉपर डेटोनेटर किस रंग में दिखाई देगा?","In which one of the colors will copper detonator appear on the X-Ray moniter?\r\nएक्स-रे मॉनिटर पर कॉपर डेटोनेटर किस रंग में दिखाई देगा?",["Blue/नीला","नीला/नीला"],["Orange/नारंगी","नारंगी/नारंगी"],["Opaque/अस्पष्ट","अपारदर्शी/अस्पष्ट"],["Green/हरा","हरा/हरा"]],[7,2,"In X-BIS all organic material will be seen in.................\r\nX-BIS में सभी कार्बनिक पदार्थ ................. में देखे जाएँगे।","In X-BIS all organic material will be seen in.................\r\nX-BIS में सभी कार्बनिक पदार्थ ................. में देखे जाएँगे।",["Green/हरा","हरा/हरा"],["Orange/नारंगी","नारंगी/नारंगी"],["Purple/बैंगनी","बैंगनी/बैंगनी"],["Blue/नीला","नीला/नीला"]],[8,4,"An element with atomic number 80 will be seen in __________colour on XBIS monitor\r\nपरमाणु संख्या 80 वाला एक तत्व XBIS मॉनिटर पर __________ रंग में देखा जाएगा","An element with atomic number 80 will be seen in __________colour on XBIS monitor\r\nपरमाणु संख्या 80 वाला एक तत्व XBIS मॉनिटर पर __________ रंग में देखा जाएगा",["Orange/नारंगी","नारंगी/नारंगी"],["Green/हरा","हरा/हरा"],["Blue/ नीला","नीला/नीला"],["Opaque/अस्पष्ट","अपारदर्शी/अस्पष्ट"]],[9,3,"An element with atomic number 19 will be seen in __________colour on XBIS monitor\r\nपरमाणु संख्या 19 वाला एक तत्व XBIS मॉनिटर पर __________ रंग में देखा जाएगा","An element with atomic number 19 will be seen in __________colour on XBIS monitor\r\nपरमाणु संख्या 19 वाला एक तत्व XBIS मॉनिटर पर __________ रंग में देखा जाएगा",["Orange/नारंगी","नारंगी/नारंगी"],["Green/हरा","हरा/हरा"],["Blue नीला","नीला नीला"],["Opaque/अस्पष्ट","अपारदर्शी/अस्पष्ट"]],[10,4,"In civil aviation security X-Bis is not used for\r\nनागरिक उड्डयन सुरक्षा में X-BIS का प्रयोग नहीं किया जाता है","In civil aviation security X-Bis is not used for\r\nनागरिक उड्डयन सुरक्षा में X-BIS का प्रयोग नहीं किया जाता है",["Screening of hand baggage/हैंड बैगेज की स्क्रीनिंग","हैंड बैगेज/हैंडबैग की स्क्रीनिंग"],["Screening of a registered baggage/एक पंजीकृत सामान की स्क्रीनिंग","एक पंजीकृत सामान की स्क्रीनिंग/एक पंजी कृषि सामान की स्क्रीनिंग"],["Screening of tiffin carries/टिफिन कैरी की स्क्रीनिंग","टिफिन कैरी/टिफिन की स्क्रीनिंग"],["Screening of pax/पैक्स की स्क्रीनिंग","पैक्स/पैक्स की स्क्रीनी निबंध की स्क्रीनिंग"]],[11,2,"Operating Temperater of X-_BIS is ? X‑BIS की संचालन तापमान सीमा है:","Operating Temperater of X-_BIS is ? X‑BIS की संचालन तापमान सीमा है:",["a) –10°C से 30°C","a) –10°C से 30°C"],["b) 0°C से 40°C","b) 0°C से 40°C"],["c) –20°C से 50°C","ग) –20°C से 50°C"],["d) 10°C से 50°C","d) 10°C से 50°C"]],[12,1,"Which is one of the specification of X-BIS\r\nजो एक्स-बीआईएस के विनिर्देशों में से एक है","Which is one of the specification of X-BIS\r\nजो एक्स-बीआईएस के विनिर्देशों में से एक है",["Speed of the conveyor belt should be 0.18 to 0.3 mtr/ sec/कन्वेयर बेल्ट की गति 0.18 से 0.3 मीटर/सेकंड होनी चाहिए","कन्वेयर बेल्ट की गति 0.18 से 0.3 मीटर/ सेकेंड/कनवेयर बेल्ट की गत 0.18 से 0.3 मीटर/सेकेंड होनी चाहिए"],["Convince to the pax/पैक्स को मनाओ","पैक्स/पैक्स को मनाने के लिए मनाएँ"],["all options are correct/ सभी विकल्प सही हैं","सभी विकल्प सही हैं/सभ्यता का साथ है"],["Detect all kind of explosive/सभी प्रकार के विस्फोटकों का पता लगाएं","सभी प्रकार के विस्फोटक/सभ्यता का पता लगाएं"]],[13,3,"Through put Rate for registered & Cabin baggage in X-BIS Screening as per BCAS specification shall be? BCAS विनिर्देशों के अनुसार X-BIS स्क्रीनिंग में पंजीकृत और केबिन बैगेज के लिए थ्रूपुट दर क्या होगी?","Through put Rate for registered & Cabin baggage in X-BIS Screening as per BCAS specification shall be? BCAS विनिर्देशों के अनुसार X-BIS स्क्रीनिंग में पंजीकृत और केबिन बैगेज के लिए थ्रूपुट दर क्या होगी?",["200 Bags/hr","200 बैग/घंटा"],["300 Bags/hr","300 बैग/घंटा"],["400 Bags/hr","400 बैग/घंटा"],["100 Bags/hr","100 बैग/घंटा"]],[14,1,"Through put Rate for Cargo in X-BIS Screening as per BCAS specification shall be? BCAS विनिर्देशों के अनुसार X-BIS स्क्रीनिंग में Cargo के लिए थ्रूपुट दर क्या होगी?","Through put Rate for Cargo in X-BIS Screening as per BCAS specification shall be? BCAS विनिर्देशों के अनुसार X-BIS स्क्रीनिंग में Cargo के लिए थ्रूपुट दर क्या होगी?",["200 Bags/hr","200 बैग/घंटा"],["300 Bags/hr","300 बैग/घंटा"],["400 Bags/hr","400 बैग/घंटा"],["100 Bags/hr","100 बैग/घंटा"]],[15,1,"In civil aviation security X-Bis is used for\r\nनागरिक उड्डयन सुरक्षा में X-Bis का प्रयोग किया जाता है","In civil aviation security X-Bis is used for\r\nनागरिक उड्डयन सुरक्षा में X-Bis का प्रयोग किया जाता है",["Screening of hand baggage/हैंड बैगेज की स्क्रीनिंग","हैंड बैगेज/हैंडबैग की स्क्रीनिंग"],["Screening of Service Animal baggage/सेवा पशुओं के सामान की जांच","सेवा पशु सामान की स्क्रीनिंग/सेवा पशु सामान की स्क्रीनिंग"],["Screening of animals/पशुओं की स्क्रीनिंग","जानवरों/पशुओं की स्क्रीनिंग"],["Screening of pax/पैक्स की स्क्रीनिंग","पैक्स/पैक्स की स्क्रीनी निबंध की स्क्रीनिंग"]],[16,2,"The date on which X‑rays were discovered is: एक्स‑रे की खोज की तारीख है:","The date on which X‑rays were discovered is: एक्स‑रे की खोज की तारीख है:",["a) 8th December 1895","क) 8 दिसंबर 1895"],["b) 8th November 1895","ख) 8 नवंबर 1895"],["c) 10th January 1896","ग) 10 जनवरी 1896"],["d) 1st August 1895","d) 1 अगस्त 1895"]],[17,3,"X‑rays are a form of: एक्स‑रे निम्न का रूप है:","X‑rays are a form of: एक्स‑रे निम्न का रूप है:",["a) Mechanical wavesa) यांत्रिक तरंगें","a) Mechanical wavesa) यांत्रिकी तरंगें"],["b) Sound waves b) ध्वनि तरंगें","b) ध्वनि तरंगें b) ध्वनि तरंगें"],["c) Electromagnetic radiation c) विद्युत‑चुम्बकीय विकिरण","ग) विद्युत चुम्बकीय विकिरण ग) विद्युत चुम्बकीय विकिरण ग) विद्युत चुम्बकीय विकिरण"],["d) Magnetic field d) चुम्बकीय क्षेत्र","d) चुंबकीय क्षेत्र d) चुम्ची क्षेत्र"]],[18,2,"X‑rays penetrate easily through: एक्स-रे आसानी से इन अंगों को भेद सकते हैं:","X‑rays penetrate easily through: एक्स-रे आसानी से इन अंगों को भेद सकते हैं:",["a) High‑density materials a) हाई ‑डेंसिटी मैटेरियल्स","a) हाई-डेंसिटी मैटेरियल्स a) हाई - डेंसिटी मैटेरियल्स a) हाई - डेंसिटी मैटेरियल्स"],["b) Low‑density materials b) लौ ‑डेंसिटी मैटेरियल्स","b) कम घनत्व वाली सामग्री b) लॉ डेंसिटी मैटेरियल्स"],["c) Very thick lead सी) बहुत मोटी सीसा","ग) बहुत मोटी सीसा) बहुत मोटी सीसा"],["d) Thick steel only d) केवल मोटी स्टील","घ) केवल मोटा स्टील घ) केवल मोटी स्टील"]],[19,2,"Maximum permissible radiation level at 5 cm from external housing is: ऐसी सामग्री जो एक्स‑रे को ज़्यादा अवशोषित या परिवर्तित करती है:","Maximum permissible radiation level at 5 cm from external housing is: ऐसी सामग्री जो एक्स‑रे को ज़्यादा अवशोषित या परिवर्तित करती है:",["a) 0.05 mR/hr","a) 0.05 mR/hr"],["b) 0.1 mR/hr","b) 0.1 mR/hr"],["c) 0.2 mR/hr","ग) 0.2 mR/hr"],["d) 0.5 mR/hr","घ) 0.5 mR/hr"]],[20,3,"Minimum image resolution of X‑BIS is:\r\nX‑BIS की न्यूनतम इमेज रिज़ोल्यूशन है:","Minimum image resolution of X‑BIS is:\r\nX‑BIS की न्यूनतम इमेज रिज़ोल्यूशन है:",["a) 800×600 pixels","a) 800×600 पिक्सेल"],["b) 1024×768 pixels","b) 1024×768 पिक्सेल"],["c) 1280×1024 pixels (Full HD)","c) 1280×1024 पिक्सल (पूर्ण HD)"],["d) 1920×1080 pixel","घ) 1920×1080 पिक्सेल"]],[21,3,"Archive images must be retained for a minimum of:\r\nआर्काइव इमेजेस को न्यूनतम कितने दिन तक रखना है?","Archive images must be retained for a minimum of:\r\nआर्काइव इमेजेस को न्यूनतम कितने दिन तक रखना है?",["a) 7 days","क) 7 दिन"],["b) 10 days","ख) 10 दिन"],["c) 14 days","ग) 14 दिन"],["d) 30 days","d) 30 दिन"]],[22,3,"All software features of the machine must be:\r\nमशीन के सभी सॉफ्टवेयर फ़ीचर होने चाहिए:","All software features of the machine must be:\r\nमशीन के सभी सॉफ्टवेयर फ़ीचर होने चाहिए:",["a) Turned off to avoid clutter a) बिना उपयोग के रखे हुए","a) अव्यवस्था से बचने के लिए बंद कर दिया a) बिनाना उपयोग के लिए"],["b) Deactivated by default b) डिफ़ॉल्ट रूप से बंद","b) डिफ़ॉल्ट रूप से निष्क्रिय b) डिफ़ॉल्ट रूप से बंद"],["c) Activated and password‑protected c) सक्रिय और पासवर्ड‑सुरक्षित","c) सक्रिय और पासवर्ड-संरक्षित c) सक्रीय और पासवर्द - सुरक्षित"],["d) Disabled for security d) सुरक्षा के लिए बंद","d) सुरक्षा के लिए अक्षम d) सुरक्षा के लिए अक्षम"]],[23,3,"“Food and Film Safe” means: “Food and Film Safe” का अर्थ है:","“Food and Film Safe” means: “Food and Film Safe” का अर्थ है:",["a) Food items must be removed before screening a) खाने की वस्तुएँ पहले हटानी होंगी","a) स्क्रीनिंग से पहले खाद्य पदार्थों को हटाया जाना चाहिए a) खाने की वस्तुएँ"],["b) X‑ray can damage photographic film b) फ़ोटोग्राफ़िक फ़िल्म खराब हो सकती है","ख) एक्स-रे फोटोग्राफिक फिल्म को नुकसान पहुंचा सकता है ख) फिल्म खरब हो सकती है"],["c) Food and photographic film must not be damaged by X‑ray c) भोजन और फोटोग्राफ़िक फ़िल्म पर एक्स‑रे का विनाशकारी प्रभाव नहीं होना चाहिए","ग) एक्स-रे से खाद्य और फोटोग्राफिक फिल्म को नुकसान नहीं पहुंचाया जाना चाहिए ग) भोजन और फोतोगरा फिक्की फिल्म पर एक फिल्म एक बार में एक फिल्म का नाम बदलना शककारी प्रभावा नहिं होना चाहिंआ"],["d) Only film is safe d) फिल्म ही सुरक्षित है","d) केवल फिल्म सुरक्षित है d) फिल्म ही सुरक्षित है"]],[24,2,"Lead‑impregnated safety screens at both ends of the tunnel are used to:\r\nटनल के दोनों सिरों पर लेड‑युक्त सुरक्षा स्क्रीन का उपयोग होता है:","Lead‑impregnated safety screens at both ends of the tunnel are used to:\r\nटनल के दोनों सिरों पर लेड‑युक्त सुरक्षा स्क्रीन का उपयोग होता है:",["a) Increase throughput a) थ्रूपुट बढ़ाने के लिए","a) थ्रूपुट बढ़ाएं a) थ्रूपुट बढ़ाएं"],["b) Reduce X‑ray scattering and radiation leakage b) एक्स‑रे प्रकीर्णन और विकिरण लीक को कम करने","b) एक्स-रे स्कैटरिंग और रेडिएशन रिसाव को कम करें b) एकसरे के प्रकीर्णन और विकिरण को कम करने के लिए"],["c) Detect explosives c) विस्फोटक पहचानने","ग) विस्फोटकों का पता लगाएं ग) विस्फोटक पहचाने"],["d) Improve colour of images d) छवि के रंग में सुधार करने","घ) छवियों केरंग में सुधार घ) छवियों के रंग में सुधार"]],[25,3,"X‑BIS must have: X‑BIS में होना चाहिए:","X‑BIS must have: X‑BIS में होना चाहिए:",["a) Offline recording only a) केवल ऑफ़लाइन रिकॉर्डिंग","a) ऑफ़लाइन रिकॉर्डिंग केवल a) केवला रिकार्डिंग"],["b) No image recording b) कोई इमेज रिकॉर्डिंग नहीं","b) कोई इमेज रिकॉर्डिंग नहीं b) कोई इमेज रिकॉर्डिंग नहीं है"],["c) Online recording for at least 14 days c) 14 दिन तक की ऑनलाइन रिकॉर्डिंग","c) कम से कम 14 दिनों के लिए ऑनलाइन रिकॉर्डिंग c) 14 दिन तक की ऑनलाइन रिकॉर्डिंग"],["d) Recording for 7 days only d) केवल 7 दिन की रिकॉर्डिंग","घ) केवल 7 दिनों के लिए रिकॉर्डिंग घ) केवल 7 दिन की रिकॉर्डिंग"]],[26,3,"Before installation, X‑BIS must have radiation‑safety NOC from: स्थापना से पहले X‑BIS को विकिरण‑सुरक्षा NOC प्राप्त करना होता है:","Before installation, X‑BIS must have radiation‑safety NOC from: स्थापना से पहले X‑BIS को विकिरण‑सुरक्षा NOC प्राप्त करना होता है:",["a) DGCA","क) डीजीसीए"],["b) BCAS","बी) बीसीएएस"],["c) AERB (Atomic Energy Regulatory Board)","ग) एईआरबी (परमाणु ऊर्जा नियामक बोर्ड)"],["d) ICAO","घ) ICAO"]],[27,2,"X‑rays are classified as: एक्स‑रे को वर्गीकृत किया जाता है:","X‑rays are classified as: एक्स‑रे को वर्गीकृत किया जाता है:",["a) Non‑ionizing radiation ए) गैर-आयनकारी विकिरण","क) गैर-आयनकारी विकिरण क) गैर - आयनकारी विकिरण"],["b) Ionizing radiation b) आयनीकरण विकिरण","b) आयनकारी विकिरण b) आयनिकरण विकिरण"],["c) Mechanical vibration ग) यांत्रिक कंपन","ग) मैकेनिकल कंपन ग) यांत्रिकी कंकण"],["d) Magnetic field only d) केवल चुंबकीय क्षेत्र","घ) चुंबकीय क्षेत्र केवल घ) केवल चुंखीक्षेत्र"]],[28,2,"A dense metal object will appear in X‑ray image as: घना धातु वस्तु एक्स‑रे छवि में दिखाई देगी:","A dense metal object will appear in X‑ray image as: घना धातु वस्तु एक्स‑रे छवि में दिखाई देगी:",["a) Light yellow area","क) हल्का पीला क्षेत्र"],["b) Dark or black area","ख) गहरा या काला क्षेत्र"],["c) Green area","ग) हरित क्षेत्र"],["d) White area","घ) सफेद क्षेत्र"]],[29,3,"VPB (View Previous Bag) is used mainly to: VPB (View Previous Bag) का मुख्य उपयोग है","VPB (View Previous Bag) is used mainly to: VPB (View Previous Bag) का मुख्य उपयोग है",["a) Change baggage colour a) बैग का रंग बदलने में","क) सामान का रंग बदलें क)बैग का रंग बदलें में"],["b) Increase throughput b) थ्रूपुट बढ़ाने में","b) थ्रूपुट बढ़ाएं b) थ्रूपुट बढ़ाएं में"],["c) Re‑check doubtful bags without re‑running them c) बैग को दोबारा भागने के बिना संदिग्ध बैग की पुनर‑जाँच में","ग) बिना फिर से चल रहे संदिग्ध बैगों की फिर से जांच करें ग) बैंग कोड़ोरा भागने के बाद बैंग की पुनीत जांघ में"],["d) Print ticket receipts d) टिकट रसीद छापने में","d) टिकट की रसीदें प्रिंट करें d) टिकट रसिया में"]],[30,3,"The manufacturer of X‑BIS equipment should have: X‑BIS उपकरण निर्माता के पास होना चाहिए:","The manufacturer of X‑BIS equipment should have: X‑BIS उपकरण निर्माता के पास होना चाहिए:",["a) DIN certification","ए) डीआईएन प्रमाणीकरण"],["b) CE mark only","b) केवल CE मार्क"],["c) ISO certification","ग) आईएसओ प्रमाणीकरण"],["d) National lab test only","घ) केवल राष्ट्रीय प्रयोगशाला परीक्षण"]],[31,4,"Minimum zoom facility in X‑BIS should be: X‑BIS में न्यूनतम ज़ूम सुविधा होनी चाहिए:","Minimum zoom facility in X‑BIS should be: X‑BIS में न्यूनतम ज़ूम सुविधा होनी चाहिए:",["a) 4×","* A.4."],["b) 8×","b. 8"],["c) 12×","सी-12"],["d) 16× or more","घ) 16× या अधिक"]],[32,3,"How many bags can be stored in View Previous Bag (VPB)? View Previous Bag (VPB) में कितने बैग संग्रह किए जा सकते हैं?","How many bags can be stored in View Previous Bag (VPB)? View Previous Bag (VPB) में कितने बैग संग्रह किए जा सकते हैं?",["a) 5–10 bags","a) 5 -10 बैग"],["b) 10–15 bags","b) 10 -15 बैग"],["c) 15–20 bags","ग) 15 -20 बैग"],["d) 20–25 bags","घ) 20 -25 बैग"]],[33,1,"In the X-Ray machines “Lead” is primarily used to\r\nएक्स-रे मशीनों में “लेड” का मुख्य रूप से उपयोग किया जाता है","In the X-Ray machines “Lead” is primarily used to\r\nएक्स-रे मशीनों में “लेड” का मुख्य रूप से उपयोग किया जाता है",["Absorb radiation/विकिरण अवशोषित करें","विकिरण अवशोषितकरें"],["Detect arms and ammunition/हथियारों और गोला बारूद का पता लगाएं","हथियार और गोला बारूद का पता लगाएं/हथियारों और गोलाबारूद का पता लगाएं"],["Detect Explosives/विस्फोटकों का पता लगाएं","विस्फोटकों का पता लगाएं/विस्‍फोटकों का पता लगाएं"],["Increase the “through-put”/\"थ्रू-पुट\" बढ़ाएँ","थ्रू - पुट/थ्रू - पुट बढ़ाएँ"]],[34,2,"CTP is conducted to check that ?\r\nइसकी जांच के लिए सीटीपी का आयोजन किया जाता है ?","CTP is conducted to check that ?\r\nइसकी जांच के लिए सीटीपी का आयोजन किया जाता है ?",["X-Bis is working properly/एक्स-बिस ठीक से काम कर रहा है","एक्स- बीआईएस ठीक से काम कर रहा है/एकस - बीआईएस ठिक काम कर रहाहै"],["X_BIS is working as p er BCAS specification/एक्स बीआईएस बीसीएएस विनिर्देश के अनुसार काम कर रहा है","X_BIS पूर्व बीसीएएस विनिर्देश के रूप में काम कर रहा है/एकस बीआईएस बीसीएस विनिर्देश के अनसार काम कर रहाहै"],["X-Bis will not work without CTP/CTP के बिना X-Bis काम नहीं करेगा","X - Bis CTP/CTP के बिना काम नहीं करेगा"],["DFMD is working properly/डीएफएमडी ठीक से काम कर रहा है","डीएफएमडी ठीक से काम कर रहा है/डीएफएमडी थिक काम कर रहाहै"]],[35,1,"AERB","AERB",["Atomic Energy Regulatory Board","परमाणु ऊर्जा नियामक बोर्ड"],["Atomic Energy Regulation Board","परमाणु ऊर्जा विनियमन बोर्ड"],["",""],["",""]],[36,4,"An element with atomic number 76 will be seen in __________colour on XBIS monitor\r\nपरमाणु संख्या 76 वाला एक तत्व XBIS मॉनिटर पर __________ रंग में देखा जाएगा","An element with atomic number 76 will be seen in __________colour on XBIS monitor\r\nपरमाणु संख्या 76 वाला एक तत्व XBIS मॉनिटर पर __________ रंग में देखा जाएगा",["Orange/नारंगी","नारंगी/नारंगी"],["Green/हरा","हरा/हरा"],["OpaqueBlue/अपारदर्शी नीला","अपारदर्शी नीला/अपारदर्शी नीला"],["Opaque/अस्पष्ट","अपारदर्शी/अस्पष्ट"]],[37,3,"CTX stands for?\r\nCTX का मतलब है?","CTX stands for?\r\nCTX का मतलब है?",["Complex topographic X-Ray/जटिल स्थलाकृतिक एक्स-रे","कॉम्प्लेक्स टोपोग्राफिक एक्स - रे/जटिल स्ताक कृषक एक- रे"],["Crystal trace X-Ray/क्रिस्टल ट्रेस एक्स-रे","क्रिस्टल ट्रेस एक्स - रे/क्रिस्टल ट्रीस वन - रे"],["Computed tomography X-ray/कंप्यूटेड टोमोग्राफी एक्स-रे","कंप्यूटेड टोमोग्राफी एक्स - रे/कंपीयूटेड टोमोग्राफी एक्स - रे/कंपीयूटेड टोमोग्राफी एक्स- रे"],["Computerized telescopic X-ray/कम्प्यूटरीकृत टेलीस्कोपिक एक्स-रे","कम्प्यूटरीकृत टेलीस्कोपिक एक्स - रे/कम्यूटरीकृषि टेलीस्कोपिक वन-रे"]],[38,4,"Which of the following is technology of X-Ray BIS? निम्नलिखित में से कौन सी तकनीक एक्स-रे बीआईएस की तकनीक है?","Which of the following is technology of X-Ray BIS? निम्नलिखित में से कौन सी तकनीक एक्स-रे बीआईएस की तकनीक है?",["Single Energy","एकल ऊर्जा"],["Multi- Energy","बहु ऊर्जा"],["Back Scatter","बैक स्कैटर"],["All of the above","इंजन और चार्जिंग सिस्टम&#10;टायरों का संतुलन&#10;उपरोक्त सभी"]],[39,1,"SWG","SWG",["Standard wire gauge","स्टैंडर्ड वायर गेज"],["SPECIFIC wire gauge","विशिष्ट वायर गेज"],["",""],["",""]],[40,1,"BCAS­","BCAS­",["BUREAU OF CIVIL AVIATION SECURITY","नागर विमानन सुरक्षा ब्यूरो"],["BOARD OF CIVIL AVIATION SECURITY","नागरिक उड्डयन सुरक्षा बोर्ड"],["",""],["",""]],[41,2,"CTP­","CTP­",["COMBINED TESTING PIECE","संयुक्त परीक्षण टुकड़ा"],["COMBINED TEST PIECE","संयुक्त परीक्षण टुकड़ा"],["",""],["",""]],[42,1,"ICAO­","ICAO­",["INTERNATIONAL CIVIL AVIATION ORGANIZATION","अन्तर्राष्ट्रीय नागर विमानन संगठन"],["INTERNATIONAL CIVIL AVIATION SAFETY","अंतर्राष्ट्रीय नागरिक उड्डयन सुरक्षा"],["",""],["",""]],[43,2,"CTP stands for?\r\nसीटीपी का मतलब है?","CTP stands for?\r\nसीटीपी का मतलब है?",["Combined test performance/संयुक्त परीक्षण प्रदर्शन","कंबाइंड टेस्ट परफॉर्मेंस/संयुक्‍त प्रस्‍तुति प्रस्‍तुति"],["Combined test piece/संयुक्त परीक्षण टुकड़ा","संयुक्त परीक्षण टुकड़ा/संयुक्‍त परीक्षण टुकड़ा"],["Computer tomography projection/कंप्यूटर टोमोग्राफी प्रक्षेपण","कंप्यूटर टोमोग्राफी प्रोजेक्शन/कंपीयूटर तोगराफी प्रक्षेपण"],["Comprehensive testing procedure/व्यापक परीक्षण प्रक्रिया","व्यापक परीक्षण प्रक्रिया/व्यापार प्रक्रिया"]],[44,1,"If an attempt is made to generate X-Ray with a critical panel / cover of X-Bis missing\r\n__________ will senesce this and prevent x-ray form being generated.\r\nयदि एक्स-बीआईएस के महत्वपूर्ण पैनल/कवर के गायब होने के साथ एक्स-रे उत्पन्न करने का प्रयास किया जाता है\r\n__________ इसे जीर्ण कर देगा और एक्स-रे फॉर्म को उत्पन्न होने से रोकेगा .","If an attempt is made to generate X-Ray with a critical panel / cover of X-Bis missing\r\n__________ will senesce this and prevent x-ray form being generated.\r\nयदि एक्स-बीआईएस के महत्वपूर्ण पैनल/कवर के गायब होने के साथ एक्स-रे उत्पन्न करने का प्रयास किया जाता है\r\n__________ इसे जीर्ण कर देगा और एक्स-रे फॉर्म को उत्पन्न होने से रोकेगा .",["Interlocks/इंटरलॉक","इंटरलॉक/इंट्रालॉक"],["Lead shielding/सीसा परिरक्षण","सीसा परिरक्षण/सीसा परिरक्षण"],["Collimator/समांतरित्र","Collimator/समाचार"],["Emergency switch/आपातकालीन स्विच","इमरजेंसी स्विच/आपाली स्विच"]],[45,3,"32.In CTP test, the “material discrimination” ability of X-BIS is tested by\r\nCTP परीक्षण में, X-BIS की \"भौतिक भेदभाव\" क्षमता का परीक्षण किसके द्वारा किया जाता है?","32.In CTP test, the “material discrimination” ability of X-BIS is tested by\r\nCTP परीक्षण में, X-BIS की \"भौतिक भेदभाव\" क्षमता का परीक्षण किसके द्वारा किया जाता है?",["Single wire resolution test/एकल तार संकल्प परीक्षण","सिंगल वायर रिज़ॉल्यूशन टेस्ट/सिंगल तार संकल्प परिकल्पना"],["Simple penetration test/सरल पैठ परीक्षण","सरल प्रवेश परीक्षण/सरल पैठ परीक्षण"],["Multi-energy test/बहु-ऊर्जा परीक्षण","बहु - ऊर्जा परीक्षण/बहु - ऊर्जा परीक्षण"],["Useful penetration test/उपयोगी पैठ परीक्षण","उपयोगी प्रवेश परीक्षण/उपयोगी पैठ परिकल्पना"]],[46,1,"36.In spatial resolution test the 8 horizontal and 8 vertical gratings should be seen on plate of\r\nwhich metal\r\nस्थानिक संकल्प परीक्षण में 8 क्षैतिज और ऊर्ध्वाधर झंझरी की प्लेट पर देखा जाना चाहिए\r\nकौन सी धातु","36.In spatial resolution test the 8 horizontal and 8 vertical gratings should be seen on plate of\r\nwhich metal\r\nस्थानिक संकल्प परीक्षण में 8 क्षैतिज और ऊर्ध्वाधर झंझरी की प्लेट पर देखा जाना चाहिए\r\nकौन सी धातु",["Copper/ताँबा","तांबा/ताँबा"],["Iron/लोहा","आयरन/लोहा"],["Nickel/निकल","निकल/नील"],["Zinc/जस्ता","जिंक/जस्ता"]],[47,1,"38.in thin metal imaging test _______mm strip should be seen\r\nथिन मेटल इमेजिंग टेस्ट में _______mm स्ट्रिप दिखनी चाहिए","38.in thin metal imaging test _______mm strip should be seen\r\nथिन मेटल इमेजिंग टेस्ट में _______mm स्ट्रिप दिखनी चाहिए",["0.1/0.1","0.1/0.1"],["0.05/0.05","0.05/0.05"],["0.01/0.01","0.01/0.01"],["46023","46023"]],[48,1,"39.In useful penetration wire should be seen under second step of thickness\r\nउपयोगी पैठ तार में मोटाई के दूसरे चरण के तहत देखा जाना चाहिए","39.In useful penetration wire should be seen under second step of thickness\r\nउपयोगी पैठ तार में मोटाई के दूसरे चरण के तहत देखा जाना चाहिए",["5/16”","5:16)। "],["3/16”","3:16)। "],["7/16”","7:16)।"],["9/16”","9: 16"]],[49,2,"41.In which one of the colors will plastic detonator appear on the X-Ray moniter?\r\n. एक्स-रे मॉनिटर पर प्लास्टिकडेटोनेटर किस रंग में दिखाई देगा?","41.In which one of the colors will plastic detonator appear on the X-Ray moniter?\r\n. एक्स-रे मॉनिटर पर प्लास्टिकडेटोनेटर किस रंग में दिखाई देगा?",["Blue/नीला","नीला/नीला"],["Orange/नारंगी","नारंगी/नारंगी"],["Opaque/अस्पष्ट","अपारदर्शी/अस्पष्ट"],["Green/हरा","हरा/हरा"]],[50,2,"49. Name of the test Of CTP, in which a lead strip placed beneath of 30mm steel is visible\r\nCTP के परीक्षण का नाम, जिसमें 30mm स्टील के नीचे रखी सीसे की पट्टी दिखाई देती है","49. Name of the test Of CTP, in which a lead strip placed beneath of 30mm steel is visible\r\nCTP के परीक्षण का नाम, जिसमें 30mm स्टील के नीचे रखी सीसे की पट्टी दिखाई देती है",["Single wire resolution/एकल तार संकल्प","सिंगल वायर रिज़ॉल्यूशन/सिंगलतार संकल्प"],["Simple penetration/सरल पैठ","सरल प्रवेश/सरल पैठ"],["Useful penetration/उपयोगी पैठ","उपयोगी प्रवेश/उपयोगी पैठ"],["Spatial resolution /स्थानिक संकल्प","स्थानिक रिज़ॉल्यूशन /स्थानिक संकल्प"]],[51,2,"In which one of the following colors will Zinc apperar on the X- ray monitor ?\r\nएक्स-रे मॉनिटर पर जिंक निम्नलिखित में से किस रंग में दिखाई देगा ?","In which one of the following colors will Zinc apperar on the X- ray monitor ?\r\nएक्स-रे मॉनिटर पर जिंक निम्नलिखित में से किस रंग में दिखाई देगा ?",["Orange/नारंगी","नारंगी/नारंगी"],["Blue/नीला","नीला/नीला"],["Green/हरा","हरा/हरा"],["Opaque/अस्पष्ट","अपारदर्शी/अस्पष्ट"]],[52,1,"A large item is stuck in the X-Ray tunnel. What happens the next.\r\nएक्स-रे सुरंग में एक बड़ी वस्तु फंसी हुई है।","A large item is stuck in the X-Ray tunnel. What happens the next.\r\nएक्स-रे सुरंग में एक बड़ी वस्तु फंसी हुई है।",["Shut down the machine or disable the X-ray function before attempting to remove the bag.बैग को निकालने का प्रयास करने से पहले मशीन को बंद कर दें या एक्स-रे फ़ंक्शन को अक्षम कर दें।","बैग को हटाने का प्रयास करने से पहले मशीन को बंद कर दें या एक्स - रे फ़ंक्शन को अक्षमकर दें।"],["Climb on the tunnel and push the bag. सुरंग पर चढ़ो और बैग को धक्का दो।","सुरंग पर चढ़ें और बैग को धक्का दें। सुरंग पर चढ़ाई और बैंग कोष्ठकादो।"],["Keep running bags through the machine until they pile up.मशीन के माध्यम से बैगों को तब तक चलाते रहें जब तक कि वे ढेर न हो जाएं।","मशीन के माध्यम से तब तक बैग चलाते रहें जब तक कि वे ढेर न हो जाएं।"],["Put your arm into the tunnel and pull out the bag. अपना हाथ सुरंग में डालें और बैग को बाहर निकालें।","अपना हाथ सुरंग में रखो और बैग बाहर निकालो। अपने हाथ में सुरंग मेंडालें और बैग कोहर निकले।"]],[53,3,"An element with atomic number 74 will be seen in __________ colour on XBIS monitor?\r\nएक्सबीआईएस मॉनिटर पर परमाणु संख्या 74 वाला तत्व __________ रंग में देखा जाएगा?","An element with atomic number 74 will be seen in __________ colour on XBIS monitor?\r\nएक्सबीआईएस मॉनिटर पर परमाणु संख्या 74 वाला तत्व __________ रंग में देखा जाएगा?",["Orange/नारंगी","नारंगी/नारंगी"],["Green/हरा","हरा/हरा"],["Blue/नीला","नीला/नीला"],["BlacK/काला","ब्लाक/काला"]],[54,3,"Pre-operation check of X-BIS is carried out to ?\r\nX-BIS की प्री-ऑपरेशन जांच की जाती है?","Pre-operation check of X-BIS is carried out to ?\r\nX-BIS की प्री-ऑपरेशन जांच की जाती है?",["A. Measure radiation level विकिरण स्तर मापें","A. विकिरण स्तर को मापें"],["B. X-BIS will not work without pre-operation check एक्स-बीआईएस प्री-ऑपरेशन जांच के बिना काम नहीं करेगा","B. एक्स- बीआईएस प्री -ऑपरेशन चेक के बिना काम नहीं करेगा एक - बीआईएस आईएसपीआरआई - ओपरेशनेशन जांच के बिनाम नहीं करगा"],["C. Ensure X-BIS is working properly सुनिश्चित करें कि एक्स-बीआईएस ठीक से काम कर रहा है","C. सुनिश्चित करें कि X - BIS ठीक से काम कर रहाहै"],["none","कुछ भी नहीं"]],[55,4,"As per guidelines of BCAS, Single wire resolution of X-BIS should be ?\r\nBCAS के दिशानिर्देशों के अनुसार, X-BIS का सिंगल वायर रिज़ॉल्यूशन कितना होना चाहिए?","As per guidelines of BCAS, Single wire resolution of X-BIS should be ?\r\nBCAS के दिशानिर्देशों के अनुसार, X-BIS का सिंगल वायर रिज़ॉल्यूशन कितना होना चाहिए?",["26 SWG/26 एसडब्ल्यूजी","26 SWG/26 SDBLYUJI"],["38 SWG/38 एसडब्ल्यूजी","38 SWG/38 एसडबल्यूजी"],["30 SWG/30 एसडब्ल्यूजी","30 SWG/30 SDBLYUJI"],["40 SWG/40 एसडब्ल्यूजी","40 SWG/40 SDBLYUJI"]],[56,3,"34.In how many colors do the X-BIS project images?\r\nX-BIS प्रोजेक्ट कितने रंगों में चित्र बनाता है?","34.In how many colors do the X-BIS project images?\r\nX-BIS प्रोजेक्ट कितने रंगों में चित्र बनाता है?",["One/एक","एक/एक"],["Two/दो","दो/दो"],["Three/तीन","थ्री/टीन"],["Four/चार","चार/चार"]],[57,1,"37.In the X-Ray machines “Lead” is primarily used to\r\nएक्स-रे मशीनों में “लेड” का मुख्य रूप से उपयोग किया जाता है","37.In the X-Ray machines “Lead” is primarily used to\r\nएक्स-रे मशीनों में “लेड” का मुख्य रूप से उपयोग किया जाता है",["Absorb radiation/विकिरण अवशोषित करें","विकिरण अवशोषितकरें"],["Detect arms and ammunition/हथियारों और गोला बारूद का पता लगाएं","हथियार और गोला बारूद का पता लगाएं/हथियारों और गोलाबारूद का पता लगाएं"],["Detect Explosives/विस्फोटकों का पता लगाएं","विस्फोटकों का पता लगाएं/विस्‍फोटकों का पता लगाएं"],["Increase the “through-put”/\"थ्रू-पुट\" बढ़ाएँ","थ्रू - पुट/थ्रू - पुट बढ़ाएँ"]],[58,4,"40.In which color glass will appear in X-BIS?\r\nX-BIS में किस रंग का ग्लास दिखाई देगा?","40.In which color glass will appear in X-BIS?\r\nX-BIS में किस रंग का ग्लास दिखाई देगा?",["RED/लाल","लाल/लाल"],["BLUE/नीला","नीला/नीला"],["ORANGE/नारंगी","नारंगी/नारंगी"],["GREEN/हरा","हरा/हरा"]],[59,2,"42.In X-BIS all organic material will be seen in.................\r\n.X-BIS में सभी कार्बनिक पदार्थ ................. में देखे जाएँगे।","42.In X-BIS all organic material will be seen in.................\r\n.X-BIS में सभी कार्बनिक पदार्थ ................. में देखे जाएँगे।",["Green/हरा","हरा/हरा"],["Orange/नारंगी","नारंगी/नारंगी"],["Purple/बैंगनी","बैंगनी/बैंगनी"],["Blue/नीला","नीला/नीला"]],[60,1,"46.Low X Ray dose pertains to which of the following\r\nकम एक्स रे खुराक निम्नलिखित में से किससे संबंधित है","46.Low X Ray dose pertains to which of the following\r\nकम एक्स रे खुराक निम्नलिखित में से किससे संबंधित है",["In – built safety measures/में निर्मित सुरक्षा उपाय","अंतर्निहित सुरक्षा उपाय/मेंनिमित्त सुरक्षाय"],["Properties of X Rays/एक्स किरणों के गुण","एक्स किरणों/एकस किरणों के गुण"],["Requirements of X-Ray/एक्स-रे की आवश्यकताएं","एक्स - रे/एकस - रे की आवश्यकताएं"],["Advantage of XBIS/एक्सबीआईएस का लाभ","एक्सबीआईएस/एक सब्बी आईएस कालाभ का लाभ"]]];
+            questionData = [
+                [1, 1, "NOC for manufacturer of X-BIS is given by ________ X-BIS", "के निर्माता के लिए अनापत्ति प्रमाण पत्र ________________ के द्वारा दिया जाता है", ["AERBI", "ए इ आर बी आई द्वारा दिया जाता है"],
+                    ["AEC", "ए इ सी द्वारा दिया जाता है"],
+                    ["ISO9001", "आई एस ओ 9001 द्वारा दिया जाता है"],
+                    ["RBI", "आर बी आई द्वारा दिया जाता है"]
+                ],
+                [2, 3, "NOC for manufacturing of X-BIS is given for _______", "एक्स-बि.आई.एस निर्माण हेतु अनापत्ति प्रमाण पत्र ____________ के लिए दी जाती है", ["Electrical safety", "विद्युत सलामती के लिए दी जाती है"],
+                    ["Mechanical safety", "यांत्रिक सलामती के लिए दी जाती है"],
+                    ["Radiation safety", "विकिरण सलामती के लिए दी जाती है"],
+                    ["As a proof of credibility of manufacturer", "निर्माता की विश्वसनीयता के सबूत के रूप में की जाती है"]
+                ],
+                [3, 3, "As per BCAS specifications, ________facility should be available in XBIS BCAS", "विनिर्देशों के अनुसार, XBIS में ________सुविधा उपलब्ध होनी चाहिए", ["Image Reduction", "घटाने"],
+                    ["Image Maintenance", "मेंटेनेंस"],
+                    ["Image Enhancement", "वृद्धि"],
+                    ["Image Clarity", "स्पष्टता"]
+                ],
+                [4, 4, "In Civil Aviation Security X-BIS is not used for Screening of", "नागर विमानन सुरक्षा में एक्स-बि-आई-एस का उपयोग ____की स्क्रीनिंग के लिये नहीं किया जाता है।", ["Live animals", "जीवित जन्तु"],
+                    ["Pax", "यात्री"],
+                    ["Eatables", "खाद्य पदार्थ"],
+                    ["Both a and b", "दोनों ए व बी"]
+                ],
+                [5, 4, "In Civil Aviation Security X-BIS is not used for", "नागर विमान्न सुरक्षा में एक्स-बि.आई.एस का उपयोग नहीं किया जाता है?", ["Screening of a hand baggage", "हेण्ड बैगेज की स्क्रीनिंग के लिये"],
+                    ["Screening of a registered baggage", "रजिस्टर्ड बैगेज की स्क्रीनिंग के लिये"],
+                    ["Screening of cargo", "स्क्रीनिंग ऑफ कॉर्गो"],
+                    ["Screening of Pax", "स्क्रीनिंग ऑफ पैक्स"]
+                ],
+                [6, 1, "‘SEN’ key in X-BIS machine stands for", "एक्स-बि.आई.एस. मषीन में 'SEN' की से तात्पर्य है", ["Super enhancement", "सुपर इन्हॉंन्समेन्ट"],
+                    ["Specific Enhancement", "स्पेस्फिक एन्हॉंसमेन्ट"],
+                    ["Superior Enhancement", "सुपीरियर इन्हॉंसमेन्ट"],
+                    ["Sector Enhancement", "सैक्टर इन्हॉंसमेन्ट"]
+                ],
+                [7, 2, "Which X-BIS machine has ‘SEN’ key in its keyboard?", "कौन से एक्स.बि.आई.एस. मशीन में “एस ई एन की” उपलब्ध होता है?", ["Rapiscan", "रापिसकेन"],
+                    ["Hiemann Smith", "हिमैन स्मिथ"],
+                    ["Both a and b", "दोनों ए और बी"],
+                    ["None of the above", 'इनमे से कोई नहीं gate" "टर्मिनल भवन के द्वार"']
+                ],
+                [8, 3, "A device worn by a person operating X-ray equipment to warn them of potential over exposure to radiation leakage from X-ray equipment", "एॅक्स-रे मशीन के परिचालक को एक्स-रे उपकरण से होने वाले आवश्यकतासे अधिक रेडियेशन के रिसाव के बारे में चेतावनी देने वाला  पहना गया उपकरण कहलाता है ।", ["Bullet proof jacket", "Bullet proof jacket"],
+                    ["Fan beam geometry", "Fan beam geometry"],
+                    ["Dosimeter batch", "Dosimeter batch"],
+                    ["Lead shielding", "Lead shielding"]
+                ],
+                [9, 4, "Dosimeter batch is a device worn by a person operating ___equipment to warn them of potential exposure to radiation leakage of the equipment", "डोसीमीटर बैच ______के परिचालक को उपकरण से होने वाले आवश्यकता से अधिक रेडियेशन के रिसाव के बारे में चेतावनी देने वाला पहना गया उपकरण कहलाता है ।", ["Bullet proof jacket", "बुलेट प्रुफ जैकेट"],
+                    ["ETD", "ईटीडी"],
+                    ["DFMD", "डीएफ़एमडी"],
+                    ["X-ray", "एक्स-बीआईएस"]
+                ],
+                [10, 2, "Load officer of the X-BIS is also known as ____. X-BIS", "का लोड ऑफिसर........... भी कहलाता है ।", ["Senior", "सीनियर"],
+                    ["Profiler", "प्रोफाइलर"],
+                    ["Pilot", "पायलट"],
+                    ["Loader", "लोडर"]
+                ],
+                [11, 4, "The load officer is positioned at __________", "लोड अधिकारी _____ पर तैनात रहता है", ["The Output end of XRAY machine", "एक्स-रे मशीन के आउटपुट छोर"],
+                    ["The baggage search area", "सामान जांच क्षेत्र"],
+                    ["At the baggage guide area", "सामान गाइड पॉइंट"],
+                    ["The In- put end of XRAY machine", "एक्स-रे मशीन के इनपुट छोर"]
+                ],
+                [12, 1, "Bag searcher is also known as", "बैग सर्चर को जाना जाता है?", ["ETD operator", "ईटीडी ऑपरेटर"],
+                    ["EVD operator", "ईवीडी ऑपरेटर"],
+                    ["X-BIS operator", "एैस-बीस ऑपरेटर"],
+                    ["Load officer", "लोड ऑफिसर"]
+                ],
+                [13, 3, "Which one is NOT the type of X-BIS?", "इसमें से कौन सा X-BIS का प्रकार नहीं है ?", ["Down-Top Beamer", "डाउन-टॉप बीमर"],
+                    ["Top-Down Beamer", "टॉप-डाउन बीमर"],
+                    ["Horizontal –vertical beamer", "हॉरिजॉन्टल – वर्टीकल बीमर"],
+                    ["Side Beamer", "साइड बीमर"]
+                ],
+                [14, 1, "What is REM? REM", "क्या है?", ["Roentgen Equivalent Men", "Roentgen Equivalent Men"],
+                    ["Radiation Equivalent Machine.", "Radiation Equivalent Machine."],
+                    ["Radiation Equipment Machine", "Radiation Equipment Machine"],
+                    ["All the Above", "All the Above"]
+                ],
+                [15, 3, "SWG stands for?", "एस.डब्ल्यू.जी का पूर्ण रूप है ?", ["Simple wire guage", "सिम्पल वायर गेज"],
+                    ["Single wire guage", "सिंगल वायर गेज"],
+                    ["Standard wire guage", "स्टेण्डर्ड वायर गेज"],
+                    ["Steel wire guage", "स्टील वायर गेज"]
+                ],
+                [16, 4, "X-BIS should be switched on after ensuring", "क्या सुनिश्चित करने के पश्चात् एॅक्स-बि.आर्इ.एस का स्विच ऑन करना चाहिए", ["Empty tunnel", "टनल खाली हो"],
+                    ["Unobstructed Conveyor belt", "कन्वेटर बेल्ट अवरोधित नही हो"],
+                    ["Electric supply", "विधुत धारा का प्रवाह हो"],
+                    ["All the above", "उपरोक्त सभी"]
+                ],
+                [17, 1, "X-Ray radiation should not exceed accepted health standard _____at a distance of 05 cms from the external housing.", "बाहरी आवरण से 05 से.मी की दूरी पर एॅक्स-रे विकिरणे से अधिक नही होनी चाहिए", ["0.1 mR/Hrs", "0.1 mR/Hrs"],
+                    ["0.01 mR/Hrs", "0.01 mR/Hrs"],
+                    ["0.001 mR/Hrs", "0.001 mR/Hrs"],
+                    ["None", "इनमे से कोर्इ नही"]
+                ],
+                [18, 3, "Pre-operation check of X-BIS is carried to", "एक्स-बि.आई.एस को चालू करने से पूर्व जॉंच क्यों की जाती है", ["Measure radiation level", "रेडियेशन के स्तर की जॉंच के लिये"],
+                    ["XBIS will not work without pre-operation check.", "एक्स-बि.आई.एस को चालू करने से पूर्व जॉंचे बिना यह कार्य नही करेंगी"],
+                    ["Ensure X-BIS is working properly", "सुनिश्चित करने के लिये कि एक्स-बि.आई.एस सही ढ़ग से कार्य कर रही है"],
+                    ["Both (a) & (b).", "अ और ब दोनो"]
+                ],
+                [19, 3, "X-ray cannot be ______ by means of lens or prism", "एक्स-रे लेंस या प्रिज्म से -------नही होता है-", ["Deformed", "डिर्फाम्ड"],
+                    ["Degraded", "डिग्रेडेड"],
+                    ["Deflected", "डिफलेक्टेड"],
+                    ["Deflagrate", "डिफलेगरेड"]
+                ],
+                [20, 3, "________ is not a test to check the efficiency of X-BIS", "एक्स.बी.आई.एस की कार्यक्षमता जॉचने का टेस्ट नहीं है -", ["Single Wire Resolution", "सिंगल वॉयर रैज्योल्यूशन"],
+                    ["Multi energy", "मल्टी एनर्जी"],
+                    ["Thick Metal imaging", "थिक मैटल इमेजिंग"],
+                    ["Simple penetration", 'सिम्पल पैनेट्रेशन कार्ड"']
+                ],
+                [21, 3, "When ______key is pressed all colour information from the image is removed and black and white image is displayed", "जब.....की क्रमबद्द दबाया जाता है तो छवि से सभी रंग की जानकारी निकाल दिया जाता है और काले सफेद छवि प्रदर्शित होती है", ["Menu key", "मेनू की"],
+                    ["Inorganic material key", "इनआर्गेनिक मैटीरियल की"],
+                    ["Black and white key", "ब्लैक एन्ड वाईट की"],
+                    ["Inverse key", "इनवर्स की"]
+                ],
+                [22, 1, "Which is one of the specification of X-BIS", "निम्न मे से कौन सा एक्स-बि.आई.एस. का मापदण्ड है ?", ["Speed of the conveyor belt should be 0.18 to 0.3 mtr/sec", "कन्वेटर बेलट की गति 0.18 से 0.3 मीटर प्रति सेकण्ड होनी चाहिए"],
+                    ["Convenience to the pax", "यात्रियों के लिये सुविधाजनक है"],
+                    ["Safe for film food and drugs", "खाध् पदार्थ, फिल्म और औशधी के लिये सुरक्षित है"],
+                    ["Detect all kind of explosive", "सभी प्रकार के एक्प्लोजीव को पकड़ता है"]
+                ],
+                [23, 2, "In which one of the following colors will Zinc appear on the X-ray monitor?", "जिंक एक्स-रे मॉनिटर पर किस रंग में दिखाई देगा।", ["Orange", "नारंगी"],
+                    ["Blue", "नीला"],
+                    ["Green", "हरा"],
+                    ["Opaque", "अपारदर्शी"]
+                ],
+                [24, 3, "_____ Keys of X-BIS show different level of absorption.", "एक्स-बि.आई.एस के किस बटन को दबाने से विकिरणों को सोखने के विभिन्न स्तर प्रदर्शित होगें", ["NEG", "एन.ई.जी"],
+                    ["OS", "ओ.एस"],
+                    ["VARI", "वी.ए.आर.आई"],
+                    ["High", "हाई"]
+                ],
+                [25, 1, "A large items is stuck in the X-Ray tunnel. What happens the next?", "एक बड़ा सामान एक्स-रे के दौरान टनल में फॅंस जाता है आगे क्या होगा ?", ["Shut down the machine or disable the X-Ray function before attempting to remove the bag.", "बैगेज को मशीन से निकालने से पूर्व मशीन को बंद करेंगे या एक्स-रे उर्त्सजन को बंद करेंगे"],
+                    ["Climb on the tunnel and push the bag.", "टनल के उपर चढ़कर बैगेज को धक्का देंगे"],
+                    ["Keep running bags through the machine until they pile up.", "बैगेज पर स्क्रीनिंग जारी रखेंगे जब तक बैगेज इकठ्ठे ना हो जायें"],
+                    ["Put your arm into the tunnel and pull out the bag.", "इन्स्पेक्शन टनल में हाथ ड़ालकर बैगेज को खींच कर निकालेंगे"]
+                ],
+                [26, 4, "As per guidelines of BCAS high resolution of X-BIS should be", "बी.सी.ए.एस के अनुसार एक्स-बि.आई.एस का उच्च विष्लेशण होना चाहिए?", ["26 SWG", "26 एस.डब्ल्यू.जी"],
+                    ["38 SWG", "38 एस.डब्ल्यू.जी"],
+                    ["30 SWG", "30 एस.डब्ल्यू.जी"],
+                    ["40 SWG", "40 एस.डब्ल्यू.जी"]
+                ],
+                [27, 2, "In X-BIS all organic material will be seen in____________", "एक्स-बि.आई.एस. में सभी ऑर्गनिक पदार्थ किस रंग में दिखाई देते है ।", ["Green", "हरा"],
+                    ["Orange", "नारंगी"],
+                    ["Purple", "पर्पल (बेंगनीद्)"],
+                    ["Blue", "नीला"]
+                ],
+                [28, 1, "On detection of an IED during screening in X-BIS, the screener should___________", "एक्स-बिस पर स्क्रीनिंग करते समय आई.ई.डी के पकड़े जाने पर स्क्रीनर को चाहिए कि", ["Stop conveyer belt", "कन्वेटर बेल्ट को रोक दे"],
+                    ["Continue screening", "लगातार स्क्रीनिंग करें"],
+                    ["Check the bag physically", "बैग की प्रत्यक्ष रूप से जांच करें"],
+                    ["Alarm PAX", "यात्री को चेतावनी दे"]
+                ],
+                [29, 3, "Among the following which is the disadvantage of side beamer", "निम्नलिखित में से साइड बीमर का नुकसान क्या है?", ["High performance", "उच्च प्रदर्श"],
+                    ["Handling of bulky baggage is easier", "भारी सामान संभालना आसान है"],
+                    ["Stability of the baggage is poor", "सामान की स्थिरता खराब है"],
+                    ["Low conveyor belt height", "कन्वेयर बेल्ट की कम ऊंचाई"]
+                ],
+                [30, 2, "As per Avsec Circular 23/2005 each X-BIS is to be manned by how many trained personnel", "Avsec सर्कुलर 23/2005 के अनुसार, प्रत्येक X-BIS पर कितने प्रशिक्षित कर्मचारी तैनात होने चाहिए?", ["3 staff", "3 staff"],
+                    ["4 staff", "4 staff"],
+                    ["2 staff", "2 staff"],
+                    ["5 staff", "5 staff"]
+                ],
+                [31, 3, "Maximum validity of NOC issued by AERB for radiation level is valid for", "विकिरण स्तर हेतु एईआरबी द्वारा जारी एनओसी की अधिकतम वैधता मान्य है", ["3 years", "3 years"],
+                    ["4 years", "4 years"],
+                    ["5 years", "5 years"],
+                    ["2 years", "2 years"]
+                ],
+                [32, 3, "In X-BIS machine keyboard navigator automatically magnifies the image up to how many times  X-BIS", "मशीन में कीबोर्ड नेविगेटर स्वचालित रूप से छवि को कितने गुना तक बढ़ा देता है", ["4 times", "4 times"],
+                    ["3 times", "3 times"],
+                    ["2 times", "2 times"],
+                    ["16 times", "16 times"]
+                ],
+                [33, 2, "All X-BIS models should have online recording facility and the recording should be retained for how many days", "सभी एक्स-बीआईएस मॉडल में ऑनलाइन रिकॉर्डिंग की सुविधा होनी चाहिए और रिकॉर्डिंग कितने दिनों", ["Minimum 15 days", "Minimum 15 days"],
+                    ["Minimum 14 days", "Minimum 14 days"],
+                    ["Minimum 10 days", "Minimum 10 days"],
+                    ["Minimum 11 days", "Minimum 11 days"]
+                ],
+                [34, 1, "Operating temperature of X-BIS should be between", "एक्स-बीआईएस का ऑपरेटिंग तापमान के बीच होना चाहिए", ["0°c to 40°c", "0°c to 40°c"],
+                    ["0°c to 45°c", "0°c to 45°c"],
+                    ["0°c to 50°c", "0°c to 50°c"],
+                    ["0°c to 42°c", "0°c to 42°c"]
+                ],
+                [35, 2, "What is the storage temperature of XBIS? ", "XBIS का भंडारण तापमान क्या है?", ["-10°c TO 40°C", "-10°c TO 40°C"],
+                    ["-20°C TO 50°c", "-20°C TO 50°c"],
+                    ["-20°c to 40°c", "-20°c to 40°c"],
+                    ["-10°c to 50°c", "-10°c to 50°c"]
+                ],
+                [36, 3, "What does VPB stands for?", "वीपीबी का क्या मतलब है?", ["View press bag", "View press bag"],
+                    ["View partial bag", "View partial bag"],
+                    ["View previous bag", "View previous bag"],
+                    ["View present bag", "View present bag"]
+                ],
+                [37, 2, "Current image recalling capacity of XBIS should be ", "XBIS की वर्तमान इमेज रिकॉलिंग क्षमता होनी चाहिए", ["10-12 images", "10-12 images"],
+                    ["15-20 images", "15-20 images"],
+                    ["15-25 images", "15-25 images"],
+                    ["25-30 images", "25-30 images"]
+                ],
+                [38, 1, "What is the zooming capacity of X-BIS machine as per BCAS specifications?", "बीसीएएस विनिर्देशों के अनुसार एक्स-बीआईएस मशीन की ज़ूमिंग क्षमता क्या है", ["16x or more", "16x or more"],
+                    ["32x or more", "32x or more"],
+                    ["64x or more", "64x or more"],
+                    ["24x or more", "24x or more"]
+                ],
+                [39, 3, "Multicolor feature in XBIS should ", "XBIS में बहुरंगी सुविधा होनी चाहिए", ["Not mandatory", "Not mandatory"],
+                    ["Desirable", "Desirable"],
+                    ["Mandatory", "Mandatory"],
+                    ["Optional", "Optional"]
+                ],
+                [40, 3, "As per circular 11/2017 XBIS should have………view and ………generator", "सर्कुलर 11/2017 के अनुसार XBIS में ……… व्यू और ……… जेनरेटर होना चाहिए", ["Dual view and dual energy", "Dual view and dual energy"],
+                    ["Dual view and single generator", "Dual view and single generator"],
+                    ["Dual view & dual generator", "Dual view & dual generator"],
+                    ["Multi view & dual generator", "Multi view & dual generator"]
+                ],
+                [41, 2, "Airports having passenger movement of more then……..should have X-RAY BIS based on computed tomography at PESC points", "अधिक यात्रियों की आवाजाही वाले हवाई अड्डों पर पीईएससी बिंदुओं पर कंप्यूटेड टोमोग्राफी पर आधारित एक्स-रे बीआईएस होना चाहिए।", ["6 million per annum", "6 million per annum"],
+                    ["5 million per annum", "5 million per annum"],
+                    ["8 million per annum", "8 million per annum"],
+                    ["10 million per annum", "10 million per annum"]
+                ],
+                [42, 1, "CT X-RAY machine for passenger screening points should have storage temperature range of", "यात्री स्क्रीनिंग प्वाइंट के लिए सीटी एक्स-रे मशीन में भंडारण तापमान सीमा होनी चाहिए", ["-15c to 60c", "-15c to 60c"],
+                    ["-20c to 40c", "-20c to 40c"],
+                    ["-15c to 50c", "-15c to 50c"],
+                    ["-20c to 50c", "-20c to 50c"]
+                ],
+                [43, 1, "X-BIS machine should generate both visual and audio alarm and notify the operator if", "एक्स-बीआईएस मशीन को दृश्य और श्रव्य अलार्म दोनों उत्पन्न करना चाहिए और यदि हो तो ऑपरेटर को सूचित करना चाहिए", ["It fails to penetrate a particular item", "यह किसी विशेष वस्तु को भेदने में विफल रहता है"],
+                    ["It fails to save the particular image", "यह विशेष छवि को सहेजने में विफल रहता है"],
+                    ["It fails to display a particular item", "यह किसी विशेष आइटम को प्रदर्शित करने में विफल रहता है"],
+                    ["It fails in one of the CTP tests", "यह सीटीपी परीक्षणों में से एक में विफल रहता है"]
+                ],
+                [44, 2, "Minimum penetration level of CT X-RAY inspection system should be ", "CT X-RAY निरीक्षण प्रणाली का न्यूनतम प्रवेश स्तर होना चाहिए", ["30mm steel", "30mm steel"],
+                    ["25mm steel", "25mm steel"],
+                    ["35mm steel", "35mm steel"],
+                    ["40 mm steel", "40 mm steel"]
+                ],
+                [45, 2, "Which test defines what levels of details can be seen behind the thickness of known material", "कौन सा परीक्षण यह परिभाषित करता है कि ज्ञात सामग्री की मोटाई के पीछे किस स्तर का विवरण देखा जा सकता है", ["Simple penetration", "Simple penetration"],
+                    ["Useful penetration", "Useful penetration"],
+                    ["Multi energy", "Multi energy"],
+                    ["Spatial resolution", "Spatial resolution"]
+                ],
+                [46, 4, "What is the standard percentage of explosive devices, firearms, knifes and other prohibited articles in TIP software", "टीआईपी सॉफ्टवेयर में विस्फोटक उपकरणों, आग्नेयास्त्रों, चाकू और अन्य निषिद्ध वस्तुओं का मानक प्रतिशत क्या है?", ["40%, 30%, 30%", "40%, 30%, 30%"],
+                    ["35%, 40%, 25%", "35%, 40%, 25%"],
+                    ["25%, 45%, 30%", "25%, 45%, 30%"],
+                    ["40%, 35%, 25%", "40%, 35%, 25%"]
+                ],
+                [47, 2, "CT X-RAY machine should be internationally certified as per the quality standard of", "सीटी एक्स-रे मशीन को गुणवत्ता मानक के अनुसार अंतरराष्ट्रीय स्तर पर प्रमाणित किया जाना चाहिए", ["ISO 9000 certified", "ISO 9000 certified"],
+                    ["ISO 9001 certified", "ISO 9001 certified"],
+                    ["ISO 14001 certified", "ISO 14001 certified"],
+                    ["ISO 27001 certified", "ISO 27001 certified"]
+                ],
+                [48, 3, "For which security equipment the specification of anti-rodent and dust proof is applicable", "किस सुरक्षा उपकरण के लिए एंटी-रोडेंट और डस्ट प्रूफ की विशिष्टता लागू है", ["DFMD", "DFMD"],
+                    ["HHMD", "HHMD"],
+                    ["X-BIS", "X-BIS"],
+                    ["ETD", "ETD"]
+                ],
+                [49, 4, "A kit to check the performance of computed tomography X-RAY machine whether it is working as per BCAS norms or not", "कंप्यूटेड टोमोग्राफी एक्स-रे मशीन के प्रदर्शन की जांच करने के लिए एक किट है कि यह बीसीएएस मानदंडों के अनुसार काम कर रही है या नहीं", ["Combined test piece", "Combined test piece"],
+                    ["Variable test piece", "Variable test piece"],
+                    ["Image quality test kit", "Image quality test kit"],
+                    ["Standard test piece", "Standard test piece"]
+                ],
+                [50, 4, "What does ATRS stands for", "एटीआरएस का मतलब क्या है?", ["Automatic tray receiving system", "Automatic tray receiving system"],
+                    ["Automatically tray retrieval system", "Automatically tray retrieval system"],
+                    ["Advance tray receiving system", "Advance tray receiving system"],
+                    ["Automatic tray retrieval system", "Automatic tray retrieval system"]
+                ],
+                [51, 1, "Collimeter is a part of which equipment", "कोलीमीटर किस उपकरण का भाग है", ["X-BIS", "X-BIS"],
+                    ["ETD", "ETD"],
+                    ["EVD", "EVD"],
+                    ["DFMD", "DFMD"]
+                ],
+                [52, 2, "Which indicator shows that X-Ray unit is not reay for operation", "कौन सा इंडिकेटर यह दिखाता है कि X-Ray यूनिट ऑपरेशन के लिए तैयार नहीं है?", ["Power ON indicator", "Power ON indicator"],
+                    ["Wait Indicator", "Wait Indicator"],
+                    ["Radiation Indicator", "Radiation Indicator"],
+                    ["All of the above ", "All of the above "]
+                ],
+                [53, 3, "Rapiscan X-RAY machine keyboard is divided into how many parts", "रैपिस्कन एक्स-रे मशीन कीबोर्ड को कितने भागों में बांटा गया है", ["3 parts", "3 parts"],
+                    ["6 parts", "6 parts"],
+                    ["4 parts", "4 parts"],
+                    ["5 parts", "5 parts"]
+                ],
+                [54, 1, "Golden Principle Denser the object _________the image and Thinner the object _____________the image", "गोल्डन नियम: वस्तु जितनी घनी (denser) होगी, छवि उतनी ही _________ होगी और वस्तु जितनी पतली (thinner) होगी, छवि उतनी ही _____________ होगी।", ["Darker,Lighter", "Darker,Lighter"],
+                    ["Darker,Darker", "Darker,Darker"],
+                    ["Lighter,Darker", "Lighter,Darker"],
+                    ["Lighter,Lighter", "Lighter,Lighter"]
+                ],
+                [55, 2, "Which appendix of circular 11/2017 deals with the specification of X-BIS", "परिपत्र 11/2017 का कौन सा परिशिष्ट एक्स-बीआईएस के विनिर्देश से संबंधित है", ["Appendix E", "Appendix E"],
+                    ["Appendix A", "Appendix A"],
+                    ["Appendix B", "Appendix B"],
+                    ["Appendix F", "Appendix F"]
+                ],
+                [56, 3, "X-CIS stands for ", "X-CIS का मतलब है", ["X-RAY car inspecting system", "X-RAY car inspecting system"],
+                    ["X-RAY cabin bag inspection system", "X-RAY cabin bag inspection system"],
+                    ["X-RAY cargo inspection system", "X-RAY cargo inspection system"],
+                    ["X-RAY checked-in baggage inspection system", "X-RAY checked-in baggage inspection system"]
+                ],
+                [57, 2, "Operating voltage of X-BIS machine should be", "X-BIS मशीन का ऑपरेटिंग वोल्टेज होना चाहिए", ["350v", "350v"],
+                    ["230v", "230v"],
+                    ["300v", "300v"],
+                    ["150v", "150v"]
+                ],
+                [58, 1, "All security equipment should be certified as per quality standard of", "सभी सुरक्षा उपकरण गुणवत्ता मानक के अनुसार प्रमाणित होने चाहिए", ["ISO 9000", "ISO 9000"],
+                    ["ISO 9001", "ISO 9001"],
+                    ["ISO 2000", "ISO 2000"],
+                    ["ISO 9002", "ISO 9002"]
+                ],
+                [59, 3, "The machine should have feature of ……………… imaging facility where materials of different atomic number will be displayed in different colors", "मशीन में ……………… इमेजिंग सुविधा की सुविधा होनी चाहिए जहां विभिन्न परमाणु क्रमांक की सामग्री को विभिन्न रंगों में प्रदर्शित किया जाएगा।", ["Multi energy gamma ray", "Multi energy gamma ray"],
+                    ["Single energy X- ray", "Single energy X- ray"],
+                    ["Multi energy X- ray", "Multi energy X- ray"],
+                    ["Multi energy infra-red rays", "Multi energy infra-red rays"]
+                ],
+                [60, 1, "Load capacity for X-CIS should be X-CIS", "के लिए भार क्षमता होनी चाहिए", ["150kg", "150kg"],
+                    ["100kg", "100kg"],
+                    ["120kg", "120kg"],
+                    ["200kg", "200kg"]
+                ],
+                [61, 2, "As per BCAS specification X-BIS system should work on …………. Software", "बीसीएएस विनिर्देश के अनुसार एक्स-बीआईएस प्रणाली को ………… सॉफ़्टवेयर पर काम करना चाहिए।", ["Two", "Two"],
+                    ["One", "One"],
+                    ["Three", "Three"],
+                    ["No software", "No software"]
+                ],
+                [62, 4, "Throughput rate for cargo is", "कार्गो के लिए थ्रूपुट दर है", ["400 bags/hr", "400 bags/hr"],
+                    ["300 bags/hr", "300 bags/hr"],
+                    ["150 bags/hr", "150 bags/hr"],
+                    ["200 bags/hr", "200 bags/hr"]
+                ],
+                [63, 2, "For screening of cargo the conveyor belt speed Statement 1: Speed should be between 0.18m/s--------0.30 m/s Statement 2: Lesser speed is acceptable Which of the above statement is correct", "कार्गो की स्क्रीनिंग के लिए कन्वेयर बेल्ट की गति कथन 1 गति 0.18 मीटर/सेकेंड-------0.30 मीटर/सेकेंड के बीच होनी चाहिए कथन 2 कम गति स्वीकार्य है उपरोक्त में से कौन सा कथन सही है", ["Statement 1 is correct but statement 2 is false", "कथन 1 सही है लेकिन कथन 2 गलत है"],
+                    ["Both statement 1 and 2 are correct", "कथन 1 और 2 दोनों सही हैं"],
+                    ["Statement 1 is false but statement 2 is correct", "कथन 1 गलत है लेकिन कथन 2 सही है"],
+                    ["Both statement 1 and 2 are false", "कथन 1 और 2 दोनों गलत हैं"]
+                ],
+                [64, 1, "How many vertical and horizontal gratings are there in spatial resolution test", "स्थानिक विभेदन परीक्षण में कितनी ऊर्ध्वाधर एवं क्षैतिज झंझरी होती है", ["8 vertical and 8 horizontal gratings", "8 vertical and 8 horizontal gratings"],
+                    ["9 vertical and 7 vertical gratings", "9 vertical and 7 vertical gratings"],
+                    ["6 vertical and 4 horizontal gratings", "6 vertical and 4 horizontal gratings"],
+                    ["4 verticals and 4 horizontal gratings", "4 verticals and 4 horizontal gratings"]
+                ],
+                [65, 3, "The CTP which is used to check the performance of X-BIS should be certified by", "एक्स-बीआईएस के प्रदर्शन की जांच करने के लिए उपयोग किया जाने वाला सीटीपी प्रमाणित होना चाहिए", ["Manufacturer", "Manufacturer"],
+                    ["BCAS", "BCAS"],
+                    ["Government test lab", "Government test lab"],
+                    ["All of the above", "All of the above"]
+                ],
+                [66, 4, "The supervisory officer should carry out the CTP test -----------and compare the results with daily test sheets", "पर्यवेक्षी अधिकारी को सीटीपी परीक्षण करना चाहिए और दैनिक परीक्षण शीट के साथ परिणामों की तुलना करनी चाहिए", ["Twice a week", "Twice a week"],
+                    ["Once in a month", "Once in a month"],
+                    ["Twice a month", "Twice a month"],
+                    ["Once in a week", "Once in a week"]
+                ],
+                [67, 2, "How many times is the wavelength of X-RAYS shorter than normal light? X-RAYS", "की तरंगदैर्घ्य सामान्य प्रकाश से कितनी गुना कम होती है", ["1000 times", "1000 times"],
+                    ["10000 times", "10000 times"],
+                    ["100 times", "100 times"],
+                    ["100000 times", "100000 times"]
+                ],
+                [68, 1, "What is the gaping between the vertical and horizontal gratings in spatial resolution test?", "स्थानिक विभेदन परीक्षण में ऊर्ध्वाधर और क्षैतिज झंझरी के बीच कितना अंतर होता है", ["1mm and 1.5mm", "1mm and 1.5mm"],
+                    ["1.5mm and 1.2mm", "1.5mm and 1.2mm"],
+                    ["0.5mm and 1mm", "0.5mm and 1mm"],
+                    ["1mm and 2mm", "1mm and 2mm"]
+                ],
+                [69, 4, "What are the varying thickness of aluminum step wedges used in CTP?", "सीटीपी में उपयोग किए जाने वाले एल्यूमीनियम स्टेप वेजेज की अलग-अलग मोटाई क्या है?", ["5/16, 3/16, 7/16", "5/16, 3/16, 7/16"],
+                    ["3/16, 7/16, 5/16", "3/16, 7/16, 5/16"],
+                    ["7/16, 3/16, 5/16", "7/16, 3/16, 5/16"],
+                    ["3/16, 5/16, 7/16", "3/16, 5/16, 7/16"]
+                ],
+                [70, 4, "If the X-BIS is not ready for use than which indicator will glow or blink", "यदि एक्स-बीआईएस उपयोग के लिए तैयार नहीं है तो कौन सा संकेतक चमकेगा या झपकेगा", ["On/off indicator", "ऑन/ऑफ इंडिकेटर"],
+                    ["Wait indicator", "वेट इंडिकेटर"],
+                    ["Post indicator", "पोस्ट इंडिकेटर"],
+                    ["Both b and c", "बी और सी दोनों"]
+                ],
+                [71, 3, "What does NDA stands for", "एनडीए का क्या मतलब है?", ["Non- disclosure accord", "Non- disclosure accord"],
+                    ["Non – disclosed agreement", "Non – disclosed agreement"],
+                    ["Non-disclosure agreement", "Non-disclosure agreement"],
+                    ["New-disclosed agreement", "New-disclosed agreement"]
+                ],
+                [72, 2, "All the data related to TIP should be stored on the system for how much time", "टीआईपी से संबंधित सभी डेटा को सिस्टम पर कितने समय तक स्टोर किया जाना चाहिए", ["Minimum 3 months", "न्यूनतम 3 महीने"],
+                    ["Two months", "दो महीने"],
+                    ["4 months", "4 महीने"],
+                    ["One year", "एक वर्ष"]
+                ],
+                [73, 1, "What is the average thickness of steel which varies in the 4th test of CTP?", "स्टील की औसत मोटाई कितनी है जो सीटीपी के चौथे परीक्षण में भिन्न होती है", ["2mm", "2mm"],
+                    ["4mm", "4mm"],
+                    ["6mm", "6mm"],
+                    ["3mm", "3mm"]
+                ],
+                [74, 2, "As per circular 23/2005 screener should not monitor the screen not more than for", "सर्कुलर 23/2005 के अनुसार स्क्रीनर को इससे अधिक समय तक स्क्रीन की निगरानी नहीं ?", ["30 min", "30 min"],
+                    ["20 min", "20 min"],
+                    ["25 min", "25 min"],
+                    ["15 min", "15 min"]
+                ],
+                [75, 3, "INVERSE key in rapiscan is equivalent to which key in smith Heiman", "रैपिस्कन में व्युत्क्रम कुंजी स्मिथ हेमैन में किस कुंजी के बराबर है", ["Super enhancement", "Super enhancement"],
+                    ["Black white key", "Black white key"],
+                    ["Negative key", "Negative key"],
+                    ["Vari key", "Vari key"]
+                ],
+                [76, 3, "How much time is available with the screener at level 2 of ILHBS to analyse the image", "छवि का विश्लेषण करने के लिए ILHBS के लेवल 2 पर स्क्रीनर के पास कितना समय उपलब्ध है", ["Upto 60 sec", "Upto 60 sec"],
+                    ["upto 45 sec", "upto 45 sec"],
+                    ["upto 30 sec", "upto 30 sec"],
+                    ["40-110 sec", "40-110 sec"]
+                ],
+                [77, 3, "Explosive sniffer dogs are to be deployed at which level of ILHBS", "विस्फोटक खोजी कुत्तों को ILHBS के किस स्तर पर तैनात किया जाना है", ["Level 1", "Level 1"],
+                    ["Level 2", "Level 2"],
+                    ["Level 3", "Level 3"],
+                    ["Level 2A", "Level 2A"]
+                ],
+                [78, 4, "The CT-EDS machine deployed at level 1 of ILHBS must be certified and approved by", "आईएलएचबीएस के लेवल 1 पर तैनात सीटी-ईडीएस मशीन प्रमाणित और अनुमोदित होनी चाहिए", ["BCAS standard", "BCAS standard"],
+                    ["DGCA standard", "DGCA standard"],
+                    ["FAA Standard", "FAA Standard"],
+                    ["TSA/ECAC STANDARD", "TSA/ECAC STANDARD"]
+                ],
+                [79, 4, "Which of the following item will appear in opaque colour on the X-ray monitor?", "निम्न में से कौन सी वस्तु एक्स-रे स्क्रीन पर अपारदर्शी दिखाई देगी?", ["Books", "Books"],
+                    ["Steel", "Steel"],
+                    ["Aluminium", "Aluminium"],
+                    ["Lead", "Lead"]
+                ],
+                [80, 1, "Bag searcher is also known as", "बैग सर्चर को जाना जाता है?", ["ETD operator", "ईटीडी ऑपरेटर"],
+                    ["EVD operator", "ईवीडी ऑपरेटर"],
+                    ["X-BIS operator", "एैस-बीस ऑपरेटर"],
+                    ["Load officer", "लोड ऑफिसर"]
+                ]
+            ];
         ! function(e) {
             for (let t = e.length - 1; t > 0; t--) {
                 const n = Math.floor(Math.random() * (t + 1));
@@ -1555,20 +1989,36 @@
             timerDisplay = document.getElementById("timer-display"),
             resultDisplay = document.getElementById("result-display"),
             controlPanel = document.getElementById("exam-control-panel");
+        // Figures out which student this is, using whichever source has it.
+        function getStudentUid() {
+            const fromUrl = new URLSearchParams(window.location.search).get("uid");
+            if (fromUrl) return fromUrl;
+            return safeStorage.get("currentUid");
+        }
+
         async function submitQuizResult(e, t = 0) {
             try {
-                const n = await fetch(APPS_SCRIPT_URL, {
-                        method: "POST",
-                        body: JSON.stringify(e)
-                    }),
-                    o = await n.json();
-                if ("success" === o.status) return o;
-                if ("busy" === o.status && t < 10) return await new Promise(e => setTimeout(e, 3e3)), submitQuizResult(e, t + 1);
-                throw new Error(o.message || "Submission failed")
+                const uid = getStudentUid();
+                if (!uid) throw new Error("Could not identify the student. Please log in again from the dashboard.");
+
+                // Make sure Firebase has finished checking who's logged in
+                // before we try to save anything under their name.
+                await window._fbAuthReady;
+
+                const { db, collection, addDoc } = window._fb;
+
+                const payload = Object.assign({}, e);
+                delete payload.action;
+                delete payload.spreadsheetId;
+                payload.uid = uid;
+                payload.timestamp = new Date();
+
+                await addDoc(collection(db, "results"), payload);
+                return { status: "success" };
             } catch (n) {
-                if (t < 10) {
-                    const n = Math.floor(2e3 * Math.random()) + 3e3;
-                    return await new Promise(e => setTimeout(e, n)), submitQuizResult(e, t + 1)
+                if (t < 5) {
+                    const delayMs = Math.floor(2e3 * Math.random()) + 2e3;
+                    return await new Promise(e => setTimeout(e, delayMs)), submitQuizResult(e, t + 1)
                 }
                 throw n
             }
@@ -1584,7 +2034,7 @@
                     studentName: t.get("studentName") || safeStorage.get("currentStudent") || userName || "Trainee",
                     designation: t.get("designation") || safeStorage.get("currentDesignation") || "Trainee",
                     section: t.get("section") || safeStorage.get("studentSectionContext") || "basic",
-                    quizName: "TEST",
+                    quizName: "DAY 2 PAPER 2",
                     score: `${savedAnswers.filter((e,t)=>e&&e.toString()===questionData[t][1].toString()).length}/80`,
                     timestamp: (new Date).toLocaleString()
                 };
@@ -1986,7 +2436,7 @@
                     username: l.get("username") || safeStorage.get("currentUsername") || "trainee",
                     studentSection: l.get("section") || safeStorage.get("studentSectionContext") || "SCREENER",
                     designation: l.get("designation") || safeStorage.get("currentDesignation") || "Trainee",
-                    quizName: "TEST",
+                    quizName: "DAY 2 PAPER 2",
                     score: r,
                     tabSwitchCount: tabSwitchCount,
                     timestamp: (new Date).toLocaleString()
@@ -2017,7 +2467,7 @@
                 d = document.createElement("div");
             d.id = "mobile-pdf-render-box", d.style.position = "fixed", d.style.top = "0", d.style.left = "0", d.style.width = "100%", d.style.height = "100%", d.style.backgroundColor = "rgba(0,0,0,0.8)", d.style.zIndex = "999999", d.style.display = "flex", d.style.justifyContent = "center", d.style.alignItems = "center";
             const c = document.createElement("div");
-            c.style.width = "750px", c.style.backgroundColor = "#ffffff", c.style.padding = "30px", c.style.fontFamily = "Poppins, sans-serif", c.style.color = "#333", c.style.borderRadius = "8px", c.style.boxShadow = "0 5px 15px rgba(0,0,0,0.5)", c.innerHTML = `\n<div style="border-bottom: 2px solid #38bdf8; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">\n<h1 style="color: #0284c7; margin: 0; font-size: 24px;">ASTI DELHI</h1>\n<h3 style="margin: 5px 0 0 0; color: #555; font-size: 16px;">Exam Performance Summary</h3>\n</div>\n<div style="background: #f8f9fa; border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">\n<table style="width: 100%; border-collapse: collapse; font-size: 14px;">\n<tr>\n<td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>\n<td style="padding: 6px 0;">TEST</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>\n<td style="padding: 6px 0;">${userName}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Designation:</td>\n<td style="padding: 6px 0;">${s}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Section:</td>\n<td style="padding: 6px 0;">${r}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Time of Submission:</td>\n<td style="padding: 6px 0;">${l}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Final Score / Marks:</td>\n<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: #0284c7;">${e} / 80</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Percentage / Accuracy:</td>\n<td style="padding: 6px 0;">${o.toFixed(1)}%</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Result Status:</td>\n<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: ${i};">${a}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Screen Switch / Minimize Count:</td>\n<td style="padding: 6px 0; font-weight: bold; color: ${tabSwitchCount>0?"#dc3545":"#16a34a"};">${tabSwitchCount}</td>\n</tr>\n</table>\n</div>\n<h3 style="color: #0284c7; margin-bottom: 10px; font-size: 16px;">Summary Breakdown Statistics</h3>\n<table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">\n<thead>\n<tr style="background-color: #0284c7; color: white;">\n<th style="padding: 10px; border: 1px solid #38bdf8;">Total Questions</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Correct</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Wrong</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Unattempted</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">80</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a; font-weight: bold;">${e}</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #dc3545; font-weight: bold;">${t}</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #6c757d; font-weight: bold;">${n}</td>\n</tr>\n</tbody>\n</table>\n<div style="margin-top: 40px; text-align: center; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 10px;">\nThis is an official automated performance report generated by ASTI Delhi Exam Portal.\n</div>\n`, d.appendChild(c), document.body.appendChild(d);
+            c.style.width = "750px", c.style.backgroundColor = "#ffffff", c.style.padding = "30px", c.style.fontFamily = "Poppins, sans-serif", c.style.color = "#333", c.style.borderRadius = "8px", c.style.boxShadow = "0 5px 15px rgba(0,0,0,0.5)", c.innerHTML = `\n<div style="border-bottom: 2px solid #38bdf8; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">\n<h1 style="color: #0284c7; margin: 0; font-size: 24px;">ASTI DELHI</h1>\n<h3 style="margin: 5px 0 0 0; color: #555; font-size: 16px;">Exam Performance Summary</h3>\n</div>\n<div style="background: #f8f9fa; border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">\n<table style="width: 100%; border-collapse: collapse; font-size: 14px;">\n<tr>\n<td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>\n<td style="padding: 6px 0;">DAY 2 PAPER 2</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>\n<td style="padding: 6px 0;">${userName}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Designation:</td>\n<td style="padding: 6px 0;">${s}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Section:</td>\n<td style="padding: 6px 0;">${r}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Time of Submission:</td>\n<td style="padding: 6px 0;">${l}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Final Score / Marks:</td>\n<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: #0284c7;">${e} / 80</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Percentage / Accuracy:</td>\n<td style="padding: 6px 0;">${o.toFixed(1)}%</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Result Status:</td>\n<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: ${i};">${a}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Screen Switch / Minimize Count:</td>\n<td style="padding: 6px 0; font-weight: bold; color: ${tabSwitchCount>0?"#dc3545":"#16a34a"};">${tabSwitchCount}</td>\n</tr>\n</table>\n</div>\n<h3 style="color: #0284c7; margin-bottom: 10px; font-size: 16px;">Summary Breakdown Statistics</h3>\n<table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">\n<thead>\n<tr style="background-color: #0284c7; color: white;">\n<th style="padding: 10px; border: 1px solid #38bdf8;">Total Questions</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Correct</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Wrong</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Unattempted</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">80</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a; font-weight: bold;">${e}</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #dc3545; font-weight: bold;">${t}</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #6c757d; font-weight: bold;">${n}</td>\n</tr>\n</tbody>\n</table>\n<div style="margin-top: 40px; text-align: center; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 10px;">\nThis is an official automated performance report generated by ASTI Delhi Exam Portal.\n</div>\n`, d.appendChild(c), document.body.appendChild(d);
             const u = {
                 margin: 10,
                 filename: `${userName.toLowerCase().replace(/\s+/g,"_")}_summary.pdf`,
