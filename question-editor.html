@@ -1184,6 +1184,13 @@ async function saveToGithub() {
         //   - the visible on-screen header (.test-title h3)
         newContent = newContent.replace(/(<div class="test-title">\s*<h3[^>]*>)([^<]*)(<\/h3>)/,
             (m, pre, mid, post) => pre + quizConfig.name + post);
+        //   - the pre-exam setup screen's topbar name (newer camera papers only)
+        newContent = newContent.replace(/(<div class="setup-exam-name">)([^<]*)(<\/div>)/,
+            (m, pre, mid, post) => pre + quizConfig.name + post);
+        //   - the "here's how your exam screen works" mock walkthrough preview,
+        //     which shows a second hardcoded copy of the name (newer camera papers only)
+        newContent = newContent.replace(/(<div class="mock-header-bar"[^>]*>\s*<div>\s*<div style="font-weight:700;font-size:\.95em">)([^<]*)(<\/div>)/,
+            (m, pre, mid, post) => pre + quizConfig.name + post);
         //   - the "Quiz Title:" row in the downloadable PDF performance summary.
         //     (?:\\n)? handles papers where this row lives inside a template
         //     literal with a literal escaped "\n" instead of a real newline.
