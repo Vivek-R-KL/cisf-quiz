@@ -256,7 +256,7 @@
         <button class="btn-tool" onclick="copySelectedFile()" style="white-space:nowrap; flex:none;">📋 Copy as New Paper</button>
         <button class="btn-danger" onclick="deleteQuizPaper()" style="white-space:nowrap; flex:none;">🗑️ Delete Quiz Paper</button>
     </div>
-    <small class="hint">To create a brand-new quiz paper, pick an existing paper above to use as the template, then click "Copy as New Paper" — you'll be asked for a new file name and whether to start with no questions. "Delete Quiz Paper" permanently removes the selected paper from GitHub.</small>
+    <small class="hint">To create a brand-new quiz paper, pick an existing paper above to use as the template, then click "Copy as New Paper" — you'll be asked for a new file name, whether to start blank, and (if blank) how many questions it should have, so the exam's question palette is sized correctly right away. "Delete Quiz Paper" permanently removes the selected paper from GitHub.</small>
     <div id="loadStatus"></div>
 </div>
 
@@ -304,6 +304,7 @@
     <small class="hint">Click bubble (A, B, C, D) to set correct answer. Use "Paste Options" to paste 4 options copied from Excel, "Translate" to auto-fill Hindi for one question, "Import Questions from Excel" to bulk-load English questions from the template file, and "Translate All to Hindi" to fill in every missing Hindi field at once.</small>
     <div class="q-tools" style="margin-bottom:10px; flex-wrap: wrap;">
         <button class="btn-tool" onclick="document.getElementById('excelFileInput').click()">📥 Import Questions from Excel</button>
+        <button class="btn-tool" onclick="setQuestionCount()">🔢 Set No. of Questions</button>
         <button class="btn-tool" id="translateAllBtn" onclick="translateAllQuestions()">🌐 Translate All to Hindi</button>
         <button class="btn-tool" onclick="exportQuestionsToExcel()">📤 Export to Excel</button>
         <button class="btn-danger" style="flex:1; padding: 6px 10px; font-size:12px;" onclick="deleteAllQuestions()">🗑️ Delete All Questions</button>
@@ -762,9 +763,21 @@ async function copySelectedFile() {
     if (!/\.html$/i.test(newPath)) newPath += '.html';
 
     const startBlank = confirm(
-        'Start the new paper with NO questions, so you can add fresh ones (e.g. import from Excel)?\n\n' +
+        'Start the new paper with fresh (blank) questions, so you can add your own (e.g. import from Excel)?\n\n' +
         'OK = Start blank\nCancel = Keep a copy of all existing questions from the source paper'
     );
+
+    let blankCount = 0;
+    if (startBlank) {
+        const countInput = prompt(
+            'How many questions will this paper have?\n\n' +
+            'Enter a number to pre-create that many blank question slots — this sizes the exam\'s question palette correctly right away. Enter 0 to start with none and add questions one at a time.',
+            '80'
+        );
+        if (countInput === null) return; // cancelled the whole "copy as new paper" action
+        const parsedCount = parseInt(countInput, 10);
+        blankCount = (!isNaN(parsedCount) && parsedCount > 0) ? parsedCount : 0;
+    }
 
     showStatus('loadStatus', `Copying ${sourcePath} → ${newPath}…`, 'info');
     try {
@@ -777,7 +790,15 @@ async function copySelectedFile() {
 
         if (startBlank) {
             const loc = locateArrayLiteral(newContent, 'questionData');
-            newContent = newContent.slice(0, loc.start) + '[]' + newContent.slice(loc.end + 1);
+            const blankQuestions = [];
+            for (let i = 0; i < blankCount; i++) {
+                blankQuestions.push([i + 1, 1, '', '', ['', ''], ['', ''], ['', ''], ['', '']]);
+            }
+            newContent = newContent.slice(0, loc.start) + JSON.stringify(blankQuestions) + newContent.slice(loc.end + 1);
+            // Keep TOTAL_QUESTIONS (which drives the exam's question palette size)
+            // in sync immediately, rather than leaving it at the source paper's
+            // old count until the next Save.
+            newContent = newContent.replace(/TOTAL_QUESTIONS\s*=\s*\d+/, `TOTAL_QUESTIONS = ${blankCount}`);
         }
 
         // Check whether the destination file name is already taken.
@@ -1129,6 +1150,46 @@ function addNewQuestion() {
     }, 50);
 }
 function renumberQuestions() { questions.forEach((q, i) => { q[0] = i + 1; }); }
+
+/* ================= SET NUMBER OF QUESTIONS (SIZES THE EXAM PALETTE) ================= */
+/* Asks how many questions the paper should have, then adds blank question
+   slots at the end (if increasing) or removes trailing ones (if decreasing)
+   so the count matches exactly. Since the exam page (CAMTEST.html) builds its
+   question palette straight from questionData.length / TOTAL_QUESTIONS, this
+   is what actually resizes the palette once the change is saved. */
+function setQuestionCount() {
+    if (!currentFile) {
+        alert('Open a quiz paper first.');
+        return;
+    }
+    const current = questions.length;
+    const input = prompt(
+        `How many questions should this paper have?\n\nCurrently: ${current} question(s). ` +
+        `Enter the new total — extra blank questions will be added at the end, or extra questions will be removed from the end.`,
+        String(current || 80)
+    );
+    if (input === null) return;
+    const target = parseInt(input, 10);
+    if (isNaN(target) || target < 0) {
+        alert('Please enter a valid number (0 or more).');
+        return;
+    }
+    if (target === current) return;
+
+    if (target > current) {
+        for (let i = current; i < target; i++) {
+            questions.push([i + 1, 1, '', '', ['', ''], ['', ''], ['', ''], ['', '']]);
+        }
+    } else {
+        const removedCount = current - target;
+        if (!confirm(`This will remove the last ${removedCount} question(s) (question #${target + 1} to #${current}). Continue?`)) return;
+        questions.length = target;
+    }
+
+    renumberQuestions();
+    renderQuestions();
+    showStatus('loadStatus', `Question count set to ${target}. Click "💾 Save Changes to GitHub" to make it permanent — that's also what updates the exam's question palette.`, 'info');
+}
 
 /* ================= SAVE UPDATED QUIZ FILE BACK TO GITHUB ================= */
 async function saveToGithub() {
