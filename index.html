@@ -236,7 +236,7 @@ async function loginStudent() {
                 loginBtn.innerText = "Retrying...";
                 await new Promise(resolve => setTimeout(resolve, retryDelay));
             } else {
-                alert("The server is busy. Please wait a few seconds and try again.");
+                alert("Please check your internet connection and try again.");
             }
         }
     }
