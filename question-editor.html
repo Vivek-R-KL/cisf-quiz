@@ -936,15 +936,36 @@ async function handleExcelFile(event) {
             ];
         });
 
-        const mode = questions.length > 0
-            ? confirm(`Add ${imported.length} imported question(s) to the ${questions.length} already in this paper?\n\nOK = Append\nCancel = Replace all existing questions`)
-            : true;
+        // If the paper currently contains only empty placeholder questions (e.g.
+        // created via "how many questions" on Copy as New Paper, or "Set No. of
+        // Questions"), fill those slots in place with the imported rows instead
+        // of stacking the real questions below a wall of still-blank ones —
+        // that's what made a successful import look like "nothing showed up".
+        const allBlank = questions.length > 0 && questions.every(q => !q[2] || !String(q[2]).trim());
 
-        questions = mode ? questions.concat(imported) : imported;
+        let extraCount = 0;
+        let leftoverBlanks = 0;
+        if (allBlank) {
+            const blankSlots = questions.length;
+            const filled = imported.slice(0, blankSlots);
+            const extra = imported.slice(blankSlots);
+            leftoverBlanks = blankSlots - filled.length;
+            extraCount = extra.length;
+            questions = filled.concat(questions.slice(filled.length)).concat(extra);
+        } else if (questions.length > 0) {
+            const append = confirm(`Add ${imported.length} imported question(s) to the ${questions.length} already in this paper?\n\nOK = Append\nCancel = Replace all existing questions`);
+            questions = append ? questions.concat(imported) : imported;
+        } else {
+            questions = imported;
+        }
         renumberQuestions();
         renderQuestions();
 
         let msg = `Imported ${imported.length} question(s) from Excel.`;
+        if (allBlank) {
+            if (leftoverBlanks > 0) msg += ` Filled ${imported.length} blank slot(s); ${leftoverBlanks} still blank.`;
+            if (extraCount > 0) msg += ` ${extraCount} extra question(s) were added at the end beyond the original count.`;
+        }
         if (unmatchedAnswers > 0) msg += ` ${unmatchedAnswers} correct-answer value(s) could not be matched and were defaulted to Option A — please check them.`;
         showStatus('loadStatus', msg, unmatchedAnswers > 0 ? 'info' : 'ok');
     } catch (e) {
