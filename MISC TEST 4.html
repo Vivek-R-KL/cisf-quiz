@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes,viewport-fit=cover">
-    <title>ASTI Delhi – DAY 2 PAPER 2 (80 Questions | 45 Min)</title>
+    <title>ASTI Delhi – MISC TEST 4 (80 Questions | 45 Min)</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -1359,7 +1359,7 @@
             <div id="setup-topbar">
                 <div>
                     <div class="setup-org">ASTI Delhi</div>
-                    <div class="setup-exam-name">DAY 2 PAPER 2</div>
+                    <div class="setup-exam-name">MISC TEST 4</div>
                 </div>
                 <div class="setup-meta"><span>Questions: 80</span> <span>Duration: 45 Min</span></div>
             </div>
@@ -1370,7 +1370,7 @@
                     <div class="mock-row">
                         <div class="mock-header-bar" style="justify-content:space-between">
                             <div>
-                                <div style="font-weight:700;font-size:.95em">DAY 2 PAPER 2</div>
+                                <div style="font-weight:700;font-size:.95em">MISC TEST 4</div>
                                 <div style="font-size:.75em;opacity:.75">ASTI Delhi</div>
                             </div>
                             <div style="display:flex;align-items:center;gap:10px"><span style="font-weight:600;font-size:.8em">Candidate: Your Name</span> <span class="mock-timer">45:00</span></div>
@@ -1424,7 +1424,7 @@
     </div>
     <div class="header notranslate" style="display:none" id="main-header" translate="no">
         <div class="test-title">
-            <h3 style="font-size:1.5em">DAY 2 PAPER 2</h3>
+            <h3 style="font-size:1.5em">MISC TEST 4</h3>
             <div class="institute-logo">ASTI Delhi</div>
         </div>
         <div class="user-info"><span id="header-user-name">Candidate: N/A</span> <span id="timer-display">45:00</span></div>
@@ -1584,7 +1584,7 @@
                     studentName: t.get("studentName") || safeStorage.get("currentStudent") || userName || "Trainee",
                     designation: t.get("designation") || safeStorage.get("currentDesignation") || "Trainee",
                     section: t.get("section") || safeStorage.get("studentSectionContext") || "basic",
-                    quizName: "DAY 2 PAPER 2",
+                    quizName: "MISC TEST 4",
                     score: `${savedAnswers.filter((e,t)=>e&&e.toString()===questionData[t][1].toString()).length}/80`,
                     timestamp: (new Date).toLocaleString()
                 };
@@ -1986,7 +1986,7 @@
                     username: l.get("username") || safeStorage.get("currentUsername") || "trainee",
                     studentSection: l.get("section") || safeStorage.get("studentSectionContext") || "SCREENER",
                     designation: l.get("designation") || safeStorage.get("currentDesignation") || "Trainee",
-                    quizName: "DAY 2 PAPER 2",
+                    quizName: "MISC TEST 4",
                     score: r,
                     tabSwitchCount: tabSwitchCount,
                     timestamp: (new Date).toLocaleString()
@@ -2017,7 +2017,7 @@
                 d = document.createElement("div");
             d.id = "mobile-pdf-render-box", d.style.position = "fixed", d.style.top = "0", d.style.left = "0", d.style.width = "100%", d.style.height = "100%", d.style.backgroundColor = "rgba(0,0,0,0.8)", d.style.zIndex = "999999", d.style.display = "flex", d.style.justifyContent = "center", d.style.alignItems = "center";
             const c = document.createElement("div");
-            c.style.width = "750px", c.style.backgroundColor = "#ffffff", c.style.padding = "30px", c.style.fontFamily = "Poppins, sans-serif", c.style.color = "#333", c.style.borderRadius = "8px", c.style.boxShadow = "0 5px 15px rgba(0,0,0,0.5)", c.innerHTML = `\n<div style="border-bottom: 2px solid #38bdf8; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">\n<h1 style="color: #0284c7; margin: 0; font-size: 24px;">ASTI DELHI</h1>\n<h3 style="margin: 5px 0 0 0; color: #555; font-size: 16px;">Exam Performance Summary</h3>\n</div>\n<div style="background: #f8f9fa; border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">\n<table style="width: 100%; border-collapse: collapse; font-size: 14px;">\n<tr>\n<td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>\n<td style="padding: 6px 0;">DAY 2 PAPER 2</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>\n<td style="padding: 6px 0;">${userName}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Designation:</td>\n<td style="padding: 6px 0;">${s}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Section:</td>\n<td style="padding: 6px 0;">${r}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Time of Submission:</td>\n<td style="padding: 6px 0;">${l}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Final Score / Marks:</td>\n<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: #0284c7;">${e} / 80</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Percentage / Accuracy:</td>\n<td style="padding: 6px 0;">${o.toFixed(1)}%</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Result Status:</td>\n<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: ${i};">${a}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Screen Switch / Minimize Count:</td>\n<td style="padding: 6px 0; font-weight: bold; color: ${tabSwitchCount>0?"#dc3545":"#16a34a"};">${tabSwitchCount}</td>\n</tr>\n</table>\n</div>\n<h3 style="color: #0284c7; margin-bottom: 10px; font-size: 16px;">Summary Breakdown Statistics</h3>\n<table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">\n<thead>\n<tr style="background-color: #0284c7; color: white;">\n<th style="padding: 10px; border: 1px solid #38bdf8;">Total Questions</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Correct</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Wrong</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Unattempted</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">80</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a; font-weight: bold;">${e}</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #dc3545; font-weight: bold;">${t}</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #6c757d; font-weight: bold;">${n}</td>\n</tr>\n</tbody>\n</table>\n<div style="margin-top: 40px; text-align: center; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 10px;">\nThis is an official automated performance report generated by ASTI Delhi Exam Portal.\n</div>\n`, d.appendChild(c), document.body.appendChild(d);
+            c.style.width = "750px", c.style.backgroundColor = "#ffffff", c.style.padding = "30px", c.style.fontFamily = "Poppins, sans-serif", c.style.color = "#333", c.style.borderRadius = "8px", c.style.boxShadow = "0 5px 15px rgba(0,0,0,0.5)", c.innerHTML = `\n<div style="border-bottom: 2px solid #38bdf8; padding-bottom: 15px; margin-bottom: 20px; text-align: center;">\n<h1 style="color: #0284c7; margin: 0; font-size: 24px;">ASTI DELHI</h1>\n<h3 style="margin: 5px 0 0 0; color: #555; font-size: 16px;">Exam Performance Summary</h3>\n</div>\n<div style="background: #f8f9fa; border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">\n<table style="width: 100%; border-collapse: collapse; font-size: 14px;">\n<tr>\n<td style="padding: 6px 0; font-weight: bold; width: 40%;">Quiz Title:</td>\n<td style="padding: 6px 0;">MISC TEST 4</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Candidate Name:</td>\n<td style="padding: 6px 0;">${userName}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Designation:</td>\n<td style="padding: 6px 0;">${s}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Section:</td>\n<td style="padding: 6px 0;">${r}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Time of Submission:</td>\n<td style="padding: 6px 0;">${l}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Final Score / Marks:</td>\n<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: #0284c7;">${e} / 80</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Percentage / Accuracy:</td>\n<td style="padding: 6px 0;">${o.toFixed(1)}%</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Result Status:</td>\n<td style="padding: 6px 0; font-size: 16px; font-weight: bold; color: ${i};">${a}</td>\n</tr>\n<tr>\n<td style="padding: 6px 0; font-weight: bold;">Screen Switch / Minimize Count:</td>\n<td style="padding: 6px 0; font-weight: bold; color: ${tabSwitchCount>0?"#dc3545":"#16a34a"};">${tabSwitchCount}</td>\n</tr>\n</table>\n</div>\n<h3 style="color: #0284c7; margin-bottom: 10px; font-size: 16px;">Summary Breakdown Statistics</h3>\n<table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">\n<thead>\n<tr style="background-color: #0284c7; color: white;">\n<th style="padding: 10px; border: 1px solid #38bdf8;">Total Questions</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Correct</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Wrong</th>\n<th style="padding: 10px; border: 1px solid #38bdf8;">Unattempted</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td style="padding: 10px; border: 1px solid #ccc; font-weight: bold;">80</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a; font-weight: bold;">${e}</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #dc3545; font-weight: bold;">${t}</td>\n<td style="padding: 10px; border: 1px solid #ccc; color: #6c757d; font-weight: bold;">${n}</td>\n</tr>\n</tbody>\n</table>\n<div style="margin-top: 40px; text-align: center; font-size: 11px; color: #777; border-top: 1px solid #eee; padding-top: 10px;">\nThis is an official automated performance report generated by ASTI Delhi Exam Portal.\n</div>\n`, d.appendChild(c), document.body.appendChild(d);
             const u = {
                 margin: 10,
                 filename: `${userName.toLowerCase().replace(/\s+/g,"_")}_summary.pdf`,
