@@ -1522,12 +1522,13 @@
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      // Other code on this page waits for this promise before saving a
-      // score, so we know Firebase has finished restoring the student's
-      // login session from the browser before we try to write anything.
-      window._fbAuthReady = new Promise((resolve) => {
-        onAuthStateChanged(auth, (user) => resolve(user));
-      });
+      // authStateReady() waits until Firebase has FULLY finished checking
+      // browser storage for a logged-in session, instead of just asking
+      // once and possibly getting a premature "nobody's logged in" answer.
+      window._fbAuthReady = (async () => {
+        await auth.authStateReady();
+        return auth.currentUser;
+      })();
 
       window._fb = { db, collection, addDoc };
     </script>
