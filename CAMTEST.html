@@ -1932,6 +1932,7 @@
             cameraLockActive = !1;
         const MAX_WARNINGS = 2,
             MAX_LOCKS = 4,
+            CAMERA_PROCTORING_ENABLED = true,
             safeStorage = {
                 _mem: {},
                 get(e) {
@@ -2051,7 +2052,7 @@
         function attemptUnlock() {
             const e = document.getElementById("admin-unlock-input"),
                 t = document.getElementById("unlock-error-msg");
-            "igiasti123" === (e ? e.value : "") ? resumeQuiz(): (t && (t.style.display = "block"), e && (e.value = "", e.focus()))
+            ADMIN_UNLOCK_PASSWORD === (e ? e.value : "") ? resumeQuiz(): (t && (t.style.display = "block"), e && (e.value = "", e.focus()))
         }
 
         function resumeQuiz() {
@@ -2154,7 +2155,15 @@
         function updateStartBtnState() {
             const e = document.getElementById("user-name-input").value.trim().length > 0,
                 t = document.getElementById("declaration-check").checked;
-            document.getElementById("start-btn").disabled = !(e && t && cameraGranted)
+            document.getElementById("start-btn").disabled = !(e && t && (!CAMERA_PROCTORING_ENABLED || cameraGranted))
+        }
+
+        function disableCameraProctoring() {
+            cameraGranted = !0;
+            const e = document.getElementById("setup-camera-row"),
+                t = document.getElementById("camera-monitor-widget"),
+                n = document.querySelector(".safety-note");
+            e && (e.style.display = "none"), t && (t.style.display = "none"), n && (n.innerHTML = '🔒 <strong>Please Note:</strong> Minimizing this window or switching tabs is tracked. For the first 2 time(s) you do this, you will only get a WARNING and the exam continues. On attempt number 3 through attempt number 4, your exam will be LOCKED immediately and will require an Administrator password to resume. On attempt number 5, your exam will be submitted automatically. Please stay on this tab for the entire duration.'), updateStartBtnState()
         }
 
         function generateQuestions() {
@@ -2459,17 +2468,18 @@
                 a = e.get("section");
             t && safeStorage.set("currentStudent", t), n && safeStorage.set("currentUsername", n), o && safeStorage.set("currentDesignation", o), a && safeStorage.set("studentSectionContext", a);
             const i = t || safeStorage.get("currentStudent");
-            i && (document.getElementById("user-name-input").value = i), updateStartBtnState(), requestCameraPermission()
+            i && (document.getElementById("user-name-input").value = i), updateStartBtnState(), CAMERA_PROCTORING_ENABLED ? requestCameraPermission() : disableCameraProctoring()
         }), document.getElementById("user-name-input").addEventListener("input", updateStartBtnState), document.getElementById("declaration-check").addEventListener("change", updateStartBtnState), document.getElementById("start-btn").addEventListener("click", async () => {
             const e = document.getElementById("user-name-input").value.trim(),
                 t = document.getElementById("declaration-check").checked;
             if (e && t) {
-                if (!cameraGranted || !persistentCameraStream || !persistentCameraStream.getVideoTracks().some(e => "live" === e.readyState)) return cameraGranted = !1, updateStartBtnState(), void(await requestCameraPermission());
-                userName = e, document.getElementById("header-user-name").textContent = `Candidate: ${userName}`, document.getElementById("initial-setup").style.display = "none", document.getElementById("main-header").style.display = "flex", document.getElementById("main-test-area").style.display = "flex", document.querySelector(".zoom-controls").style.display = "flex", generateQuestions(), generateQuestionGrid(), displayQuestion(0), startTimer(), quizInProgress = !0, initFaceMonitoring(), setTimeout(adjustMobileLayout, 50)
+                if (CAMERA_PROCTORING_ENABLED && (!cameraGranted || !persistentCameraStream || !persistentCameraStream.getVideoTracks().some(e => "live" === e.readyState))) return cameraGranted = !1, updateStartBtnState(), void(await requestCameraPermission());
+                userName = e, document.getElementById("header-user-name").textContent = `Candidate: ${userName}`, document.getElementById("initial-setup").style.display = "none", document.getElementById("main-header").style.display = "flex", document.getElementById("main-test-area").style.display = "flex", document.querySelector(".zoom-controls").style.display = "flex", generateQuestions(), generateQuestionGrid(), displayQuestion(0), startTimer(), quizInProgress = !0, CAMERA_PROCTORING_ENABLED && initFaceMonitoring(), setTimeout(adjustMobileLayout, 50)
             }
         }), window.addEventListener("resize", adjustMobileLayout), window.addEventListener("orientationchange", () => setTimeout(adjustMobileLayout, 200)), document.getElementById("lang-toggle-local").addEventListener("click", toggleLanguageHandler);
 
         function initFaceMonitoring() {
+            if (!CAMERA_PROCTORING_ENABLED) return;
             const e = document.getElementById("webcam-preview"),
                 t = document.getElementById("face-status-text");
             if (!persistentCameraStream || !persistentCameraStream.getVideoTracks().some(e => "live" === e.readyState)) return t && (t.style.color = "#dc3545", t.textContent = "Camera not available"), void handleCameraLostDuringExam();
