@@ -404,11 +404,16 @@ function base64ToUtf8(str) { return decodeURIComponent(escape(atob(str.replace(/
 
 /* ================= PARSING & CONFIG EXTRACTION ================= */
 function locateArrayLiteral(content, varName) {
-    const marker = `const ${varName}`;
-    let idx = content.indexOf(marker);
-    if (idx === -1) throw new Error(`Could not find "${varName}" in this file.`);
-    let bracketStart = content.indexOf('[', idx);
-    if (bracketStart === -1) throw new Error(`Could not find start of "${varName}" array.`);
+    // Match the variable name itself rather than requiring a literal
+    // "const " right before it — the newer camera-proctoring quiz papers
+    // declare questionData as the last of several comma-separated
+    // declarators in one `const a = 1, b = 2, ..., questionData = [...]`
+    // statement, so "const questionData" never actually appears in the
+    // source even though "const" governs it.
+    const re = new RegExp(`\\b${varName}\\s*=\\s*\\[`);
+    const m = re.exec(content);
+    if (!m) throw new Error(`Could not find "${varName}" in this file.`);
+    let bracketStart = m.index + m[0].length - 1;
 
     let depth = 0, inString = false, quoteChar = '', i = bracketStart;
     for (; i < content.length; i++) {
