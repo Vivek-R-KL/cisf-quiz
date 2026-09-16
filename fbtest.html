@@ -2003,7 +2003,12 @@
 
                 // Make sure Firebase has finished checking who's logged in
                 // before we try to save anything under their name.
-                await window._fbAuthReady;
+                const loggedInUser = await window._fbAuthReady;
+
+                // --- TEMPORARY DEBUG LOGGING ---
+                console.log("DEBUG: uid from URL/localStorage =", uid);
+                console.log("DEBUG: Firebase thinks logged-in user is =", loggedInUser ? loggedInUser.uid : "NOBODY (null)");
+                // --- END DEBUG LOGGING ---
 
                 const { db, collection, addDoc } = window._fb;
 
@@ -2016,6 +2021,7 @@
                 await addDoc(collection(db, "results"), payload);
                 return { status: "success" };
             } catch (n) {
+                console.error("DEBUG: full error object:", n);
                 if (t < 5) {
                     const delayMs = Math.floor(2e3 * Math.random()) + 2e3;
                     return await new Promise(e => setTimeout(e, delayMs)), submitQuizResult(e, t + 1)
