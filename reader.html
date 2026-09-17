@@ -616,7 +616,7 @@ async function loadMaterial() {
         if (result.status !== "success") {
             const msg = result.message || "Could not load this material.";
             showStatus(`<h3>Couldn't open the reader view</h3><p>${msg}</p>
-                <a class="btn-solid" href="${driveUrl}" target="_blank" rel="noopener">Open Original PDF Instead</a>`);
+                <button class="btn-solid" onclick="location.reload()">Retry</button>`);
             return;
         }
 
