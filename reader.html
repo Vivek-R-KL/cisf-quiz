@@ -71,6 +71,64 @@
     }
     .pill-btn:hover { background: rgba(255,255,255,0.22); }
 
+    /* ---------- Restricted material warning ---------- */
+    .restricted-banner {
+        background: #fdeaea;
+        border-bottom: 2px solid #c0392b;
+        color: #b91c1c;
+        font-family: 'Inter', sans-serif;
+        text-align: center;
+        padding: 12px 18px;
+    }
+    .restricted-banner strong {
+        display: block;
+        font-size: 15px;
+        letter-spacing: 0.4px;
+        margin-bottom: 4px;
+        color: #b91c1c;
+    }
+    .restricted-banner p {
+        margin: 0 auto;
+        max-width: 760px;
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: #9b1c1c;
+    }
+
+    /* ---------- Screenshot / capture deterrents ---------- */
+    /* Best-effort only: no web page can truly prevent a screenshot (OS
+       tools, a second camera, etc. are outside the browser's control).
+       These measures make casual capture harder and visibly disrupt it,
+       and printing is disabled outright. */
+    .pdf-native-wrap, .pdf-page-shell, .pdf-page-shell canvas {
+        -webkit-user-select: none; -moz-user-select: none; user-select: none;
+        -webkit-touch-callout: none;
+    }
+    body.capture-guard #nativeView,
+    body.capture-guard .pdf-page-shell canvas {
+        filter: blur(18px);
+        transition: filter 0.05s linear;
+    }
+    #captureNotice {
+        display: none;
+        position: fixed; inset: 0; z-index: 500;
+        background: rgba(11, 60, 93, 0.94);
+        color: #fff; font-family: 'Inter', sans-serif;
+        flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; padding: 24px;
+    }
+    #captureNotice.show { display: flex; }
+    #captureNotice h3 { margin: 0 0 8px 0; font-size: 18px; color: #ffd7d7; }
+    #captureNotice p { margin: 0; font-size: 13.5px; max-width: 420px; line-height: 1.5; }
+    @media print {
+        body * { display: none !important; }
+        body::after {
+            content: "Printing is disabled for this restricted material.";
+            display: block !important;
+            font-family: sans-serif; font-size: 18px; padding: 60px; text-align: center;
+        }
+    }
+
     /* ---------- How-to banner ---------- */
     .howto-banner {
         display: flex; align-items: center; justify-content: center; gap: 14px;
@@ -89,10 +147,24 @@
     @media (max-width: 640px) { .howto-banner { font-size: 12.5px; padding: 9px 14px; } }
 
     /* ---------- Reading column ---------- */
-    .page-wrap { display: flex; justify-content: center; padding: 40px 20px 120px; }
+    .page-wrap { position: relative; display: flex; justify-content: center; padding: 40px 20px 120px; }
     .doc-meta {
         font-family: 'Inter', sans-serif; font-size: 13px; color: var(--muted);
         margin: 0 0 40px 0; padding-bottom: 24px; border-bottom: 1px solid var(--paper-edge);
+    }
+
+    /* ---------- Per-session watermark ---------- */
+    /* A repeating tile (username + live timestamp) painted faintly across
+       the whole reading area. Unlike the capture-guard blur/focus tricks,
+       this survives a screenshot or photo of the screen on any device,
+       including mobile, because it's baked into the pixels themselves —
+       so a leaked image can still be traced back to who viewed it and
+       when, even though the capture itself couldn't be prevented. */
+    #watermarkOverlay {
+        position: absolute; inset: 0;
+        z-index: 5;
+        pointer-events: none;
+        background-repeat: repeat;
     }
 
     /* ---------- Native PDF view: real rendered pages ---------- */
@@ -363,9 +435,12 @@
         <a class="back-link" href="student-dashboard.html">← Dashboard</a>
         <p class="material-title" id="topTitle">Study Material</p>
     </div>
-    <div class="right">
-        <a class="pill-btn" id="downloadOriginal" href="#" target="_blank" rel="noopener">⬇ Original PDF</a>
-    </div>
+    <div class="right"></div>
+</div>
+
+<div class="restricted-banner">
+    <strong>WARNING: RESTRICTED MATERIAL</strong>
+    <p>The material contained on this platform is Sensitive Aviation Security Information (SASI) and is strictly restricted. Unauthorized sharing, distribution, or misuse of this information is strictly prohibited and will result in disciplinary and severe legal action.</p>
 </div>
 
 <div class="howto-banner" id="howtoBanner">
@@ -374,6 +449,7 @@
 </div>
 
 <div class="page-wrap">
+    <div id="watermarkOverlay"></div>
     <div id="statusBox" class="status-box">
         <div class="spinner"></div>
         <h3>Opening material…</h3>
@@ -440,6 +516,10 @@
         </div>
     </div>
 </div>
+<div id="captureNotice">
+    <h3>⚠ Screen capture blocked</h3>
+    <p>This is restricted material. Screenshots, screen recording, and printing are not permitted.</p>
+</div>
 <div id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -456,7 +536,6 @@ const username = localStorage.getItem('currentUsername') || '';
 const sessionToken = localStorage.getItem('currentSessionToken') || '';
 
 document.getElementById('topTitle').innerText = materialTitle;
-document.getElementById('downloadOriginal').href = driveUrl;
 
 // The how-to tip only needs to be seen once — remembered per device.
 const howtoBanner = document.getElementById('howtoBanner');
@@ -1092,6 +1171,104 @@ async function translateOne(text, targetLang, retries = 2) {
     }
 }
 
+
+/* ---------- Per-session watermark ---------- */
+// Draws username + a live timestamp, tiled diagonally and faintly across
+// the whole reading area, as a canvas image used as a repeating CSS
+// background. Regenerated every 20s so the timestamp stays current for
+// however long the page has been open — if a screenshot or photo of the
+// screen leaks, this ties it back to the account and the moment it was
+// taken, which is the one protection that still works on mobile (where
+// there's no browser event to detect a screenshot at all).
+function buildWatermarkTile(text) {
+    const tileW = 340, tileH = 220;
+    const canvas = document.createElement('canvas');
+    canvas.width = tileW;
+    canvas.height = tileH;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, tileW, tileH);
+    ctx.translate(tileW / 2, tileH / 2);
+    ctx.rotate(-28 * Math.PI / 180);
+    ctx.font = '600 14px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(11, 60, 93, 0.14)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, 0);
+    return canvas.toDataURL('image/png');
+}
+
+function updateWatermark() {
+    const overlay = document.getElementById('watermarkOverlay');
+    if (!overlay) return;
+    const who = username || 'unknown-user';
+    const stamp = new Date().toLocaleString('en-GB', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    overlay.style.backgroundImage = `url(${buildWatermarkTile(`${who} • ${stamp}`)})`;
+}
+
+updateWatermark();
+setInterval(updateWatermark, 20000);
+
+/* ---------- Screenshot / screen-recording deterrents ---------- */
+/* Important limitation, stated plainly: a web page cannot actually detect
+   or block a screenshot. The OS's own screenshot tool, a second phone
+   camera, screen recording software, etc. all operate outside anything a
+   browser page can see or stop. What follows raises friction and reacts
+   to the *signals* a browser does get (loss of focus, devtools opening,
+   common capture shortcuts, print) — it deters casual capture, it does
+   not prevent a determined one. */
+const captureNotice = document.getElementById('captureNotice');
+let captureNoticeTimer = null;
+
+function flagCaptureAttempt(reason) {
+    document.body.classList.add('capture-guard');
+    captureNotice.classList.add('show');
+    console.warn('Capture-guard triggered:', reason);
+    clearTimeout(captureNoticeTimer);
+    captureNoticeTimer = setTimeout(() => {
+        document.body.classList.remove('capture-guard');
+        captureNotice.classList.remove('show');
+    }, 2500);
+}
+
+// Disable right-click / long-press context menu over the reading area.
+document.addEventListener('contextmenu', (e) => {
+    if (e.target.closest('#nativeView')) e.preventDefault();
+});
+
+// Common screenshot / devtools / save shortcuts.
+document.addEventListener('keydown', (e) => {
+    const key = (e.key || '').toLowerCase();
+    const isPrintScreen = key === 'printscreen';
+    const isDevtools = e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(key));
+    const isSaveOrPrint = (e.ctrlKey || e.metaKey) && ['s', 'p'].includes(key);
+    const isSnip = (e.metaKey && e.shiftKey && ['s', '3', '4', '5'].includes(key)); // mac screenshot combos
+    if (isPrintScreen || isDevtools || isSaveOrPrint || isSnip) {
+        e.preventDefault();
+        flagCaptureAttempt(e.key);
+    }
+});
+
+// PrintScreen key doesn't fire everywhere reliably, but when it does,
+// blur immediately and clear the clipboard's image if we can.
+window.addEventListener('keyup', (e) => {
+    if ((e.key || '').toLowerCase() === 'printscreen') {
+        flagCaptureAttempt('printscreen-keyup');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText('').catch(() => {});
+        }
+    }
+});
+
+// Blur the material whenever the tab/window loses focus or is hidden —
+// this covers screen-recording tools and some capture utilities that
+// switch focus, and also keeps the material off-screen while backgrounded.
+window.addEventListener('blur', () => flagCaptureAttempt('window-blur'));
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) flagCaptureAttempt('tab-hidden');
+});
 
 loadMaterial();
 </script>
