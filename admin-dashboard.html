@@ -421,28 +421,41 @@
     async function apiCall(data) {
         data.spreadsheetId = SPREADSHEET_ID;
 
-        // Apps Script occasionally hangs on a cold instance instead of erroring
-        // out. Without a timeout, fetch() just waits indefinitely and the admin
-        // panel looks permanently stuck with no feedback. 25s is generous but
-        // finite, and it lets us at least tell the admin something is wrong.
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 25000);
+        // Only READ calls are retried automatically. A dropped connection on a
+        // write (saveData etc.) may or may not have reached the server, so
+        // writes are never silently repeated.
+        const isRead = data.action === "loadData" || data.action === "loadDashboardData";
+        const maxAttempts = isRead ? 3 : 1;
+        let lastError;
 
-        try {
-            let res = await fetch(APPS_SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify(data),
-                signal: controller.signal
-            });
-            return await res.json();
-        } catch (e) {
-            if (e.name === "AbortError") {
-                throw new Error("Request timed out after 25 seconds. The server may be under heavy load.");
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 25000);
+            try {
+                const res = await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                    signal: controller.signal
+                });
+                return await res.json();
+            } catch (e) {
+                if (e.name === "AbortError") {
+                    lastError = new Error("Request timed out after 25 seconds. The server may be under heavy load.");
+                } else if (e instanceof TypeError) {
+                    lastError = new Error("Connection to the server was closed before a reply arrived (network or Apps Script overload). Please retry.");
+                } else {
+                    lastError = e;
+                }
+                console.warn("apiCall attempt " + attempt + "/" + maxAttempts + " failed:", e);
+                if (attempt < maxAttempts) {
+                    // wait 1.5s, then 3s, before trying again
+                    await new Promise(r => setTimeout(r, 1500 * attempt));
+                }
+            } finally {
+                clearTimeout(timeoutId);
             }
-            throw e;
-        } finally {
-            clearTimeout(timeoutId);
         }
+        throw lastError;
     }
 
     async function loadAllData() {
