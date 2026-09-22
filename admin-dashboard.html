@@ -835,14 +835,20 @@
         loadAllData();
     }
 
+    /* FAST INSTANT DELETE MATERIAL */
     async function deleteMaterial(id) {
         if(!confirm("Are you sure you want to delete this Google Drive link?")) return;
-        let materials = await apiCall({ action: "loadData", key: "Materials" });
-        if(!Array.isArray(materials)) return;
 
-        let updated = materials.filter(m => m.materialId !== id);
-        await apiCall({ action: "saveData", key: "Materials", data: updated });
-        loadAllData();
+        // 1. Remove instantly from memory & re-render immediately
+        cachedMaterials = cachedMaterials.filter(m => m.materialId !== id);
+        renderAllSections();
+
+        // 2. Sync deletion in background
+        try {
+            await apiCall({ action: "saveData", key: "Materials", data: cachedMaterials });
+        } catch(e) {
+            alert("Failed to update database on cloud server.");
+        }
     }
 
     async function addForm() {
@@ -862,14 +868,20 @@
         loadAllData();
     }
 
+    /* FAST INSTANT DELETE FORM */
     async function deleteForm(id) {
         if(!confirm("Are you sure you want to delete this Google Form link?")) return;
-        let forms = await apiCall({ action: "loadData", key: "Forms" });
-        if(!Array.isArray(forms)) return;
 
-        let updated = forms.filter(f => f.formId !== id);
-        await apiCall({ action: "saveData", key: "Forms", data: updated });
-        loadAllData();
+        // 1. Remove instantly from memory & re-render immediately
+        cachedForms = cachedForms.filter(f => f.formId !== id);
+        renderAllSections();
+
+        // 2. Sync deletion in background
+        try {
+            await apiCall({ action: "saveData", key: "Forms", data: cachedForms });
+        } catch(e) {
+            alert("Failed to update database on cloud server.");
+        }
     }
 
     function openQuizGenerator() {
