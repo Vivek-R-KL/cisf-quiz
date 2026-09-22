@@ -879,21 +879,29 @@
         document.getElementById('instructionText').value = "";
     }
 
+    /* FAST INSTANT ADD MATERIAL */
     async function addMaterial() {
         let title = document.getElementById('mTitle').value.trim();
         let url = document.getElementById('mUrl').value.trim();
 
         if(!title || !url) return alert("Please enter material name and Google Drive link.");
 
-        let materials = await apiCall({ action: "loadData", key: "Materials" });
-        if(!Array.isArray(materials)) materials = [];
+        let newMaterial = { materialId: 'm_' + Date.now(), title: title, driveUrl: url, section: activeSection };
 
-        materials.push({ materialId: 'm_' + Date.now(), title: title, driveUrl: url, section: activeSection });
-        await apiCall({ action: "saveData", key: "Materials", data: materials });
+        // 1. Add instantly to memory & re-render immediately
+        cachedMaterials.push(newMaterial);
+        renderAllSections();
 
         document.getElementById('mTitle').value = "";
         document.getElementById('mUrl').value = "";
-        loadAllData();
+
+        // 2. Sync in background
+        try {
+            await apiCall({ action: "saveData", key: "Materials", data: cachedMaterials });
+            saveLocalCache();
+        } catch(e) {
+            alert("Warning: Failed to sync material to server. Please check your connection.");
+        }
     }
 
     /* FAST INSTANT DELETE MATERIAL */
@@ -913,21 +921,29 @@
         }
     }
 
+    /* FAST INSTANT ADD FORM */
     async function addForm() {
         let title = document.getElementById('fTitle').value.trim();
         let url = document.getElementById('fUrl').value.trim();
 
         if(!title || !url) return alert("Please enter form title and Google Form link.");
 
-        let forms = await apiCall({ action: "loadData", key: "Forms" });
-        if(!Array.isArray(forms)) forms = [];
+        let newForm = { formId: 'f_' + Date.now(), formTitle: title, formUrl: url, section: activeSection };
 
-        forms.push({ formId: 'f_' + Date.now(), formTitle: title, formUrl: url, section: activeSection });
-        await apiCall({ action: "saveData", key: "Forms", data: forms });
+        // 1. Add instantly to memory & re-render immediately
+        cachedForms.push(newForm);
+        renderAllSections();
 
         document.getElementById('fTitle').value = "";
         document.getElementById('fUrl').value = "";
-        loadAllData();
+
+        // 2. Sync in background
+        try {
+            await apiCall({ action: "saveData", key: "Forms", data: cachedForms });
+            saveLocalCache();
+        } catch(e) {
+            alert("Warning: Failed to sync form to server. Please check your connection.");
+        }
     }
 
     /* FAST INSTANT DELETE FORM */
