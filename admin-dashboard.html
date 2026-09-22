@@ -391,8 +391,57 @@
     let cachedMaterials = [];
     let cachedForms = [];
 
+    // Key includes the spreadsheet ID so switching sheets never shows stale
+    // data from a different sheet.
+    function localCacheKey() {
+        return 'dashboardCache_' + SPREADSHEET_ID;
+    }
+
+    // Paint instantly from whatever we last successfully loaded, before the
+    // network call even starts. This is what makes the page feel fast on open:
+    // the server round-trip to Apps Script/Sheets still takes the same time,
+    // but the admin isn't staring at a blank screen while it happens.
+    function renderFromLocalCache() {
+        try {
+            const raw = localStorage.getItem(localCacheKey());
+            if (!raw) return false;
+            const saved = JSON.parse(raw);
+            if (Array.isArray(saved.users)) cachedUsers = saved.users;
+            if (Array.isArray(saved.quizzes)) cachedQuizzes = saved.quizzes;
+            if (Array.isArray(saved.materials)) cachedMaterials = saved.materials;
+            if (Array.isArray(saved.forms)) cachedForms = saved.forms;
+            renderAllSections();
+            return true;
+        } catch(e) {
+            console.warn("Could not read local cache:", e);
+            return false;
+        }
+    }
+
+    function saveLocalCache() {
+        try {
+            localStorage.setItem(localCacheKey(), JSON.stringify({
+                users: cachedUsers,
+                quizzes: cachedQuizzes,
+                materials: cachedMaterials,
+                forms: cachedForms
+            }));
+        } catch(e) {
+            console.warn("Could not write local cache:", e);
+        }
+    }
+
     window.onload = () => {
         document.getElementById('globalSpreadsheetId').value = SPREADSHEET_ID;
+        // 1. Show last-known data immediately (if any) so the lists aren't
+        //    blank while the network call is in flight.
+        const hadCache = renderFromLocalCache();
+        if (hadCache) {
+            document.getElementById('userList').insertAdjacentHTML('beforebegin',
+                '<small id="refreshingNote" style="color:var(--text-muted);display:block;margin-bottom:4px;">Showing last-loaded data — refreshing…</small>');
+        }
+        // 2. Fetch the real, current data in the background and replace it
+        //    once it arrives.
         loadAllData();
     };
 
@@ -513,6 +562,15 @@
         if (dashboardResult && Array.isArray(dashboardResult.forms)) cachedForms = dashboardResult.forms;
 
         renderAllSections();
+
+        // Only persist as the "last-known good" cache if BOTH calls actually
+        // succeeded, so a partial/failed refresh never overwrites good cached
+        // data with an incomplete snapshot.
+        if (usersOutcome.status === "fulfilled" && dashboardOutcome.status === "fulfilled") {
+            saveLocalCache();
+        }
+        const note = document.getElementById('refreshingNote');
+        if (note) note.remove();
     }
 
     /* RE-RENDER ALL FOUR LISTS FOR THE CURRENTLY ACTIVE SECTION, FROM CACHE ONLY.
@@ -642,6 +700,7 @@
         // 2. Save in background
         try {
             await apiCall({ action: "saveData", key: "Quizzes", data: cachedQuizzes });
+            saveLocalCache();
         } catch(e) {
             alert("Warning: Failed to sync quiz to server. Please check your connection.");
         }
@@ -658,6 +717,7 @@
             // 2. Sync changes in background
             try {
                 await apiCall({ action: "saveData", key: "Quizzes", data: cachedQuizzes });
+                saveLocalCache();
             } catch(e) {
                 alert("Failed to save changes to cloud server.");
             }
@@ -675,6 +735,7 @@
         // 2. Sync deletion in background
         try {
             await apiCall({ action: "saveData", key: "Quizzes", data: cachedQuizzes });
+            saveLocalCache();
         } catch(e) {
             alert("Failed to update database on cloud server.");
         }
@@ -846,6 +907,7 @@
         // 2. Sync deletion in background
         try {
             await apiCall({ action: "saveData", key: "Materials", data: cachedMaterials });
+            saveLocalCache();
         } catch(e) {
             alert("Failed to update database on cloud server.");
         }
@@ -879,6 +941,7 @@
         // 2. Sync deletion in background
         try {
             await apiCall({ action: "saveData", key: "Forms", data: cachedForms });
+            saveLocalCache();
         } catch(e) {
             alert("Failed to update database on cloud server.");
         }
