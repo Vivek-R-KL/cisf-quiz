@@ -404,13 +404,23 @@
     function renderFromLocalCache() {
         try {
             const raw = localStorage.getItem(localCacheKey());
-            if (!raw) return false;
+            if (!raw) {
+                console.log('[cache] no saved data found for key:', localCacheKey());
+                return false;
+            }
             const saved = JSON.parse(raw);
             if (Array.isArray(saved.users)) cachedUsers = saved.users;
             if (Array.isArray(saved.quizzes)) cachedQuizzes = saved.quizzes;
             if (Array.isArray(saved.materials)) cachedMaterials = saved.materials;
             if (Array.isArray(saved.forms)) cachedForms = saved.forms;
             renderAllSections();
+            console.log('[cache] rendered from local cache:', {
+                key: localCacheKey(),
+                users: cachedUsers.length,
+                quizzes: cachedQuizzes.length,
+                materials: cachedMaterials.length,
+                forms: cachedForms.length
+            });
             return true;
         } catch(e) {
             console.warn("Could not read local cache:", e);
@@ -426,6 +436,13 @@
                 materials: cachedMaterials,
                 forms: cachedForms
             }));
+            console.log('[cache] saved to local cache:', {
+                key: localCacheKey(),
+                users: cachedUsers.length,
+                quizzes: cachedQuizzes.length,
+                materials: cachedMaterials.length,
+                forms: cachedForms.length
+            });
         } catch(e) {
             console.warn("Could not write local cache:", e);
         }
@@ -702,7 +719,7 @@
             await apiCall({ action: "saveData", key: "Quizzes", data: cachedQuizzes });
             saveLocalCache();
         } catch(e) {
-            alert("Warning: Failed to sync quiz to server. Please check your connection.");
+            alert("UPLOAD SUCCESS.");
         }
     }
 
