@@ -233,6 +233,30 @@
             background: #4b5563;
         }
 
+        /* RENAME (EDIT TITLE) CONTROLS */
+        .btn-edit {
+            width: auto;
+            margin: 0;
+            padding: 4px 8px;
+            font-size: 11px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            background: #2563eb;
+            white-space: nowrap;
+        }
+        .btn-edit:hover { background: #1d4ed8; }
+        .btn-cancel { background: #6b7280; }
+        .btn-cancel:hover { background: #4b5563; }
+        .rename-input {
+            width: 100%;
+            margin: 0;
+            padding: 5px 8px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+
         /* BOTTOM BAR */
         .bottom-action-bar {
             position: fixed;
@@ -469,6 +493,7 @@
     }
 
     function switchSection(sec) {
+        editingItem = null;
         activeSection = sec;
         document.getElementById('btn-basic').classList.toggle('active', sec === 'basic');
         document.getElementById('btn-screener').classList.toggle('active', sec === 'screener');
@@ -597,8 +622,85 @@
     function renderAllSections() {
         renderUserList(cachedUsers.filter(x => (x.section || 'basic').toLowerCase() === activeSection));
         renderQuizList();
-        renderList('materialList', cachedMaterials.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'title', 'materialId', deleteMaterial);
+        renderList('materialList', cachedMaterials.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'title', 'materialId', deleteMaterial, 'material');
         renderList('formList', cachedForms.filter(x => (x.section || 'basic').toLowerCase() === activeSection), 'formTitle', 'formId', deleteForm);
+    }
+
+    /* ---------- RENAME QUIZZES & STUDY MATERIALS ----------
+       Uses the existing "saveData" action, so code.gs needs no change.
+       Only the title field is changed; IDs, links, section and
+       visibility are kept exactly as they were. */
+    const RENAME_CONFIG = {
+        quiz:     { getList: () => cachedQuizzes,   idKey: 'quizId',     titleKey: 'quizTitle', tab: 'Quizzes',   label: 'quiz' },
+        material: { getList: () => cachedMaterials, idKey: 'materialId', titleKey: 'title',     tab: 'Materials', label: 'study material' }
+    };
+    let editingItem = null; // { type, id } while a row is being renamed
+
+    function escapeHtml(val) {
+        return String(val == null ? '' : val)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function isEditing(type, id) {
+        return !!editingItem && editingItem.type === type && String(editingItem.id) === String(id);
+    }
+
+    function renameInputHtml(type, id, currentTitle) {
+        return `<input type="text" class="rename-input" id="rename-${type}-${id}"
+                    value="${escapeHtml(currentTitle)}"
+                    onkeydown="if(event.key==='Enter'){saveRename('${type}','${id}');}else if(event.key==='Escape'){cancelRename();}">`;
+    }
+
+    function renameButtonsHtml(type, id) {
+        if (isEditing(type, id)) {
+            return `<button class="btn-edit" onclick="saveRename('${type}','${id}')">💾 Save</button>
+                    <button class="btn-edit btn-cancel" onclick="cancelRename()">✖ Cancel</button>`;
+        }
+        return `<button class="btn-edit" onclick="startRename('${type}','${id}')">✏️ Rename</button>`;
+    }
+
+    function startRename(type, id) {
+        editingItem = { type: type, id: id };
+        renderAllSections();
+        const box = document.getElementById(`rename-${type}-${id}`);
+        if (box) { box.focus(); box.select(); }
+    }
+
+    function cancelRename() {
+        editingItem = null;
+        renderAllSections();
+    }
+
+    async function saveRename(type, id) {
+        const cfg = RENAME_CONFIG[type];
+        const box = document.getElementById(`rename-${type}-${id}`);
+        if (!cfg || !box) return;
+
+        const newTitle = box.value.trim();
+        if (!newTitle) return alert(`Please enter a name for the ${cfg.label}.`);
+
+        const item = cfg.getList().find(x => String(x[cfg.idKey]) === String(id));
+        if (!item) { cancelRename(); return; }
+
+        const oldTitle = item[cfg.titleKey];
+        if (newTitle === String(oldTitle)) { cancelRename(); return; }
+
+        // 1. Update instantly in memory & re-render
+        item[cfg.titleKey] = newTitle;
+        editingItem = null;
+        renderAllSections();
+
+        // 2. Sync in background; roll back if the server did not accept it
+        try {
+            const res = await apiCall({ action: "saveData", key: cfg.tab, data: cfg.getList() });
+            if (res && res.status === "error") throw new Error(res.message || "Server error");
+            saveLocalCache();
+        } catch (e) {
+            item[cfg.titleKey] = oldTitle;
+            renderAllSections();
+            alert(`Failed to rename the ${cfg.label} on the server. The old name has been restored.\n\n${e.message || e}`);
+        }
     }
 
     /* INSTANTLY RENDER QUIZZES FROM LOCAL CACHE */
@@ -615,13 +717,16 @@
             const isVisible = q.isVisible !== false; 
             return `
                 <div class="item-row" id="quiz-row-${q.quizId}" style="${!isVisible ? 'opacity: 0.65; background: #f3f4f6;' : ''}">
-                    <div>
-                        <strong>${q.quizTitle}</strong>
+                    <div style="flex: 1; min-width: 0; margin-right: 8px;">
+                        ${isEditing('quiz', q.quizId)
+                            ? renameInputHtml('quiz', q.quizId, q.quizTitle)
+                            : `<strong>${escapeHtml(q.quizTitle)}</strong>`}
                         <span class="status-badge ${isVisible ? 'status-active' : 'status-inactive'}">
                             ${isVisible ? 'Live for Students' : 'Hidden'}
                         </span>
                     </div>
                     <div style="display: flex; gap: 4px;">
+                        ${renameButtonsHtml('quiz', q.quizId)}
                         <button class="btn-toggle ${isVisible ? 'btn-toggle-active' : 'btn-toggle-inactive'}" 
                                 onclick="toggleQuizVisibility('${q.quizId}')">
                             ${isVisible ? '🙈 Hide' : '👁️ Share'}
@@ -636,7 +741,7 @@
         }).join('');
     }
 
-    function renderList(elemId, list, titleKey, idKey, deleteFn) {
+    function renderList(elemId, list, titleKey, idKey, deleteFn, renameType) {
         if (!list || list.length === 0) {
             document.getElementById(elemId).innerHTML = '<small style="color:var(--text-muted)">No records found.</small>';
             return;
@@ -644,10 +749,17 @@
 
         document.getElementById(elemId).innerHTML = list.map(i => `
             <div class="item-row">
-                <span>${i[titleKey]}</span>
-                <button class="btn-danger" style="width: auto; margin: 0; padding: 4px 10px; font-size: 11px;" onclick="${deleteFn.name}('${i[idKey]}')">
-                    🗑️ Delete
-                </button>
+                <div style="flex: 1; min-width: 0; margin-right: 8px;">
+                    ${renameType && isEditing(renameType, i[idKey])
+                        ? renameInputHtml(renameType, i[idKey], i[titleKey])
+                        : `<span>${escapeHtml(i[titleKey])}</span>`}
+                </div>
+                <div style="display: flex; gap: 4px;">
+                    ${renameType ? renameButtonsHtml(renameType, i[idKey]) : ''}
+                    <button class="btn-danger" style="width: auto; margin: 0; padding: 4px 10px; font-size: 11px;" onclick="${deleteFn.name}('${i[idKey]}')">
+                        🗑️ Delete
+                    </button>
+                </div>
             </div>
         `).join('');
     }
