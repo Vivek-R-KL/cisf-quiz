@@ -668,18 +668,36 @@
           </select>
         </div>
 
-        <div>
-          <label for="overallBatchFilter">Select Batch: </label>
-          <select id="overallBatchFilter" onchange="renderOverallPerformanceTable()">
-            <option value="ALL">All Batches</option>
-          </select>
+        <div style="position: relative;">
+          <label>Select Batch: </label>
+          <button type="button" id="overallBatchFilterToggle" class="btn-download" style="background: #7f8c8d; padding: 8px 14px; font-size: 13px;" onclick="toggleOverallBatchDropdown(event)">
+            All Batches ▾
+          </button>
+          <div id="overallBatchDropdownPanel" style="display: none; position: absolute; top: 100%; left: 0; z-index: 200; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-top: 4px; min-width: 230px; max-height: 240px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.18);">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: bold; padding: 5px 4px; border-bottom: 1px solid #eee; margin-bottom: 6px; cursor: pointer;">
+              <input type="checkbox" id="overallBatchAllOption" checked onchange="onOverallBatchAllToggle(this)"> All Batches
+            </label>
+            <div id="overallBatchCheckboxList"></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="button" class="btn-download" style="background: linear-gradient(135deg, #16a085 0%, #117a65 100%); padding: 6px 14px; font-size: 12px;" onclick="closeOverallBatchDropdown()">Done</button>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label for="overallQuizFilter">Select Quiz Paper: </label>
-          <select id="overallQuizFilter" onchange="calculatePerformanceAndSort(); renderOverallPerformanceTable();">
-            <option value="ALL">All Quiz Papers (Average)</option>
-          </select>
+        <div style="position: relative;">
+          <label>Select Quiz Paper(s): </label>
+          <button type="button" id="overallQuizFilterToggle" class="btn-download" style="background: #7f8c8d; padding: 8px 14px; font-size: 13px;" onclick="toggleOverallQuizDropdown(event)">
+            All Quiz Papers (Average) ▾
+          </button>
+          <div id="overallQuizDropdownPanel" style="display: none; position: absolute; top: 100%; left: 0; z-index: 200; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-top: 4px; min-width: 260px; max-height: 240px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.18);">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: bold; padding: 5px 4px; border-bottom: 1px solid #eee; margin-bottom: 6px; cursor: pointer;">
+              <input type="checkbox" id="overallQuizAllOption" checked onchange="onOverallQuizAllToggle(this)"> All Quiz Papers (Average)
+            </label>
+            <div id="overallQuizCheckboxList"></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="button" class="btn-download" style="background: linear-gradient(135deg, #16a085 0%, #117a65 100%); padding: 6px 14px; font-size: 12px;" onclick="closeOverallQuizDropdown()">Done</button>
+            </div>
+          </div>
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -1917,8 +1935,8 @@
           globalReportRows = result.rows || [];
           batchColumnIndex = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'batch');
 
-          populateOverallBatchDropdown();
-          populateQuizPaperDropdown();
+          populateOverallBatchCheckboxes();
+          populateOverallQuizCheckboxes();
           calculatePerformanceAndSort();
           renderOverallPerformanceTable();
         } else {
@@ -1932,43 +1950,159 @@
       }
     }
 
-    function populateOverallBatchDropdown() {
-      const filterSelect = document.getElementById('overallBatchFilter');
-      filterSelect.innerHTML = '<option value="ALL">All Batches</option>';
+    function populateOverallBatchCheckboxes() {
+      const listContainer = document.getElementById('overallBatchCheckboxList');
+      listContainer.innerHTML = '';
+      document.getElementById('overallBatchAllOption').checked = true;
 
-      if (batchColumnIndex === -1) return;
+      if (batchColumnIndex !== -1) {
+        const uniqueBatches = new Set();
+        globalReportRows.forEach(row => {
+          const val = row[batchColumnIndex];
+          if (val && val.toString().trim() !== '') {
+            uniqueBatches.add(val.toString().trim());
+          }
+        });
 
-      const uniqueBatches = new Set();
-      globalReportRows.forEach(row => {
-        const val = row[batchColumnIndex];
-        if (val && val.toString().trim() !== '') {
-          uniqueBatches.add(val.toString().trim());
-        }
-      });
+        Array.from(uniqueBatches).sort().forEach(batchName => {
+          const label = document.createElement('label');
+          label.style.cssText = 'display: flex; align-items: center; gap: 6px; padding: 4px; cursor: pointer; font-size: 13px;';
+          label.innerHTML = `<input type="checkbox" class="overall-batch-checkbox" value="${batchName}" onchange="onOverallBatchOptionToggle()"> ${batchName}`;
+          listContainer.appendChild(label);
+        });
+      }
 
-      Array.from(uniqueBatches).sort().forEach(batchName => {
-        const opt = document.createElement('option');
-        opt.value = batchName;
-        opt.textContent = batchName;
-        filterSelect.appendChild(opt);
-      });
+      updateOverallBatchFilterLabel();
     }
 
-    function populateQuizPaperDropdown() {
-      const quizSelect = document.getElementById('overallQuizFilter');
-      quizSelect.innerHTML = '<option value="ALL">All Quiz Papers (Average)</option>';
+    function toggleOverallBatchDropdown(evt) {
+      if (evt) evt.stopPropagation();
+      closeOverallQuizDropdown();
+      const panel = document.getElementById('overallBatchDropdownPanel');
+      panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function closeOverallBatchDropdown() {
+      document.getElementById('overallBatchDropdownPanel').style.display = 'none';
+    }
+
+    function onOverallBatchAllToggle(masterCheckbox) {
+      if (masterCheckbox.checked) {
+        document.querySelectorAll('.overall-batch-checkbox').forEach(cb => cb.checked = false);
+      }
+      updateOverallBatchFilterLabel();
+      renderOverallPerformanceTable();
+    }
+
+    function onOverallBatchOptionToggle() {
+      const anyChecked = Array.from(document.querySelectorAll('.overall-batch-checkbox')).some(cb => cb.checked);
+      document.getElementById('overallBatchAllOption').checked = !anyChecked;
+      updateOverallBatchFilterLabel();
+      renderOverallPerformanceTable();
+    }
+
+    function getSelectedOverallBatches() {
+      const allOption = document.getElementById('overallBatchAllOption');
+      const selected = Array.from(document.querySelectorAll('.overall-batch-checkbox:checked')).map(cb => cb.value);
+      if (!allOption || allOption.checked || selected.length === 0) return ['ALL'];
+      return selected;
+    }
+
+    function updateOverallBatchFilterLabel() {
+      const toggleBtn = document.getElementById('overallBatchFilterToggle');
+      if (!toggleBtn) return;
+      const selected = getSelectedOverallBatches();
+      if (selected[0] === 'ALL') {
+        toggleBtn.innerHTML = 'All Batches ▾';
+      } else if (selected.length === 1) {
+        toggleBtn.innerHTML = `${selected[0]} ▾`;
+      } else {
+        toggleBtn.innerHTML = `${selected.length} Batches Selected ▾`;
+      }
+    }
+
+    function populateOverallQuizCheckboxes() {
+      const listContainer = document.getElementById('overallQuizCheckboxList');
+      listContainer.innerHTML = '';
+      document.getElementById('overallQuizAllOption').checked = true;
 
       const quizStartColIndex = 14;
       for (let i = quizStartColIndex; i < globalReportHeaders.length; i++) {
         const headerName = globalReportHeaders[i];
         if (headerName && headerName.trim() !== '') {
-          const opt = document.createElement('option');
-          opt.value = i;
-          opt.textContent = headerName.trim();
-          quizSelect.appendChild(opt);
+          const label = document.createElement('label');
+          label.style.cssText = 'display: flex; align-items: center; gap: 6px; padding: 4px; cursor: pointer; font-size: 13px;';
+          label.innerHTML = `<input type="checkbox" class="overall-quiz-checkbox" value="${i}" onchange="onOverallQuizOptionToggle()"> ${headerName.trim()}`;
+          listContainer.appendChild(label);
         }
       }
+
+      updateOverallQuizFilterLabel();
     }
+
+    function toggleOverallQuizDropdown(evt) {
+      if (evt) evt.stopPropagation();
+      closeOverallBatchDropdown();
+      const panel = document.getElementById('overallQuizDropdownPanel');
+      panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function closeOverallQuizDropdown() {
+      document.getElementById('overallQuizDropdownPanel').style.display = 'none';
+    }
+
+    function onOverallQuizAllToggle(masterCheckbox) {
+      if (masterCheckbox.checked) {
+        document.querySelectorAll('.overall-quiz-checkbox').forEach(cb => cb.checked = false);
+      }
+      updateOverallQuizFilterLabel();
+      calculatePerformanceAndSort();
+      renderOverallPerformanceTable();
+    }
+
+    function onOverallQuizOptionToggle() {
+      const anyChecked = Array.from(document.querySelectorAll('.overall-quiz-checkbox')).some(cb => cb.checked);
+      document.getElementById('overallQuizAllOption').checked = !anyChecked;
+      updateOverallQuizFilterLabel();
+      calculatePerformanceAndSort();
+      renderOverallPerformanceTable();
+    }
+
+    function getSelectedOverallQuizCols() {
+      const allOption = document.getElementById('overallQuizAllOption');
+      const selected = Array.from(document.querySelectorAll('.overall-quiz-checkbox:checked')).map(cb => parseInt(cb.value, 10));
+      if (!allOption || allOption.checked || selected.length === 0) return ['ALL'];
+      return selected;
+    }
+
+    function getOverallQuizFilterLabelText() {
+      const selected = getSelectedOverallQuizCols();
+      if (selected[0] === 'ALL') return 'All Quiz Papers (Average)';
+      const checkedBoxes = Array.from(document.querySelectorAll('.overall-quiz-checkbox:checked'));
+      if (checkedBoxes.length === 1) {
+        return checkedBoxes[0].parentElement.textContent.trim();
+      }
+      return `${checkedBoxes.length} Quiz Papers Selected (Average)`;
+    }
+
+    function updateOverallQuizFilterLabel() {
+      const toggleBtn = document.getElementById('overallQuizFilterToggle');
+      if (!toggleBtn) return;
+      toggleBtn.innerHTML = `${getOverallQuizFilterLabelText()} ▾`;
+    }
+
+    document.addEventListener('click', function(evt) {
+      const batchPanel = document.getElementById('overallBatchDropdownPanel');
+      const batchToggleBtn = document.getElementById('overallBatchFilterToggle');
+      if (batchPanel && batchPanel.style.display === 'block' && !batchPanel.contains(evt.target) && evt.target !== batchToggleBtn) {
+        batchPanel.style.display = 'none';
+      }
+      const quizPanel = document.getElementById('overallQuizDropdownPanel');
+      const quizToggleBtn = document.getElementById('overallQuizFilterToggle');
+      if (quizPanel && quizPanel.style.display === 'block' && !quizPanel.contains(evt.target) && evt.target !== quizToggleBtn) {
+        quizPanel.style.display = 'none';
+      }
+    });
 
     function getRemarkForAverage(avg) {
       if (avg >= 1 && avg <= 50) return { text: "Very Poor Performance", cssClass: "remark-very-poor" };
@@ -1981,7 +2115,7 @@
     }
 
     function calculatePerformanceAndSort() {
-      const selectedQuizCol = document.getElementById('overallQuizFilter').value;
+      const selectedQuizCols = getSelectedOverallQuizCols();
       const usernameIdx = globalReportHeaders.findIndex(h => h && (h.toLowerCase().includes('user') || h.toLowerCase().includes('id')));
       const desigIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().includes('desig'));
       const nameIdx = globalReportHeaders.findIndex(h => h && h.toLowerCase().trim() === 'name' || (h.toLowerCase().includes('name') && !h.toLowerCase().includes('user')));
@@ -1997,26 +2131,21 @@
         const batch = batchColumnIndex !== -1 ? (row[batchColumnIndex] || 'N/A') : 'N/A';
 
         let calculatedMarks = 0;
+        const colsToAverage = selectedQuizCols[0] === 'ALL'
+          ? Array.from({ length: globalReportHeaders.length - quizStartColIndex }, (_, k) => k + quizStartColIndex)
+          : selectedQuizCols;
 
-        if (selectedQuizCol === 'ALL') {
-          let quizTotal = 0;
-          let quizCount = 0;
-
-          for (let i = quizStartColIndex; i < globalReportHeaders.length; i++) {
-            const rawScore = row[i];
-            const pct = parseScoreToPercentage(rawScore);
-            if (pct !== null) {
-              quizTotal += pct;
-              quizCount++;
-            }
-          }
-          calculatedMarks = quizCount > 0 ? (quizTotal / quizCount) : 0;
-        } else {
-          const colIdx = parseInt(selectedQuizCol, 10);
-          const rawScore = row[colIdx];
+        let quizTotal = 0;
+        let quizCount = 0;
+        colsToAverage.forEach(i => {
+          const rawScore = row[i];
           const pct = parseScoreToPercentage(rawScore);
-          calculatedMarks = pct !== null ? pct : 0;
-        }
+          if (pct !== null) {
+            quizTotal += pct;
+            quizCount++;
+          }
+        });
+        calculatedMarks = quizCount > 0 ? (quizTotal / quizCount) : 0;
 
         const roundedAvg = Math.round(calculatedMarks * 100) / 100;
         const remarkObj = getRemarkForAverage(roundedAvg);
@@ -2051,15 +2180,14 @@
 
     function renderOverallPerformanceTable() {
       const tbody = document.getElementById('overallTableBody');
-      const selectedSubBatch = document.getElementById('overallBatchFilter').value;
-      const selectedQuizCol = document.getElementById('overallQuizFilter').value;
+      const selectedSubBatches = getSelectedOverallBatches();
+      const selectedQuizCols = getSelectedOverallQuizCols();
       const marksHeaderLabel = document.getElementById('marksHeaderLabel');
 
-      if (selectedQuizCol === 'ALL') {
+      if (selectedQuizCols[0] === 'ALL') {
         marksHeaderLabel.innerText = "AVERAGE MARKS (%)";
       } else {
-        const selectedOptionText = document.getElementById('overallQuizFilter').options[document.getElementById('overallQuizFilter').selectedIndex].text;
-        marksHeaderLabel.innerText = `${selectedOptionText} MARKS (%)`;
+        marksHeaderLabel.innerText = `${getOverallQuizFilterLabelText()} MARKS (%)`;
       }
 
       tbody.innerHTML = '';
@@ -2067,8 +2195,8 @@
       let filteredData = processedOverallData;
 
       // Filter by Batch
-      if (selectedSubBatch !== 'ALL') {
-        filteredData = filteredData.filter(item => item.batch === selectedSubBatch);
+      if (selectedSubBatches[0] !== 'ALL') {
+        filteredData = filteredData.filter(item => selectedSubBatches.includes(item.batch));
       }
 
       // Filter by Performance Grade
@@ -2238,8 +2366,7 @@
       const sectionSelect = document.getElementById('overallSectionSelector');
       const sectionText = sectionSelect.options[sectionSelect.selectedIndex].text;
 
-      const quizSelect = document.getElementById('overallQuizFilter');
-      const quizText = quizSelect.options[quizSelect.selectedIndex].text;
+      const quizText = getOverallQuizFilterLabelText();
 
       function drawReportHeader() {
         pdf.setFont(undefined, 'bold');
@@ -2358,18 +2485,18 @@
     }
 
     function downloadOverallPerformanceCsv() {
-      const selectedSubBatch = document.getElementById('overallBatchFilter').value;
-      const selectedQuizCol = document.getElementById('overallQuizFilter').value;
+      const selectedSubBatches = getSelectedOverallBatches();
+      const selectedQuizCols = getSelectedOverallQuizCols();
       let quizNameText = "Overall_Average";
-      
-      if (selectedQuizCol !== 'ALL') {
-        quizNameText = document.getElementById('overallQuizFilter').options[document.getElementById('overallQuizFilter').selectedIndex].text.replace(/[^a-zA-Z0-9]/g, "_");
+
+      if (selectedQuizCols[0] !== 'ALL') {
+        quizNameText = getOverallQuizFilterLabelText().replace(/[^a-zA-Z0-9]/g, "_");
       }
 
       let filteredData = processedOverallData;
-      
-      if (selectedSubBatch !== 'ALL') {
-        filteredData = filteredData.filter(item => item.batch === selectedSubBatch);
+
+      if (selectedSubBatches[0] !== 'ALL') {
+        filteredData = filteredData.filter(item => selectedSubBatches.includes(item.batch));
       }
 
       if (selectedGradeFilter !== 'ALL') {
