@@ -1222,7 +1222,7 @@ function setQuestionCount() {
    on top of the Warning screen. The fix re-acquires the camera silently on return,
    counts one minimize only once, and uses the Max Warnings / Max Locks settings:
    1..MaxWarnings = warning, up to MaxLocks = admin password, after that = auto-submit. */
-const LOCK_FIX_SCRIPT = `/* ASTI-LOCK-FIX v2 — injected by Question Editor. Safe to re-inject. */
+const LOCK_FIX_SCRIPT = `/* ASTI-LOCK-FIX v3 — injected by Question Editor. Safe to re-inject. */
 (function () {
     if (typeof registerTabSwitch !== "function") return;
     var W = (typeof MAX_WARNINGS !== "undefined") ? Number(MAX_WARNINGS) : 2;
@@ -1362,40 +1362,77 @@ const LOCK_FIX_SCRIPT = `/* ASTI-LOCK-FIX v2 — injected by Question Editor. Sa
         faceOk();
     };
 
+    /* Face model loader. The model (~10 MB) downloads on first use, which on a phone
+       can take well over 10 s, so it is preloaded on the setup screen and the status
+       shows what is really happening. Any real error is shown on screen. */
+    var mesh = null, meshReady = false, meshLoading = null, meshError = "", loadTries = 0;
+    function shortErr(e) { var m = (e && (e.message || e.name)) || String(e); return m.length > 90 ? m.slice(0, 90) + "..." : m; }
+    function ensureMesh() {
+        if (meshReady) return Promise.resolve(mesh);
+        if (meshLoading) return meshLoading;
+        if (typeof FaceMesh !== "function") {
+            meshError = "face_mesh.js did not load (blocked or no internet)";
+            return Promise.reject(new Error(meshError));
+        }
+        loadTries++;
+        meshLoading = (async function () {
+            mesh = new FaceMesh({ locateFile: function (f) { return "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + f; } });
+            mesh.setOptions({ maxNumFaces: 2, refineLandmarks: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+            mesh.onResults(function (r) { onFaceResults(r); });
+            if (typeof mesh.initialize === "function") await mesh.initialize();
+            meshReady = true; meshError = "";
+            return mesh;
+        })().catch(function (e) {
+            console.error("[Face monitoring] model load failed:", e);
+            meshError = shortErr(e); meshLoading = null; mesh = null;
+            throw e;
+        });
+        return meshLoading;
+    }
+    if (hasCam()) ensureMesh().catch(function () {});   /* preload while student reads instructions */
+
     initFaceMonitoring = function () {
         if (!hasCam() || faceLoopStarted) return;
         var v = document.getElementById("webcam-preview");
         if (!cameraIsLive()) { faceStatus("#dc3545", "Camera not available"); handleCameraLostDuringExam(); return; }
         v.srcObject = persistentCameraStream; if (v.play) v.play().catch(function () {});
         attachStreamEndedListener(persistentCameraStream);
-        if (typeof FaceMesh !== "function") {
-            faceStatus("#dc3545", "Face monitoring failed to load - check internet & reload");
-            return;
-        }
-        var mesh;
-        try {
-            mesh = new FaceMesh({ locateFile: function (f) { return "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + f; } });
-            mesh.setOptions({ maxNumFaces: 2, refineLandmarks: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-            mesh.onResults(function (r) { onFaceResults(r); });
-        } catch (e) {
-            faceStatus("#dc3545", "Face monitoring failed to start - reload the page");
-            return;
-        }
         faceLoopStarted = true;
-        faceStatus("#0284c7", "Starting face monitoring...");
-        var startedAt = Date.now(), busy = false;
+        var busy = false, busySince = 0, readyAt = 0, sendError = "";
+        function load() {
+            if (meshReady || meshLoading) return;
+            if (loadTries >= 3) return;
+            ensureMesh().catch(function () { setTimeout(load, 5000); });
+        }
+        load();
         var timer = setInterval(async function () {
             if (isExamSubmitted) { clearInterval(timer); return; }
-            /* health check: detector never answered -> say so instead of pretending it's active */
-            var since = lastResultAt || startedAt;
-            if (!quizLocked && !document.hidden && Date.now() - since > 10000) {
-                faceStatus("#dc3545", "Face monitoring NOT running - check internet & reload");
+            var paused = quizLocked || document.hidden || !quizInProgress;
+            if (!meshReady) {
+                if (paused) return;
+                if (meshError && !meshLoading) {
+                    faceStatus("#dc3545", (loadTries >= 3 ? "Face model failed: " : "Retrying face model: ") + meshError);
+                    load();
+                } else {
+                    faceStatus("#0284c7", "Loading face model... (first time can take up to a minute)");
+                }
+                return;
             }
-            if (busy || !quizInProgress || quizLocked || document.hidden || !cameraIsLive() || v.readyState < 2) return;
-            var s = persistentCameraStream;
-            if (v.srcObject !== s) { v.srcObject = s; if (v.play) v.play().catch(function () {}); }
-            busy = true;
-            try { await mesh.send({ image: v }); } catch (e) {}
+            if (!readyAt) readyAt = Date.now();
+            if (busy) {
+                if (!paused && Date.now() - busySince > 15000)
+                    faceStatus("#dc3545", "Face detector stuck - this browser/phone may not support it. Try updated Chrome.");
+                return;
+            }
+            if (!paused && !lastResultAt && Date.now() - readyAt > 15000)
+                faceStatus("#dc3545", sendError ? "Face monitoring error: " + sendError : "Face monitoring NOT running - camera video not reaching detector");
+            if (paused || !cameraIsLive()) return;
+            if (v.srcObject !== persistentCameraStream) { v.srcObject = persistentCameraStream; if (v.play) v.play().catch(function () {}); }
+            if (v.paused && v.play) v.play().catch(function () {});
+            if (v.readyState < 2 || !v.videoWidth) return;
+            busy = true; busySince = Date.now();
+            try { await mesh.send({ image: v }); sendError = ""; }
+            catch (e) { sendError = shortErr(e); console.error("[Face monitoring] send failed:", e); }
             busy = false;
         }, Math.round(1000 / FACE_FPS));
     };
