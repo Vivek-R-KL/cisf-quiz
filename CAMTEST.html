@@ -2125,7 +2125,7 @@
     </script>
 
     <script id="asti-lock-fix">
-/* ASTI-LOCK-FIX v1 — injected by Question Editor. Safe to re-inject. */
+/* ASTI-LOCK-FIX v2 — injected by Question Editor. Safe to re-inject. */
 (function () {
     if (typeof registerTabSwitch !== "function") return;
     var W = (typeof MAX_WARNINGS !== "undefined") ? Number(MAX_WARNINGS) : 2;
@@ -2199,6 +2199,109 @@
     continueAfterWarning = function () { _continue(); resetFaceTimers(); settleCamera(); };
     var _resume = resumeQuiz;
     resumeQuiz = function () { _resume(); resetFaceTimers(); settleCamera(); };
+
+    /* ================= FACE MONITORING v2 =================
+       Old check: only left/right, and only on a very big turn (ratio < 0.2 / > 0.8),
+       nothing for looking down/up, no multi-face check, countdown said 5s but locked at 3s.
+       New check: calibrates to the student's normal position for the first ~2s, then flags
+       turning left/right, looking down/up, face missing, or 2+ faces, held for FACE_HOLD_SECONDS.
+       Tune sensitivity here (smaller = stricter). */
+    var FACE_YAW_LIMIT = 0.15;    /* left/right turn  (~20-25 degrees) */
+    var FACE_PITCH_LIMIT = 0.10;  /* down/up          (~15-20 degrees) */
+    var FACE_HOLD_SECONDS = 3;    /* how long a violation must last before it counts */
+    var FACE_FPS = 8;             /* frames checked per second (lighter on phones) */
+
+    var base = null, calib = [], lastResultAt = 0, faceLoopStarted = false;
+    function faceStatus(color, txt) {
+        var t = document.getElementById("face-status-text");
+        if (t) { t.style.color = color; t.textContent = txt; }
+    }
+    function poseOf(lm) {
+        var nose = lm[1], le = lm[33], re = lm[263], top = lm[10], chin = lm[152];
+        var eyeL = Math.min(le.x, re.x), eyeR = Math.max(le.x, re.x);
+        var w = eyeR - eyeL, h = chin.y - top.y;
+        if (w <= 0 || h <= 0) return null;
+        return { yaw: (nose.x - eyeL) / w, pitch: (nose.y - top.y) / h };
+    }
+    function faceViolation(reason) {
+        var now = Date.now();
+        if (faceViolationStartTime === null) faceViolationStartTime = now;
+        faceOutOfBoundSeconds = (now - faceViolationStartTime) / 1000;
+        var left = Math.max(0, Math.ceil(FACE_HOLD_SECONDS - faceOutOfBoundSeconds));
+        faceStatus("#dc3545", "\u26a0\ufe0f " + reason + " (" + left + "s)");
+        if (faceOutOfBoundSeconds >= FACE_HOLD_SECONDS) {
+            resetFaceTimers();
+            faceStatus("#dc3545", "Locked: " + reason);
+            registerTabSwitch();
+        }
+    }
+    function faceOk() { resetFaceTimers(); faceStatus("#16a34a", "Face Position Normal"); }
+
+    onFaceResults = function (r) {
+        lastResultAt = Date.now();
+        if (quizLocked || isExamSubmitted) return;
+        var faces = r.multiFaceLandmarks || [];
+        if (faces.length === 0) return faceViolation("No Face Detected");
+        if (faces.length > 1) return faceViolation("Multiple Faces Detected");
+        var p = poseOf(faces[0]);
+        if (!p) return faceViolation("Face Not Clear");
+        if (!base) {                      /* calibration: student's normal sitting position */
+            calib.push(p);
+            faceStatus("#0284c7", "Calibrating... keep looking at the screen");
+            if (calib.length >= FACE_FPS * 2) {
+                var y = 0, q = 0;
+                calib.forEach(function (c) { y += c.yaw; q += c.pitch; });
+                base = { yaw: y / calib.length, pitch: q / calib.length };
+                /* a badly turned start position shouldn't become "normal" */
+                if (Math.abs(base.yaw - 0.5) > 0.2) base.yaw = 0.5;
+                faceOk();
+            }
+            return;
+        }
+        var dy = p.yaw - base.yaw, dp = p.pitch - base.pitch;
+        if (Math.abs(dy) > FACE_YAW_LIMIT) return faceViolation("Face Turned Away");
+        if (dp > FACE_PITCH_LIMIT) return faceViolation("Looking Down");
+        if (dp < -FACE_PITCH_LIMIT) return faceViolation("Looking Up");
+        faceOk();
+    };
+
+    initFaceMonitoring = function () {
+        if (!hasCam() || faceLoopStarted) return;
+        var v = document.getElementById("webcam-preview");
+        if (!cameraIsLive()) { faceStatus("#dc3545", "Camera not available"); handleCameraLostDuringExam(); return; }
+        v.srcObject = persistentCameraStream; if (v.play) v.play().catch(function () {});
+        attachStreamEndedListener(persistentCameraStream);
+        if (typeof FaceMesh !== "function") {
+            faceStatus("#dc3545", "Face monitoring failed to load - check internet & reload");
+            return;
+        }
+        var mesh;
+        try {
+            mesh = new FaceMesh({ locateFile: function (f) { return "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + f; } });
+            mesh.setOptions({ maxNumFaces: 2, refineLandmarks: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+            mesh.onResults(function (r) { onFaceResults(r); });
+        } catch (e) {
+            faceStatus("#dc3545", "Face monitoring failed to start - reload the page");
+            return;
+        }
+        faceLoopStarted = true;
+        faceStatus("#0284c7", "Starting face monitoring...");
+        var startedAt = Date.now(), busy = false;
+        var timer = setInterval(async function () {
+            if (isExamSubmitted) { clearInterval(timer); return; }
+            /* health check: detector never answered -> say so instead of pretending it's active */
+            var since = lastResultAt || startedAt;
+            if (!quizLocked && !document.hidden && Date.now() - since > 10000) {
+                faceStatus("#dc3545", "Face monitoring NOT running - check internet & reload");
+            }
+            if (busy || !quizInProgress || quizLocked || document.hidden || !cameraIsLive() || v.readyState < 2) return;
+            var s = persistentCameraStream;
+            if (v.srcObject !== s) { v.srcObject = s; if (v.play) v.play().catch(function () {}); }
+            busy = true;
+            try { await mesh.send({ image: v }); } catch (e) {}
+            busy = false;
+        }, Math.round(1000 / FACE_FPS));
+    };
 
     document.addEventListener("visibilitychange", function () {
         resetFaceTimers();
