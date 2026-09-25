@@ -2123,6 +2123,94 @@
             faceOutOfBoundSeconds = 0, faceViolationStartTime = null, e && (e.style.color = "#16a34a", e.textContent = "Face Position Normal")
         }
     </script>
+
+    <script id="asti-lock-fix">
+/* ASTI-LOCK-FIX v1 — injected by Question Editor. Safe to re-inject. */
+(function () {
+    if (typeof registerTabSwitch !== "function") return;
+    var W = (typeof MAX_WARNINGS !== "undefined") ? Number(MAX_WARNINGS) : 2;
+    var L = (typeof MAX_LOCKS !== "undefined") ? Number(MAX_LOCKS) : 4;
+    if (!(W >= 0)) W = 2;
+    if (!(L >= W)) L = W + 2;
+    var lastSwitchAt = 0, cameraRecoveryPending = false;
+    var hasCam = function () { return typeof CAMERA_PROCTORING_ENABLED !== "undefined" && CAMERA_PROCTORING_ENABLED; };
+    function resetFaceTimers() {
+        try { faceOutOfBoundSeconds = 0; faceViolationStartTime = null; } catch (e) {}
+    }
+    function cameraIsLive() {
+        return !!(persistentCameraStream && persistentCameraStream.getVideoTracks().some(function (t) { return t.readyState === "live"; }));
+    }
+    function setMsg(txt) { var n = document.getElementById("cheat-lock-message"); if (n) n.textContent = txt; }
+
+    /* 1 minimize = 1 count (visibilitychange + pagehide/face check fire together), and use the configured limits */
+    registerTabSwitch = function () {
+        if (quizLocked || isExamSubmitted) return;
+        var now = Date.now();
+        if (now - lastSwitchAt < 1500) return;
+        lastSwitchAt = now;
+        resetFaceTimers();
+        tabSwitchCount++;
+        if (tabSwitchCount <= W) showWarning();
+        else if (tabSwitchCount <= L) lockQuiz();
+        else forceSubmitForCheating();
+    };
+    var _showWarning = showWarning;
+    showWarning = function () {
+        _showWarning();
+        setMsg("Warning " + tabSwitchCount + " of " + W + ": you switched/minimized the screen or moved your face. After " + W + " warning(s) your exam will be LOCKED and need the Administrator password. On attempt " + (L + 1) + " your exam will be submitted automatically. Click Continue to resume your exam.");
+    };
+    var _lockQuiz = lockQuiz;
+    lockQuiz = function () {
+        _lockQuiz();
+        setMsg("You switched or minimized the screen " + tabSwitchCount + " time(s). Your exam is LOCKED, contact your Administrator to resume. On attempt " + (L + 1) + " your exam will be submitted automatically.");
+    };
+
+    /* Camera: minimizing (esp. on mobile) makes the browser stop the camera.
+       Don't treat that as a separate password lock; re-acquire it silently on return. */
+    async function silentCameraRecover() {
+        if (!hasCam() || isExamSubmitted || !quizInProgress) return true;
+        if (cameraIsLive()) return true;
+        try {
+            stopPersistentCameraStream();
+            persistentCameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            attachStreamEndedListener(persistentCameraStream);
+            var v = document.getElementById("webcam-preview");
+            if (v) { v.srcObject = persistentCameraStream; if (v.play) v.play().catch(function () {}); }
+            cameraGranted = true;
+            var s = document.getElementById("face-status-text");
+            if (s) { s.style.color = "#16a34a"; s.textContent = "Face Monitoring Active"; }
+            resetFaceTimers();
+            return true;
+        } catch (e) { return false; }
+    }
+    async function settleCamera() {
+        if (!cameraRecoveryPending || document.hidden || quizLocked || isExamSubmitted) return;
+        cameraRecoveryPending = false;
+        var ok = await silentCameraRecover();
+        if (!ok && !quizLocked && !isExamSubmitted) { cameraGranted = false; cameraLockActive = true; lockForCameraLoss(); }
+    }
+    handleCameraLostDuringExam = function () {
+        if (isExamSubmitted || !quizInProgress || cameraLockActive) return;
+        if (document.hidden || quizLocked) { cameraRecoveryPending = true; return; }
+        cameraRecoveryPending = true;
+        settleCamera();
+    };
+    var _continue = continueAfterWarning;
+    continueAfterWarning = function () { _continue(); resetFaceTimers(); settleCamera(); };
+    var _resume = resumeQuiz;
+    resumeQuiz = function () { _resume(); resetFaceTimers(); settleCamera(); };
+
+    document.addEventListener("visibilitychange", function () {
+        resetFaceTimers();
+        if (!document.hidden && quizInProgress && !isExamSubmitted && hasCam() && !cameraIsLive()) {
+            cameraRecoveryPending = true;
+            settleCamera();
+        }
+    });
+})();
+/* /ASTI-LOCK-FIX */
+
+    </script>
 </body>
 
 </html>
