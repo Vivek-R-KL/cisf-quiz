@@ -186,7 +186,7 @@ e.preventDefault();
 ASTI Delhi Quiz Examination
 </footer>
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4qoytR5JOm7uLmk8w01k3Mbfk9GhuVzG4iAh8QzRgT4xG1SCcan6fu2qabmAOyqIf/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwq0k5tJyXXus0Nvd9ZpVOBzaJHxQdGPDSckrk6MCmHcdv8OiPxF7B0ZhBBQ6lk8wQU/exec";
 const SPREADSHEET_ID = "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
 const ADMIN_UNLOCK_PASSWORD = "igiasti123";
 const TOTAL_QUESTIONS = 60;
@@ -241,35 +241,85 @@ const timerDisplay = document.getElementById('timer-display');
 const resultDisplay = document.getElementById('result-display');
 const controlPanel = document.getElementById('exam-control-panel');
 // 1. Safe retry submission function
-async function submitQuizResult(payload, attempt = 0) {
-const MAX_ATTEMPTS = 10;
-try {
-const response = await fetch(APPS_SCRIPT_URL, {
-method: "POST",
-body: JSON.stringify(payload)
-});
-const result = await response.json();
-if (result.status === "success") {
-return result;
-} 
-// Server hit a lock timeout block
-if (result.status === "busy" && attempt < MAX_ATTEMPTS) {
-// Wait 3 seconds before trying again
-await new Promise(resolve => setTimeout(resolve, 3000));
-return submitQuizResult(payload, attempt + 1);
+// ===== Reliable score submission (security + no-loss patch, Sept 2026) =====
+// * Sends the student's sessionToken (required by the server).
+// * One submissionId per quiz attempt, so retries never create duplicate rows.
+// * The score is kept on this device until the server confirms it; if the
+//   server is busy it keeps retrying in the background, and any quiz page
+//   opened later on this device re-sends leftovers automatically.
+var QUIZ_ATTEMPT_ID = (function () {
+    try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+})();
+var PENDING_SCORES_KEY = "pendingQuizScores";
+function readPendingScores() { try { return JSON.parse(localStorage.getItem(PENDING_SCORES_KEY) || "[]"); } catch (e) { return []; } }
+function writePendingScores(list) { try { localStorage.setItem(PENDING_SCORES_KEY, JSON.stringify(list)); } catch (e) {} }
+function addPendingScore(p) { var l = readPendingScores().filter(function (x) { return x.submissionId !== p.submissionId; }); l.push(p); writePendingScores(l); }
+function removePendingScore(id) { writePendingScores(readPendingScores().filter(function (x) { return x.submissionId !== id; })); }
+function readStored(key) { try { return localStorage.getItem(key) || ""; } catch (e) { return ""; } }
+async function postScoreOnce(payload) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, 30000);
+    try {
+        var res = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload), signal: controller.signal });
+        return await res.json();
+    } finally { clearTimeout(timer); }
 }
-throw new Error(result.message || "Submission failed");
-} catch (error) {
-// Catches network glitches or 503/429 HTML error pages from Google
-if (attempt < MAX_ATTEMPTS) {
-const delay = Math.floor(Math.random() * 2000) + 3000; // Wait 3-5 seconds
-await new Promise(resolve => setTimeout(resolve, delay));
-return submitQuizResult(payload, attempt + 1);
-} else {
-throw error;
+var __scoreResendTimer = null;
+function scheduleScoreResend() { if (!__scoreResendTimer) __scoreResendTimer = setInterval(resendPendingScores, 30000); }
+async function resendPendingScores() {
+    var list = readPendingScores();
+    if (!list.length) { if (__scoreResendTimer) { clearInterval(__scoreResendTimer); __scoreResendTimer = null; } return; }
+    var curUser = readStored("currentUsername").toString().trim().toLowerCase();
+    var curToken = readStored("currentSessionToken");
+    for (var i = 0; i < list.length; i++) {
+        var p = list[i];
+        // If the student has logged in again since, use the fresh session pass.
+        if (curToken && curUser && String(p.username || "").trim().toLowerCase() === curUser) p.sessionToken = curToken;
+        try {
+            var r = await postScoreOnce(p);
+            if (r && (r.status === "success" || r.code === "REJECTED")) removePendingScore(p.submissionId);
+        } catch (e) {}
+    }
+    if (readPendingScores().length) scheduleScoreResend();
 }
+async function submitQuizResult(payload) {
+    var qs = new URLSearchParams(window.location.search);
+    if (!payload.sessionToken) payload.sessionToken = qs.get("sessionToken") || readStored("currentSessionToken");
+    if (!payload.submissionId) payload.submissionId = QUIZ_ATTEMPT_ID;
+    addPendingScore(payload);
+    var MAX_ATTEMPTS = 6;
+    for (var attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        try {
+            var r = await postScoreOnce(payload);
+            if (r && r.status === "success") { removePendingScore(payload.submissionId); return r; }
+            if (r && r.code === "REJECTED") {
+                removePendingScore(payload.submissionId);
+                var rej = new Error(r.message || "Score not accepted.");
+                rej.rejected = true;
+                window.__lastSubmitError = rej;
+                throw rej;
+            }
+        } catch (e) { if (e && e.rejected) throw e; }
+        // busy / network problem: wait a little (spread out across students) and retry
+        var wait = Math.min(2000 * (attempt + 1), 8000) + Math.floor(Math.random() * 3000);
+        await new Promise(function (res) { setTimeout(res, wait); });
+    }
+    scheduleScoreResend();
+    var q = new Error("Score saved on this device; it will be sent automatically.");
+    q.queued = true;
+    window.__lastSubmitError = q;
+    throw q;
 }
+function quizSubmitFailMsg() {
+    var e = window.__lastSubmitError;
+    if (e && e.rejected) return e.message + "\n\nPlease log in again from the dashboard and contact the invigilator.";
+    return "The server is busy right now, but your score is SAFELY KEPT on this device and will be sent automatically.\n\nPlease keep this page open for a few minutes and do not clear browser data. Your result is shown on screen.";
 }
+// Re-send any score left over from an earlier attempt on this device.
+setTimeout(resendPendingScores, 4000);
+// ===== end reliable score submission =====
+
 // 2. Attach it to your "Submit Exam" button click
 async function onFinishQuizClick() {
 const submitBtn = document.getElementById("submitQuizBtn");
@@ -295,7 +345,7 @@ await submitQuizResult(payload);
 alert("Your quiz has been successfully saved!");
 // window.location.href = "student-dashboard.html"; // Uncomment if redirection is needed
 } catch (err) {
-alert("Server is extremely busy right now. Please click 'Submit' one more time.");
+alert(quizSubmitFailMsg());
 if (submitBtn) {
 submitBtn.disabled = false;
 submitBtn.innerText = "Retry Submission";
@@ -799,7 +849,7 @@ await submitQuizResult(payload);
 alert("Your score (" + finalScoreString + ") has been saved successfully!");
 } catch (err) {
 console.error("Score logging error:", err);
-alert("Server is extremely busy right now, but your results have been rendered locally.");
+alert(quizSubmitFailMsg());
 }
 }
 }
