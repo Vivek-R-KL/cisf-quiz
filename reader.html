@@ -527,6 +527,20 @@
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwq0k5tJyXXus0Nvd9ZpVOBzaJHxQdGPDSckrk6MCmHcdv8OiPxF7B0ZhBBQ6lk8wQU/exec";
 const SPREADSHEET_ID = localStorage.getItem('globalSpreadsheetId') || "1q94opoGzIWQGcRz1fD1BJz1HODEE1_wUh3KxGTQtArk";
 
+// OPTIONAL: a Google Cloud API key (Drive API only, restricted to this
+// website) lets the full reader (text select, translate, watermark) work.
+// Leave it "" and PDFs open in Google's simple preview instead.
+const READER_API_KEY = "AIzaSyDsPByBImZKL7ytVGrXYaHm8rPGE-OF62M";
+
+// Simple fallback: show the PDF in Google Drive's own preview.
+function showDrivePreview(previewUrl) {
+    const box = document.getElementById('statusBox');
+    box.style.display = 'block';
+    box.style.padding = '0';
+    box.innerHTML = '<iframe src="' + previewUrl + '" style="width:100%;height:85vh;border:0;" allow="autoplay"></iframe>';
+    document.getElementById('nativeView').style.display = 'none';
+}
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -626,15 +640,25 @@ async function loadMaterial() {
         // base64-encoding and JSON-wrapping the whole file before the
         // browser saw a single byte). Drive's own plain download links
         // don't send CORS headers, but this authenticated API endpoint does.
-        const driveRes = await fetchWithTimeout(
-            `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(result.fileId)}?alt=media`,
-            { headers: { Authorization: `Bearer ${result.accessToken}` } },
-            45000
-        );
-        if (!driveRes.ok) throw new Error("Drive fetch failed: " + driveRes.status);
-        const pdfBytes = new Uint8Array(await driveRes.arrayBuffer());
-
-        await renderPdf(pdfBytes, result.fileName || materialTitle);
+        // SECURITY: the server no longer sends its Google access token.
+        // Full reader = public file + restricted API key; otherwise preview.
+        if (!READER_API_KEY) {
+            showDrivePreview(result.previewUrl);
+            return;
+        }
+        try {
+            const driveRes = await fetchWithTimeout(
+                `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(result.fileId)}?alt=media&key=${encodeURIComponent(READER_API_KEY)}`,
+                {},
+                45000
+            );
+            if (!driveRes.ok) throw new Error("Drive fetch failed: " + driveRes.status);
+            const pdfBytes = new Uint8Array(await driveRes.arrayBuffer());
+            await renderPdf(pdfBytes, result.fileName || materialTitle);
+        } catch (driveErr) {
+            console.warn("Full reader failed, using preview:", driveErr);
+            showDrivePreview(result.previewUrl);
+        }
 
     } catch (err) {
         console.error("Material load failed:", err);

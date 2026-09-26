@@ -76,45 +76,58 @@
     </footer>
 
     <script>
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1Do7A1tTwtHDjATM3R6o7nv9tAbEP6uajX32vWOEvk62HgPBc2PIgroWR8kRq66kcwQ/exec"; 
-        let transientOTP = "";
+        // Same Apps Script as admin-dashboard.html (the secured code.gs).
+        // Username, password and OTP are all checked on the SERVER now -
+        // nothing secret is written in this page.
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwq0k5tJyXXus0Nvd9ZpVOBzaJHxQdGPDSckrk6MCmHcdv8OiPxF7B0ZhBBQ6lk8wQU/exec";
 
-        function requestOTP() {
-            const u = document.getElementById('admUser').value;
+        async function callServer(data) {
+            const res = await fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify(data)
+            });
+            return await res.json();
+        }
+
+        async function requestOTP() {
+            const u = document.getElementById('admUser').value.trim();
             const p = document.getElementById('admPass').value;
+            if (!u || !p) { alert("Enter username and password."); return; }
 
-            // Simple validation
-            if (u === "vivek" && p === "vivek@123") {
-                transientOTP = Math.floor(100000 + Math.random() * 900000).toString();
-                document.getElementById('loadingStatus').style.display = "block";
-                document.getElementById('otpBtn').disabled = true;
-
-                fetch(APPS_SCRIPT_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action: "sendOTP", otp: transientOTP })
-                })
-                .then(() => {
-                    document.getElementById('loadingStatus').style.display = "none";
+            document.getElementById('loadingStatus').style.display = "block";
+            document.getElementById('otpBtn').disabled = true;
+            try {
+                const r = await callServer({ action: "requestAdminOtp", username: u, password: p });
+                if (r.status === "success") {
                     document.getElementById('credentialSection').style.display = 'none';
                     document.getElementById('otpSection').style.display = 'block';
-                })
-                .catch(err => {
-                    alert("Error: " + err);
-                    location.reload();
-                });
-            } else {
-                alert("Incorrect username or password.");
+                    document.getElementById('otpInput').focus();
+                } else {
+                    alert(r.message || "Login failed.");
+                }
+            } catch (err) {
+                alert("Could not reach the server. Please try again.");
+            } finally {
+                document.getElementById('loadingStatus').style.display = "none";
+                document.getElementById('otpBtn').disabled = false;
+                document.getElementById('admPass').value = "";
             }
         }
 
-        function verifyOTP() {
+        async function verifyOTP() {
             const entered = document.getElementById('otpInput').value.trim();
-            if (entered === transientOTP && transientOTP !== "") {
-                window.location.href = "admin-dashboard.html";
-            } else {
-                alert("Invalid OTP code entry.");
+            if (!/^\d{6}$/.test(entered)) { alert("Enter the 6-digit code."); return; }
+            try {
+                const r = await callServer({ action: "verifyAdminOtp", otp: entered });
+                if (r.status === "success" && r.adminToken) {
+                    sessionStorage.setItem('adminToken', r.adminToken);
+                    window.location.href = "admin-dashboard.html";
+                } else {
+                    alert(r.message || "Invalid OTP code entry.");
+                    if (r.message && r.message.indexOf("request a new") !== -1) location.reload();
+                }
+            } catch (err) {
+                alert("Could not reach the server. Please try again.");
             }
         }
     </script>

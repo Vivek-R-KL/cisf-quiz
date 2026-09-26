@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  // SECURITY: no admin pass in this tab -> go to the admin login page.
+  if (!sessionStorage.getItem('adminToken')) { window.location.replace('admin-login.html'); }
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal - CISF ASTI</title>
@@ -509,8 +513,15 @@
         renderAllSections();
     }
 
+    function adminSessionExpired() {
+        sessionStorage.removeItem('adminToken');
+        alert("Your admin login has expired. Please log in again.");
+        window.location.replace('admin-login.html');
+    }
+
     async function apiCall(data) {
         data.spreadsheetId = SPREADSHEET_ID;
+        data.adminToken = sessionStorage.getItem('adminToken') || "";
 
         // Only READ calls are retried automatically. A dropped connection on a
         // write (saveData etc.) may or may not have reached the server, so
@@ -528,8 +539,14 @@
                     body: JSON.stringify(data),
                     signal: controller.signal
                 });
-                return await res.json();
+                const json = await res.json();
+                if (json && json.code === "UNAUTHORIZED") {
+                    adminSessionExpired();
+                    throw new Error("Admin login required");
+                }
+                return json;
             } catch (e) {
+                if (e.message === "Admin login required") throw e;
                 if (e.name === "AbortError") {
                     lastError = new Error("Request timed out after 25 seconds. The server may be under heavy load.");
                 } else if (e instanceof TypeError) {
@@ -1103,6 +1120,10 @@
         }
         alert("Configurations saved successfully. Logging out of Admin Workspace...");
         localStorage.removeItem('adminRole');
+        try {
+            fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "adminLogout", adminToken: sessionStorage.getItem('adminToken') || "" }) });
+        } catch (e) {}
+        sessionStorage.removeItem('adminToken');
         window.location.href = "index.html";
     }
 </script>
