@@ -1439,7 +1439,7 @@
                     <div class="callout callout-mini">🔍 <strong>REVIEW OPTION</strong><br>After submitting, see every question with the correct answer, filterable by Correct / Wrong / Unattempted.</div>
                     <div class="callout callout-mini">📄 <strong>SUMMARY PDF</strong><br>Download a PDF of your score, accuracy, and other details once the quiz ends.</div>
                 </div>
-                <div class="safety-note">🔒 <strong>Please Note:</strong> Minimizing this window, switching tabs, or moving your face away from the camera for more than 5 seconds is tracked. For the first 2 time(s) you do this, you will only get a WARNING and the exam continues. On attempt number 3 through attempt number 4, your exam will be LOCKED immediately and will require an Administrator password to resume. On attempt number 5, your exam will be submitted automatically. Please stay on this tab, and keep your face visible to the camera, for the entire duration.</div>
+                <div class="safety-note">🔒 <strong>Please Note:</strong> Minimizing this window, switching tabs, or moving your face away from the camera for more than 3 seconds is tracked. For the first 2 time(s) you do this, you will only get a WARNING and the exam continues. On attempt number 3 through attempt number 4, your exam will be LOCKED immediately and will require an Administrator password to resume. On attempt number 5, your exam will be submitted automatically. Please stay on this tab, and keep your face visible to the camera, for the entire duration.</div>
             </div>
             <div id="setup-declaration"><input type="checkbox" id="declaration-check"> <label for="declaration-check">I have read and understood all the instructions above.</label></div>
             <div id="setup-camera-row" style="display:flex;align-items:center;gap:10px;padding:14px 22px;border-top:1px solid #eee;background:#f8fafc;flex-shrink:0">
@@ -2179,7 +2179,7 @@ setTimeout(resendPendingScores, 4000);
         // * If the phone stops the camera when the app is left, it is switched
         //   back on automatically when the student returns.
         // * Mobile: small draggable preview that can be minimised to a bubble.
-        var FACE_VIOLATION_LIMIT_SEC = 5,
+        var FACE_VIOLATION_LIMIT_SEC = 3,
             FACE_CHECK_INTERVAL_MS = 300,
             faceMesh = null,
             faceMeshReady = !1,
