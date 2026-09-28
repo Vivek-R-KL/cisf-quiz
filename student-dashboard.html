@@ -224,12 +224,10 @@ function renderDashboardUI(data) {
         const studentName = encodeURIComponent(localStorage.getItem('currentStudent') || '');
         const designation = encodeURIComponent(localStorage.getItem('currentDesignation') || '');
         const section = encodeURIComponent(localStorage.getItem('studentSectionContext') || '');
-        const token = encodeURIComponent(sessionToken || '');
-
-        // sessionToken is passed through so a quiz page CAN forward it back on
-        // submitScore for the single-device check - it's ignored if the quiz
-        // page doesn't use it.
-        const fullUrl = `${url}?username=${username}&studentName=${studentName}&designation=${designation}&section=${section}&sessionToken=${token}`;
+        // SECURITY: the sessionToken is NOT put in the URL any more (URLs end up
+        // in browser history and can be shared by copy/paste). Quiz pages are on
+        // the same site and read it from localStorage ("currentSessionToken").
+        const fullUrl = `${url}?username=${username}&studentName=${studentName}&designation=${designation}&section=${section}`;
         window.open(fullUrl, "_blank");
     }
 
@@ -267,7 +265,15 @@ async function openQuizHistoryModal() {
 
     try {
         // Fetch data from "Results" sheet
-        let historyData = await apiCall({ action: "loadData", key: "Results" });
+        let historyData = await apiCall({
+            action: "myResults",
+            username: localStorage.getItem('currentUsername') || '',
+            sessionToken: sessionToken
+        });
+        if (historyData && historyData.code === "SESSION") {
+            loader.innerText = "Your session has expired. Please log out and log in again to see your history.";
+            return;
+        }
 
         if (!Array.isArray(historyData) || historyData.length === 0) {
             loader.innerText = "No data found in the Results sheet.";
