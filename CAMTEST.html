@@ -7,7 +7,7 @@
     <title>ASTI Delhi – MISC PAPER 2 (07.09.2026) (07.09.2026) (80 Questions | 45 Min)</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js" crossorigin="anonymous"></script>
     <script>
         document.addEventListener("contextmenu", function(e) {
             e.preventDefault()
@@ -2217,17 +2217,45 @@ setTimeout(resendPendingScores, 4000);
 
         function prepareFaceMesh() {
             if (!CAMERA_PROCTORING_ENABLED || faceMesh || faceMeshFailed) return;
-            if ("undefined" == typeof FaceMesh) return void(faceMeshFailed = !0);
+            if ("undefined" == typeof FaceMesh) return void faceCheckFailed("Face-check library did not load. It is blocked by the site's security settings (CSP) or by the network. Allow https://cdn.jsdelivr.net.");
+            faceCheckInfo("Face check: downloading (about 10 MB)...", "#0c3b66");
             try {
-                faceMesh = new FaceMesh({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}` });
+                faceMesh = new FaceMesh({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${f}` });
                 faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: !1, minDetectionConfidence: .5, minTrackingConfidence: .5 });
                 faceMesh.onResults(onFaceResults);
                 Promise.resolve(faceMesh.initialize ? faceMesh.initialize() : null)
-                    .then(() => { faceMeshReady = !0, faceMeshFailed = !1 })
-                    .catch(() => { faceMeshFailed = !0 })
+                    .then(() => { faceMeshReady = !0, faceMeshFailed = !1, window.__faceCheckError = "", faceCheckInfo("Face check: ready ✓", "#16a34a") })
+                    .catch(err => faceCheckFailed(explainFaceError(err)))
             } catch (err) {
-                faceMeshFailed = !0
+                faceCheckFailed(explainFaceError(err))
             }
+        }
+
+        function explainFaceError(err) {
+            const m = String(err && (err.message || err) || "unknown error");
+            return /eval|Content Security Policy|CSP/i.test(m) ? "Face check is blocked by the site's security settings (CSP needs 'unsafe-eval', 'wasm-unsafe-eval' and https://cdn.jsdelivr.net). Details: " + m
+                : /fetch|network|load/i.test(m) ? "Face model files could not be downloaded (network or security settings). Details: " + m
+                : /webgl|gl context|gpu/i.test(m) ? "This device's browser cannot run the face check (graphics/WebGL problem). Details: " + m
+                : "Face check could not start. Details: " + m
+        }
+
+        function faceCheckInfo(text, color) {
+            // shown on the start screen, under the camera status
+            let el = document.getElementById("face-check-note");
+            if (!el) {
+                const host = document.getElementById("camera-status-subtext");
+                if (!host || !host.parentNode) return;
+                el = document.createElement("div"), el.id = "face-check-note", el.style.cssText = "font-size:.78em;margin-top:3px;font-weight:600", host.parentNode.appendChild(el)
+            }
+            el.style.color = color || "#0c3b66", el.textContent = text
+        }
+
+        function faceCheckFailed(reason) {
+            faceMeshFailed = !0, window.__faceCheckError = reason;
+            try { console.warn("[Proctoring] " + reason) } catch (e) {}
+            faceCheckInfo("⚠️ " + reason, "#b45309");
+            const t = document.getElementById("face-status-text");
+            t && (t.title = reason)
         }
 
         async function tryAutoRecoverCamera() {
@@ -2259,7 +2287,7 @@ setTimeout(resendPendingScores, 4000);
             attachStreamEndedListener(persistentCameraStream), prepareFaceMesh(), positionCameraWidget();
             if (faceLoopRunning) return;
             faceLoopRunning = !0, setCamStatus("Loading face check...", "info");
-            setTimeout(() => { faceMeshReady || (faceMeshFailed = !0) }, 60000);
+            setTimeout(() => { faceMeshReady || faceMeshFailed || faceCheckFailed("Face model is taking too long to download (slow internet). It will start automatically if the download finishes.") }, 120000);
             const tick = async () => {
                 if (isExamSubmitted) return void(faceLoopRunning = !1);
                 const active = quizInProgress && !quizLocked && !document.hidden;
