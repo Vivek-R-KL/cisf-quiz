@@ -1,1 +1,5 @@
-
+Contact: mailto:vivekmallukl@gmail.com
+Expires: 2027-09-28T00:00:00.000Z
+Preferred-Languages: en, hi
+Canonical: https://cisfastidelhi.dpdns.org/.well-known/security.txt
+Policy: https://github.com/Vivek-R-KL/cisf-quiz/blob/main/SECURITY.md
