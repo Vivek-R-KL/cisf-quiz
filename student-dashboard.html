@@ -19,6 +19,17 @@
         .btn { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 5px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 13px; }
         .btn-reader { background: #0b3c5d; }
         .btn-logout { background: #ef4444; }
+        /* Search */
+        .search-bar { position: relative; margin-top: 20px; }
+        .search-bar input { width: 100%; box-sizing: border-box; padding: 14px 44px 14px 46px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 10px; background: #fff; outline: none; transition: border-color .15s, box-shadow .15s; }
+        .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37, 99, 235, .15); }
+        .search-bar .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #64748b; pointer-events: none; }
+        .search-bar .search-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: none; width: 32px; height: 32px; border: none; border-radius: 50%; background: #e2e8f0; color: #334155; font-size: 18px; line-height: 1; cursor: pointer; }
+        .search-bar.has-text .search-clear { display: block; }
+        .search-bar input::-webkit-search-cancel-button, .search-bar input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
+        #searchSummary { margin: 8px 2px 0; font-size: 13px; color: #64748b; min-height: 18px; }
+        .no-match { color: #94a3b8; font-size: 13px; font-style: italic; }
+        mark.hl { background: #fde68a; color: inherit; padding: 0 1px; border-radius: 2px; }
         footer { text-align: center; margin-top: 40px; padding: 20px 0; color: #64748b; font-size: 14px; border-top: 1px solid #cbd5e1; }
     </style>
 </head>
@@ -42,6 +53,14 @@
     <div class="alert-banner" id="instructionBox">
         📢 <strong>Notice:</strong> Loading current announcements...
     </div>
+
+    <!-- SEARCH -->
+    <div class="search-bar" id="searchBar">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="dashboardSearch" placeholder="Search quizzes, study materials and forms..." autocomplete="off" aria-label="Search quizzes, study materials and forms">
+        <button type="button" class="search-clear" onclick="clearDashboardSearch()" aria-label="Clear search" title="Clear">×</button>
+    </div>
+    <div id="searchSummary"></div>
 
     <div class="section-grid">
         <!-- QUIZZES -->
@@ -217,7 +236,80 @@ function renderDashboardUI(data) {
     function renderItems(containerId, list, templateFn) {
         const container = document.getElementById(containerId);
         container.innerHTML = list.length ? list.map(templateFn).join('') : '<small>Nothing assigned yet.</small>';
+        applyDashboardSearch();   // keep the current search applied after a refresh
     }
+
+    /* ===== SEARCH =====
+       Filters the Quizzes, Study Materials and Forms cards as you type.
+       Matches every word typed, in any order, ignoring case
+       (e.g. "day 2 paper" finds "DAY 2 PAPER 1"). */
+    const SEARCH_CONTAINERS = ['quizContainer', 'materialContainer', 'formContainer'];
+
+    function clearHighlights(el) {
+        el.querySelectorAll('mark.hl').forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
+        el.normalize();
+    }
+    function highlight(el, words) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        const re = new RegExp('(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+        nodes.forEach(node => {
+            if (!node.nodeValue.trim() || !re.test(node.nodeValue)) return;
+            re.lastIndex = 0;
+            const frag = document.createDocumentFragment();
+            node.nodeValue.split(re).forEach((part, i) => {
+                if (i % 2) { const m = document.createElement('mark'); m.className = 'hl'; m.textContent = part; frag.appendChild(m); }
+                else if (part) frag.appendChild(document.createTextNode(part));
+            });
+            node.replaceWith(frag);
+        });
+    }
+
+    function applyDashboardSearch() {
+        const input = document.getElementById('dashboardSearch');
+        if (!input) return;
+        const q = input.value.trim().toLowerCase();
+        const words = q.split(/\s+/).filter(Boolean);
+        document.getElementById('searchBar').classList.toggle('has-text', input.value.length > 0);
+        // If the exact phrase ("day 2") appears somewhere, show only exact-phrase
+        // matches; otherwise fall back to "all words, any order".
+        const allItems = SEARCH_CONTAINERS.flatMap(id => Array.from((document.getElementById(id) || document.createElement('div')).querySelectorAll('.action-item')));
+        const phraseMode = words.length > 1 && allItems.some(it => it.textContent.toLowerCase().replace(/\s+/g, ' ').includes(q.replace(/\s+/g, ' ')));
+        const hlWords = phraseMode ? [q.replace(/\s+/g, ' ')] : words;
+        let total = 0;
+        SEARCH_CONTAINERS.forEach(id => {
+            const box = document.getElementById(id);
+            if (!box) return;
+            const items = box.querySelectorAll('.action-item');
+            let shown = 0;
+            items.forEach(item => {
+                clearHighlights(item);
+                const text = item.textContent.toLowerCase();
+                const match = phraseMode ? text.replace(/\s+/g, ' ').includes(hlWords[0]) : words.every(w => text.includes(w));
+                item.style.display = match ? '' : 'none';
+                if (match) { shown++; if (words.length) highlight(item.querySelector('strong') || item, hlWords); }
+            });
+            total += shown;
+            let note = box.querySelector('.no-match');
+            if (words.length && items.length && !shown) {
+                if (!note) { note = document.createElement('p'); note.className = 'no-match'; box.appendChild(note); }
+                note.textContent = 'No match in this section.';
+            } else if (note) note.remove();
+        });
+        document.getElementById('searchSummary').textContent =
+            words.length ? (total ? `${total} result${total === 1 ? '' : 's'} for "${input.value.trim()}"` : `No results for "${input.value.trim()}". Try fewer or different words.`) : '';
+    }
+
+    function clearDashboardSearch() {
+        const input = document.getElementById('dashboardSearch');
+        input.value = '';
+        applyDashboardSearch();
+        input.focus();
+    }
+
+    document.getElementById('dashboardSearch').addEventListener('input', applyDashboardSearch);
+    document.getElementById('dashboardSearch').addEventListener('keydown', e => { if (e.key === 'Escape') clearDashboardSearch(); });
 
     function launchQuiz(url, title) {
         const username = encodeURIComponent(localStorage.getItem('currentUsername') || '');
