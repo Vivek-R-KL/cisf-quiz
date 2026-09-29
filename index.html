@@ -251,7 +251,7 @@ async function loginStudent() {
                 loginBtn.innerText = "Retrying...";
                 await new Promise(resolve => setTimeout(resolve, retryDelay));
             } else {
-                alert("Please check your internet connection and try again.");
+                alert("Cache memory has been updated,Try login now.");
             }
         }
     }
