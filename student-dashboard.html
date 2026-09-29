@@ -19,6 +19,25 @@
         .btn { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 5px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 13px; }
         .btn-reader { background: #0b3c5d; }
         .btn-logout { background: #ef4444; }
+        /* Section tabs */
+        .tab-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .tab-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 10px; border: 2px solid #cbd5e1; border-radius: 10px; background: #fff; color: var(--brand); font-size: 16px; font-weight: 700; cursor: pointer; transition: background .15s, color .15s, border-color .15s, box-shadow .15s; font-family: inherit; }
+        .tab-btn:hover { border-color: var(--accent); }
+        .tab-btn:focus-visible { outline: 3px solid rgba(37, 99, 235, .35); outline-offset: 2px; }
+        .tab-btn.active { background: var(--brand); border-color: var(--brand); color: #fff; box-shadow: 0 6px 14px -4px rgba(30, 58, 138, .5); }
+        .tab-count { min-width: 22px; padding: 2px 7px; border-radius: 999px; background: #e2e8f0; color: #334155; font-size: 12px; font-weight: 700; }
+        .tab-btn.active .tab-count { background: rgba(255, 255, 255, .25); color: #fff; }
+        .tab-btn.zero .tab-count { opacity: .55; }
+        .tab-panels { margin-top: 14px; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: tabIn .15s ease-out; }
+        @keyframes tabIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+        @media (max-width: 480px) {
+            .tab-bar { gap: 6px; }
+            .tab-btn { flex-direction: column; gap: 3px; padding: 10px 4px; font-size: 13px; }
+            .tab-icon { font-size: 20px; }
+        }
+
         /* Search */
         .search-bar { position: relative; margin-top: 20px; }
         .search-bar input { width: 100%; box-sizing: border-box; padding: 14px 44px 14px 46px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 10px; background: #fff; outline: none; transition: border-color .15s, box-shadow .15s; }
@@ -54,29 +73,42 @@
         📢 <strong>Notice:</strong> Loading current announcements...
     </div>
 
+    <!-- SECTION TABS: only one section is shown at a time -->
+    <div class="tab-bar" role="tablist" aria-label="Dashboard sections">
+        <button type="button" class="tab-btn" id="tab-quizzes" role="tab" aria-controls="panel-quizzes" onclick="showTab('quizzes')">
+            <span class="tab-icon">📝</span><span class="tab-label">Quizzes</span><span class="tab-count" id="count-quizzes">…</span>
+        </button>
+        <button type="button" class="tab-btn" id="tab-materials" role="tab" aria-controls="panel-materials" onclick="showTab('materials')">
+            <span class="tab-icon">📚</span><span class="tab-label">Materials</span><span class="tab-count" id="count-materials">…</span>
+        </button>
+        <button type="button" class="tab-btn" id="tab-forms" role="tab" aria-controls="panel-forms" onclick="showTab('forms')">
+            <span class="tab-icon">📋</span><span class="tab-label">Forms</span><span class="tab-count" id="count-forms">…</span>
+        </button>
+    </div>
+
     <!-- SEARCH -->
     <div class="search-bar" id="searchBar">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="search" id="dashboardSearch" placeholder="Search quizzes, study materials and forms..." autocomplete="off" aria-label="Search quizzes, study materials and forms">
+        <input type="search" id="dashboardSearch" placeholder="Search quizzes, materials, forms..." autocomplete="off" aria-label="Search quizzes, study materials and forms">
         <button type="button" class="search-clear" onclick="clearDashboardSearch()" aria-label="Clear search" title="Clear">×</button>
     </div>
     <div id="searchSummary"></div>
 
-    <div class="section-grid">
+    <div class="tab-panels">
         <!-- QUIZZES -->
-        <div class="card">
+        <div class="card tab-panel" id="panel-quizzes" role="tabpanel" aria-labelledby="tab-quizzes">
             <h3>📝 Available Quizzes</h3>
             <div id="quizContainer"><p>Loading...</p></div>
         </div>
 
         <!-- STUDY MATERIALS -->
-        <div class="card">
+        <div class="card tab-panel" id="panel-materials" role="tabpanel" aria-labelledby="tab-materials">
             <h3>📚 Study Materials</h3>
             <div id="materialContainer"><p>Loading...</p></div>
         </div>
 
         <!-- GOOGLE FORMS -->
-        <div class="card">
+        <div class="card tab-panel" id="panel-forms" role="tabpanel" aria-labelledby="tab-forms">
             <h3>📋 Google Forms</h3>
             <div id="formContainer"><p>Loading...</p></div>
         </div>
@@ -297,9 +329,56 @@ function renderDashboardUI(data) {
                 note.textContent = 'No match in this section.';
             } else if (note) note.remove();
         });
+        updateTabCounts(words.length > 0);
         document.getElementById('searchSummary').textContent =
             words.length ? (total ? `${total} result${total === 1 ? '' : 's'} for "${input.value.trim()}"` : `No results for "${input.value.trim()}". Try fewer or different words.`) : '';
     }
+
+    /* ===== TABS ===== */
+    const TABS = { quizzes: 'quizContainer', materials: 'materialContainer', forms: 'formContainer' };
+    let activeTab = 'quizzes';
+    try { const saved = sessionStorage.getItem('dashboardTab'); if (TABS[saved]) activeTab = saved; } catch (e) {}
+
+    function showTab(name) {
+        if (!TABS[name]) return;
+        activeTab = name;
+        Object.keys(TABS).forEach(t => {
+            const on = t === name;
+            document.getElementById('tab-' + t).classList.toggle('active', on);
+            document.getElementById('tab-' + t).setAttribute('aria-selected', on ? 'true' : 'false');
+            document.getElementById('panel-' + t).classList.toggle('active', on);
+        });
+        try { sessionStorage.setItem('dashboardTab', name); } catch (e) {}
+    }
+
+    // Number on each button = items in that section (or matching items while searching).
+    // While searching, if the open section has no match but another one does,
+    // switch to that section automatically.
+    function updateTabCounts(searching) {
+        const counts = {};
+        Object.keys(TABS).forEach(t => {
+            const box = document.getElementById(TABS[t]);
+            const items = box ? Array.from(box.querySelectorAll('.action-item')) : [];
+            counts[t] = items.filter(i => i.style.display !== 'none').length;
+            const loading = box && !items.length && /Loading/i.test(box.textContent);
+            document.getElementById('count-' + t).textContent = loading ? '…' : counts[t];
+            document.getElementById('tab-' + t).classList.toggle('zero', !loading && counts[t] === 0);
+        });
+        if (searching && counts[activeTab] === 0) {
+            const other = Object.keys(TABS).find(t => counts[t] > 0);
+            if (other) showTab(other);
+        }
+    }
+
+    // Left / right arrow keys move between the three buttons
+    document.querySelector('.tab-bar').addEventListener('keydown', e => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        const names = Object.keys(TABS);
+        const next = names[(names.indexOf(activeTab) + (e.key === 'ArrowRight' ? 1 : names.length - 1)) % names.length];
+        showTab(next);
+        document.getElementById('tab-' + next).focus();
+    });
+    showTab(activeTab);
 
     function clearDashboardSearch() {
         const input = document.getElementById('dashboardSearch');
