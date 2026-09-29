@@ -253,7 +253,7 @@
     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <select id="fileSelect" style="margin-bottom:0; flex:1; min-width:180px;"></select>
         <button class="btn-primary" onclick="loadSelectedFile()" style="white-space:nowrap;">Open Paper</button>
-        <button class="btn-tool" onclick="copySelectedFile()" style="white-space:nowrap; flex:none;">📋 Copy as New Paper</button>
+        <button class="btn-tool" onclick="copySelectedFile()" style="white-space:nowrap; flex:none;">➕ Create New Paper</button>
         <button class="btn-danger" onclick="deleteQuizPaper()" style="white-space:nowrap; flex:none;">🗑️ Delete Quiz Paper</button>
     </div>
     <small class="hint">To create a brand-new quiz paper, pick an existing paper above to use as the template, then click "Copy as New Paper" — you'll be asked for a new file name, whether to start blank, and (if blank) how many questions it should have, so the exam's question palette is sized correctly right away. "Delete Quiz Paper" permanently removes the selected paper from GitHub.</small>
@@ -288,12 +288,28 @@
             <label>Max Locks Before Auto-Submit</label>
             <input type="number" id="cfgMaxLocks" oninput="quizConfig.maxLocks = this.value">
         </div>
-        <div id="cfgCameraRow" style="display:none;">
-            <label>Camera Proctoring</label>
-            <label style="display:flex;align-items:center;gap:8px;font-weight:normal;text-transform:none;font-size:13px;color:var(--text-primary);cursor:pointer;margin-bottom:6px;">
-                <input type="checkbox" id="cfgCameraProctoring" style="width:auto;margin:0;" onchange="quizConfig.cameraProctoring = this.checked; document.getElementById('cfgCameraProctoringLabel').textContent = this.checked ? 'Enabled — camera required to start & is monitored throughout' : 'Disabled — no camera/face monitoring for this paper';">
-                <span id="cfgCameraProctoringLabel">Enabled</span>
-            </label>
+        <div id="cfgCameraRow" style="grid-column:1/-1;">
+            <label>📷 Camera Proctoring</label>
+            <div id="cfgCameraToggleBox" style="display:none;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;">
+                <label class="cam-switch" style="display:flex;align-items:center;gap:10px;margin:0;cursor:pointer;text-transform:none;font-weight:600;font-size:14px;color:var(--text-primary,#0f172a);">
+                    <input type="checkbox" id="cfgCameraProctoring" style="width:20px;height:20px;margin:0;cursor:pointer;" onchange="setCameraProctoring(this.checked)">
+                    <span id="cfgCameraProctoringLabel">Enabled</span>
+                </label>
+                <small style="color:#64748b;">Change it here, then click <b>💾 Save Changes to GitHub</b>.</small>
+            </div>
+            <div id="cfgCameraConvertBox" style="display:none;padding:10px 12px;border:1px dashed #f59e0b;border-radius:8px;background:#fffbeb;color:#92400e;font-size:13px;">
+                This paper was made with the <b>old template, which has no camera support</b>, so camera proctoring cannot be switched on directly.
+                <div style="margin-top:8px;"><button type="button" class="btn-tool" onclick="convertToCameraTemplate()">🔄 Convert this paper to the camera template</button></div>
+                <small style="display:block;margin-top:6px;color:#78350f;">Keeps this paper's questions, name, time, password, Web App URL and warning/lock settings. Nothing changes on GitHub until you Save.</small>
+            </div>
+        </div>
+        <div id="cfgFaceRow" style="display:none;">
+            <label>Face-Away Limit (Seconds)</label>
+            <input type="number" id="cfgFaceSeconds" min="1" max="30" oninput="quizConfig.faceSeconds = this.value">
+            <small style="display:block;color:var(--text-secondary,#64748b);margin-top:4px;">How long the face may be missing / turned away before it counts as a violation. Also updates the student instructions.</small>
+        </div>
+        <div id="cfgPaperTypeRow" style="grid-column:1/-1;display:none;">
+            <small id="cfgPaperTypeNote" style="display:block;padding:8px 10px;border-radius:6px;background:#ecfdf5;color:#065f46;"></small>
         </div>
     </div>
 </div>
@@ -437,9 +453,9 @@ function locateArrayLiteral(content, varName) {
 
 let currentFile = null;
 let questions = [];
-let quizConfig = { name: '', time: 45, password: '', appUrl: '', maxWarnings: 2, maxLocks: 4, cameraProctoring: true, hasCameraFeature: false };
+let quizConfig = { name: '', time: 45, password: '', appUrl: '', maxWarnings: 2, maxLocks: 4, cameraProctoring: true, hasCameraFeature: false, hasFaceLimit: false, faceSeconds: 3, builtInProctoring: false };
 
-function parseQuizConfig(content) {
+function extractQuizConfig(content, quizConfig) {
     const getMatch = (regex, defaultVal = '') => {
         const m = content.match(regex);
         return m ? m[1] : defaultVal;
@@ -473,6 +489,13 @@ function parseQuizConfig(content) {
     quizConfig.hasCameraFeature = !!camMatch;
     quizConfig.cameraProctoring = camMatch ? (camMatch[1] === 'true' || camMatch[1] === '!0') : true;
 
+    // Newer camera papers (CAMTEST format, Sept 2026) carry their own fixed
+    // camera / face-check engine and a configurable face-away limit.
+    const faceMatch = content.match(/FACE_VIOLATION_LIMIT_SEC\s*=\s*(\d+)/);
+    quizConfig.hasFaceLimit = !!faceMatch;
+    quizConfig.faceSeconds = faceMatch ? parseInt(faceMatch[1]) : 3;
+    quizConfig.builtInProctoring = hasBuiltInProctoring(content);
+
     // Quiz title — read from the quizName variable first (the field this
     // editor actually keeps in sync on save), falling back to the <title>
     // tag only for older files that don't have quizName yet. Reading from
@@ -480,6 +503,16 @@ function parseQuizConfig(content) {
     // bug, because Save Changes never used to update the <title> tag.
     const nameMatch = content.match(/quizName:\s*"([^"]+)"/) || content.match(/<title>ASTI Delhi – ([^(]+)/);
     quizConfig.name = nameMatch ? nameMatch[1].trim() : 'Quiz';
+    return quizConfig;
+}
+
+function freshQuizConfig() {
+    return { name: '', time: 45, password: '', appUrl: '', maxWarnings: 2, maxLocks: 4, cameraProctoring: true, hasCameraFeature: false, hasFaceLimit: false, faceSeconds: 3, builtInProctoring: false, loadedName: '' };
+}
+
+function parseQuizConfig(content) {
+    extractQuizConfig(content, quizConfig);
+    quizConfig.loadedName = quizConfig.name;   // remembered so a rename can replace the old name everywhere
 
     // Populate UI
     document.getElementById('cfgQuizName').value = quizConfig.name;
@@ -489,16 +522,29 @@ function parseQuizConfig(content) {
     document.getElementById('cfgMaxWarnings').value = quizConfig.maxWarnings;
     document.getElementById('cfgMaxLocks').value = quizConfig.maxLocks;
 
-    const camRow = document.getElementById('cfgCameraRow');
-    if (quizConfig.hasCameraFeature) {
-        camRow.style.display = 'block';
-        document.getElementById('cfgCameraProctoring').checked = quizConfig.cameraProctoring;
-        document.getElementById('cfgCameraProctoringLabel').textContent = quizConfig.cameraProctoring
-            ? 'Enabled — camera required to start & is monitored throughout'
-            : 'Disabled — no camera/face monitoring for this paper';
-    } else {
-        camRow.style.display = 'none';
-    }
+    const faceRow = document.getElementById('cfgFaceRow');
+    faceRow.style.display = quizConfig.hasFaceLimit ? 'block' : 'none';
+    document.getElementById('cfgFaceSeconds').value = quizConfig.faceSeconds;
+    const typeRow = document.getElementById('cfgPaperTypeRow');
+    typeRow.style.display = quizConfig.builtInProctoring ? 'block' : 'none';
+    document.getElementById('cfgPaperTypeNote').textContent = quizConfig.builtInProctoring
+        ? '✅ New camera paper format detected (built-in face check, mobile camera preview). On save, the editor keeps this paper\'s own camera code and only adds the warning/lock counting fix.'
+        : '';
+
+    document.getElementById('cfgCameraToggleBox').style.display = quizConfig.hasCameraFeature ? 'flex' : 'none';
+    document.getElementById('cfgCameraConvertBox').style.display = quizConfig.hasCameraFeature ? 'none' : 'block';
+    if (quizConfig.hasCameraFeature) setCameraProctoring(quizConfig.cameraProctoring);
+}
+
+function setCameraProctoring(on) {
+    quizConfig.cameraProctoring = !!on;
+    document.getElementById('cfgCameraProctoring').checked = !!on;
+    const lbl = document.getElementById('cfgCameraProctoringLabel');
+    lbl.textContent = on ? '🟢 ON — camera required to start, face monitored throughout the exam'
+                         : '⚪ OFF — no camera, no face monitoring for this paper';
+    lbl.style.color = on ? '#15803d' : '#64748b';
+    // the face-away limit only matters while the camera is on
+    if (quizConfig.hasFaceLimit) document.getElementById('cfgFaceRow').style.display = on ? 'block' : 'none';
 }
 
 /* Parses quiz content already in memory (from a GET or a just-completed PUT)
@@ -747,87 +793,120 @@ async function translateQuestion(idx) {
    a brand-new file on GitHub with the same working quiz engine/HTML — either
    keeping its questions (exact duplicate) or starting blank (for a new paper
    you'll fill via typing or the Excel importer). */
-async function copySelectedFile() {
+/* ================= CREATE NEW PAPER =================
+   Opens a dialog: template, new quiz name, file name, number of questions,
+   blank / copied questions, camera proctoring on/off. The new paper is built
+   with buildPaperContent(), so the palette, "Question X of N", score and the
+   quiz name are correct everywhere inside the new file straight away. */
+let npTemplateCache = {}, npFileEdited = false, npCurrentTemplate = null;
+
+async function fetchRepoFile(path) {
     const s = getSettings();
-    const sourcePath = document.getElementById('fileSelect').value;
-    if (!sourcePath) {
-        alert('Select a quiz paper from the list first — it will be used as the template to copy.');
-        return;
-    }
+    const res = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(s.branch)}`, { headers: ghHeaders(s.token) });
+    if (!res.ok) throw new Error(`Could not read "${path}" (GitHub status ${res.status})`);
+    const data = await res.json();
+    return { sha: data.sha, content: base64ToUtf8(data.content) };
+}
 
-    const suggested = sourcePath.replace(/\.html$/i, '') + '-copy.html';
-    let newPath = prompt(`Create a new quiz paper by copying:\n${sourcePath}\n\nEnter a file name for the new paper (must end in .html):`, suggested);
-    if (!newPath) return;
-    newPath = newPath.trim();
-    if (!newPath) return;
-    if (!/\.html$/i.test(newPath)) newPath += '.html';
+function copySelectedFile() {
+    const select = document.getElementById('fileSelect');
+    if (!select.options.length) { alert('Connect to GitHub first.'); return; }
+    const tpl = document.getElementById('npTemplate');
+    tpl.innerHTML = select.innerHTML;
+    tpl.value = select.value;
+    document.getElementById('npName').value = '';
+    document.getElementById('npFile').value = '';
+    document.getElementById('npCount').value = 80;
+    document.getElementById('npBlank').checked = true;
+    document.getElementById('npStatus').textContent = '';
+    npFileEdited = false;
+    document.getElementById('newPaperModal').style.display = 'flex';
+    npLoadTemplate();
+    setTimeout(() => document.getElementById('npName').focus(), 50);
+}
 
-    const startBlank = confirm(
-        'Start the new paper with fresh (blank) questions, so you can add your own (e.g. import from Excel)?\n\n' +
-        'OK = Start blank\nCancel = Keep a copy of all existing questions from the source paper'
-    );
+function closeNewPaperModal() { document.getElementById('newPaperModal').style.display = 'none'; }
 
-    let blankCount = 0;
-    if (startBlank) {
-        const countInput = prompt(
-            'How many questions will this paper have?\n\n' +
-            'Enter a number to pre-create that many blank question slots — this sizes the exam\'s question palette correctly right away. Enter 0 to start with none and add questions one at a time.',
-            '80'
-        );
-        if (countInput === null) return; // cancelled the whole "copy as new paper" action
-        const parsedCount = parseInt(countInput, 10);
-        blankCount = (!isNaN(parsedCount) && parsedCount > 0) ? parsedCount : 0;
-    }
+function npNameChanged() {
+    if (npFileEdited) return;
+    const n = sanitizeQuizName(document.getElementById('npName').value).replace(/[\/\\:*?|]/g, '');
+    document.getElementById('npFile').value = n && n !== 'Quiz' ? n + '.html' : '';
+}
 
-    showStatus('loadStatus', `Copying ${sourcePath} → ${newPath}…`, 'info');
+async function npLoadTemplate() {
+    const path = document.getElementById('npTemplate').value;
+    const info = document.getElementById('npTemplateInfo');
+    const createBtn = document.getElementById('npCreateBtn');
+    npCurrentTemplate = null; createBtn.disabled = true;
+    info.style.color = '#64748b'; info.textContent = 'Loading template…';
     try {
-        const getRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(sourcePath)}?ref=${encodeURIComponent(s.branch)}`, {
-            headers: ghHeaders(s.token)
-        });
-        if (!getRes.ok) throw new Error(`Could not read source file (status ${getRes.status})`);
-        const sourceData = await getRes.json();
-        let newContent = base64ToUtf8(sourceData.content);
+        if (!npTemplateCache[path]) npTemplateCache[path] = await fetchRepoFile(path);
+        const content = npTemplateCache[path].content;
+        const cfg = extractQuizConfig(content, freshQuizConfig());
+        const loc = locateArrayLiteral(content, 'questionData');
+        const qs = Function('"use strict"; return (' + content.slice(loc.start, loc.end + 1) + ');')();
+        npCurrentTemplate = { path, content, cfg, qs };
+        info.textContent = `"${cfg.name}" — ${qs.length} questions, ${cfg.time} min, ` + (cfg.hasCameraFeature ? 'camera supported' : 'no camera support (old template)');
+        const cam = document.getElementById('npCamera');
+        cam.disabled = !cfg.hasCameraFeature;
+        cam.checked = cfg.hasCameraFeature ? cfg.cameraProctoring : false;
+        document.getElementById('npCamBox').style.opacity = cfg.hasCameraFeature ? '1' : '.5';
+        document.getElementById('npCamNote').style.display = cfg.hasCameraFeature ? 'none' : 'block';
+        if (document.getElementById('npCopy').checked) document.getElementById('npCount').value = qs.length;
+        createBtn.disabled = false;
+    } catch (e) {
+        info.style.color = '#b91c1c';
+        info.textContent = 'Cannot use this file as a template: ' + e.message;
+    }
+}
 
-        if (startBlank) {
-            const loc = locateArrayLiteral(newContent, 'questionData');
-            const blankQuestions = [];
-            for (let i = 0; i < blankCount; i++) {
-                blankQuestions.push([i + 1, 1, '', '', ['', ''], ['', ''], ['', ''], ['', '']]);
-            }
-            newContent = newContent.slice(0, loc.start) + JSON.stringify(blankQuestions) + newContent.slice(loc.end + 1);
-            // Keep TOTAL_QUESTIONS (which drives the exam's question palette size)
-            // in sync immediately, rather than leaving it at the source paper's
-            // old count until the next Save.
-            newContent = newContent.replace(/TOTAL_QUESTIONS\s*=\s*\d+/, `TOTAL_QUESTIONS = ${blankCount}`);
-        }
+async function createNewPaper() {
+    const st = document.getElementById('npStatus');
+    const say = (msg, color) => { st.style.color = color || '#0f172a'; st.textContent = msg; };
+    const t = npCurrentTemplate;
+    if (!t) return say('Template is not loaded yet.', '#b91c1c');
 
-        // Check whether the destination file name is already taken.
+    const name = sanitizeQuizName(document.getElementById('npName').value);
+    if (!document.getElementById('npName').value.trim()) return say('Please enter the new quiz name.', '#b91c1c');
+    let newPath = document.getElementById('npFile').value.trim();
+    if (!newPath) newPath = name + '.html';
+    if (!/\.html$/i.test(newPath)) newPath += '.html';
+    const count = parseInt(document.getElementById('npCount').value, 10);
+    if (!(count >= 1 && count <= 500)) return say('Number of questions must be between 1 and 500.', '#b91c1c');
+    if (newPath === t.path) return say('The new file name must be different from the template.', '#b91c1c');
+
+    // questions
+    const blank = i => [i + 1, 1, '', '', ['', ''], ['', ''], ['', ''], ['', '']];
+    let qs = [];
+    if (document.getElementById('npCopy').checked) {
+        qs = t.qs.slice(0, count).map(q => Array.isArray(q) ? JSON.parse(JSON.stringify(q)) : q);
+    }
+    for (let i = qs.length; i < count; i++) qs.push(blank(i));
+    qs.forEach((q, i) => { q[0] = i + 1; });
+
+    // settings: from the template, with the new name + camera choice
+    const cfg = { ...t.cfg, loadedName: t.cfg.name, name };
+    if (cfg.hasCameraFeature) cfg.cameraProctoring = document.getElementById('npCamera').checked;
+
+    const btn = document.getElementById('npCreateBtn');
+    btn.disabled = true;
+    say(`Creating "${newPath}"…`);
+    try {
+        const s = getSettings();
+        const newContent = buildPaperContent(t.content, qs, cfg);
+
         let existingSha = null;
-        const checkRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(newPath)}?ref=${encodeURIComponent(s.branch)}`, {
-            headers: ghHeaders(s.token)
-        });
+        const checkRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(newPath)}?ref=${encodeURIComponent(s.branch)}`, { headers: ghHeaders(s.token) });
         if (checkRes.ok) {
             const existing = await checkRes.json();
-            if (!confirm(`A file named "${newPath}" already exists. Overwrite it?`)) {
-                showStatus('loadStatus', 'Copy cancelled — that file name is already taken.', 'err');
-                return;
-            }
+            if (!confirm(`A file named "${newPath}" already exists. Overwrite it?`)) { say('Cancelled — that file name is already taken.', '#b91c1c'); btn.disabled = false; return; }
             existingSha = existing.sha;
         }
 
-        newContent = injectLockFix(newContent);
-
-        const putBody = {
-            message: `Create ${newPath} (copied from ${sourcePath}) via Question Editor`,
-            content: utf8ToBase64(newContent),
-            branch: s.branch
-        };
+        const putBody = { message: `Create ${newPath} (template: ${t.path}) via Question Editor`, content: utf8ToBase64(newContent), branch: s.branch };
         if (existingSha) putBody.sha = existingSha;
-
         const putRes = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(newPath)}`, {
-            method: 'PUT',
-            headers: { ...ghHeaders(s.token), 'Content-Type': 'application/json' },
-            body: JSON.stringify(putBody)
+            method: 'PUT', headers: { ...ghHeaders(s.token), 'Content-Type': 'application/json' }, body: JSON.stringify(putBody)
         });
         if (!putRes.ok) {
             const errBody = await putRes.json().catch(() => ({}));
@@ -835,28 +914,49 @@ async function copySelectedFile() {
         }
         const putResult = await putRes.json();
 
-        // Add the new file to the dropdown locally (keeping it sorted) instead of
-        // re-fetching the whole repo's file tree, and open it straight from the
-        // content we already have in memory instead of fetching it again — this
-        // is what was making "Loading it now…" feel slow after creating a paper.
         const select = document.getElementById('fileSelect');
         if (!existingSha) {
             const opt = document.createElement('option');
-            opt.value = newPath;
-            opt.textContent = newPath;
-            const existingOpts = Array.from(select.options);
-            const insertBefore = existingOpts.find(o => o.value.localeCompare(newPath) > 0);
-            select.insertBefore(opt, insertBefore || null);
+            opt.value = newPath; opt.textContent = newPath;
+            const after = Array.from(select.options).find(o => o.value.localeCompare(newPath) > 0);
+            select.insertBefore(opt, after || null);
         }
         select.value = newPath;
+        closeNewPaperModal();
+        btn.disabled = false;
 
         document.getElementById('editorCard').style.display = 'none';
         document.getElementById('quizConfigCard').style.display = 'none';
         document.getElementById('bottomBar').style.display = 'none';
         openPaperFromContent(newPath, putResult.content.sha, newContent);
-        showStatus('loadStatus', `✅ Created "${newPath}" and loaded ${questions.length} question(s).`, 'ok');
+        showStatus('loadStatus', `✅ Created "${newPath}" — "${name}", ${qs.length} question(s), camera ${cfg.hasCameraFeature ? (cfg.cameraProctoring ? 'ON' : 'OFF') : 'not supported'}.`, 'ok');
     } catch (e) {
-        showStatus('loadStatus', 'Could not copy paper: ' + e.message, 'err');
+        btn.disabled = false;
+        say('Could not create the paper: ' + e.message, '#b91c1c');
+    }
+}
+
+/* ================= CONVERT AN OLD PAPER TO THE CAMERA TEMPLATE ================= */
+const CAMERA_TEMPLATE_PATH = 'CAMTEST.html';
+async function convertToCameraTemplate() {
+    if (!currentFile) return;
+    const tplPath = prompt('Which camera paper should be used as the template?\n(It must be a paper that already has camera proctoring.)', CAMERA_TEMPLATE_PATH);
+    if (!tplPath) return;
+    if (!confirm(`"${currentFile.path}" will be rebuilt on the camera template "${tplPath.trim()}".\n\nKept: all questions, quiz name, time, lock password, Web App URL, warnings and locks.\n\nNothing changes on GitHub until you click 💾 Save Changes to GitHub. Continue?`)) return;
+    showStatus('loadStatus', 'Loading camera template…', 'info');
+    try {
+        const tpl = await fetchRepoFile(tplPath.trim());
+        const tplCfg = extractQuizConfig(tpl.content, freshQuizConfig());
+        if (!tplCfg.hasCameraFeature) throw new Error(`"${tplPath}" is not a camera paper.`);
+        renumberQuestions();
+        const cfg = { ...quizConfig, loadedName: tplCfg.name, hasCameraFeature: true, cameraProctoring: true,
+                      hasFaceLimit: tplCfg.hasFaceLimit, faceSeconds: tplCfg.faceSeconds };
+        const built = buildPaperContent(tpl.content, questions, cfg);
+        currentFile.content = built;          // same file path & sha: Save overwrites the old paper
+        parseQuizConfig(built);
+        showStatus('loadStatus', '✅ Converted to the camera template (camera ON). Check the settings, then click 💾 Save Changes to GitHub to make it live.', 'ok');
+    } catch (e) {
+        showStatus('loadStatus', 'Could not convert: ' + e.message, 'err');
     }
 }
 
@@ -1447,12 +1547,182 @@ const LOCK_FIX_SCRIPT = `/* ASTI-LOCK-FIX v3 — injected by Question Editor. Sa
 })();
 /* /ASTI-LOCK-FIX */
 `;
+/* Newer camera papers (CAMTEST format, Sept 2026) already contain a fixed camera
+   and face-check engine (pinned face model, 3 checks/sec, auto camera recovery,
+   mobile preview, FACE_VIOLATION_LIMIT_SEC). Injecting the v3 camera/face code into
+   them would replace that engine and run TWO face models at once. So for these
+   papers only the warning/lock COUNTING part is injected. */
+function hasBuiltInProctoring(content) {
+    return /FACE_VIOLATION_LIMIT_SEC\s*=/.test(content) && /function\s+tryAutoRecoverCamera\s*\(/.test(content);
+}
+
+const LOCK_ONLY_SCRIPT = `/* ASTI-LOCK-FIX v4-lite — injected by Question Editor for papers with built-in camera proctoring. Safe to re-inject. */
+(function () {
+    if (typeof registerTabSwitch !== "function") return;
+    var W = (typeof MAX_WARNINGS !== "undefined") ? Number(MAX_WARNINGS) : 2;
+    var L = (typeof MAX_LOCKS !== "undefined") ? Number(MAX_LOCKS) : 4;
+    if (!(W >= 0)) W = 2;
+    if (!(L >= W)) L = W + 2;
+    var lastSwitchAt = 0;
+    function resetFaceTimers() { try { faceOutOfBoundSeconds = 0; faceViolationStartTime = null; } catch (e) {} }
+    function setMsg(txt) { var n = document.getElementById("cheat-lock-message"); if (n) n.textContent = txt; }
+
+    /* One minimize fires visibilitychange AND pagehide together - count it once,
+       and use the Max Warnings / Max Locks settings from the editor. */
+    registerTabSwitch = function () {
+        if (quizLocked || isExamSubmitted) return;
+        var now = Date.now();
+        if (now - lastSwitchAt < 1500) return;
+        lastSwitchAt = now;
+        resetFaceTimers();
+        tabSwitchCount++;
+        if (tabSwitchCount <= W) showWarning();
+        else if (tabSwitchCount <= L) lockQuiz();
+        else forceSubmitForCheating();
+    };
+    var _showWarning = showWarning;
+    showWarning = function () {
+        _showWarning();
+        setMsg("Warning " + tabSwitchCount + " of " + W + ": you switched/minimized the screen or moved your face. After " + W + " warning(s) your exam will be LOCKED and need the Administrator password. On attempt " + (L + 1) + " your exam will be submitted automatically. Click Continue to resume your exam.");
+    };
+    var _lockQuiz = lockQuiz;
+    lockQuiz = function () {
+        _lockQuiz();
+        setMsg("You switched or minimized the screen " + tabSwitchCount + " time(s). Your exam is LOCKED, contact your Administrator to resume. On attempt " + (L + 1) + " your exam will be submitted automatically.");
+    };
+    var _continue = continueAfterWarning;
+    continueAfterWarning = function () { _continue(); resetFaceTimers(); };
+    var _resume = resumeQuiz;
+    resumeQuiz = function () { _resume(); resetFaceTimers(); };
+})();
+/* /ASTI-LOCK-FIX */
+`;
+
 function injectLockFix(content) {
     if (!/function\s+registerTabSwitch\s*\(/.test(content)) return content; // not an exam paper
     content = content.replace(/\s*<script id="asti-lock-fix">[\s\S]*?<\/script>/g, '');
-    const block = '\n    <script id="asti-lock-fix">\n' + LOCK_FIX_SCRIPT + '\n    <\/script>\n';
+    const script = hasBuiltInProctoring(content) ? LOCK_ONLY_SCRIPT : LOCK_FIX_SCRIPT;
+    const block = '\n    <script id="asti-lock-fix">\n' + script + '\n    <\/script>\n';
     const i = content.lastIndexOf('</body>');
     return i === -1 ? content + block : content.slice(0, i) + block + content.slice(i);
+}
+
+
+/* ================= BUILD A PAPER'S HTML =================
+   One place that writes questions + settings into a quiz paper's HTML.
+   Used by Save, Create New Paper and Convert-to-camera-template, so all three
+   update the question count (palette, "Question X of N", score) and the quiz
+   name in every place it appears. */
+function sanitizeQuizName(name) {
+    return String(name || '').replace(/["'`<>\\$]/g, '').replace(/\s+/g, ' ').trim() || 'Quiz';
+}
+function escapeRegExp(str) { return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function buildPaperContent(newContent, qs, cfgIn) {
+    const cfg = { ...cfgIn, name: sanitizeQuizName(cfgIn.name) };
+    const minutes = Math.max(1, parseInt(cfg.time, 10) || 45);
+    cfg.time = minutes;
+
+    // 1. Update questions array
+    const loc = locateArrayLiteral(newContent, 'questionData');
+    newContent = newContent.slice(0, loc.start) + JSON.stringify(qs) + newContent.slice(loc.end + 1);
+
+    // 2. Update Quiz Metadata & Variables
+    // These match on the identifier itself rather than requiring a
+    // literal "const " right before it, so they work whether the paper
+    // declares each constant on its own ("const NAME = value;") or as
+    // one of several comma-separated declarators in a single statement
+    // (the format used by the newer camera-proctoring papers, where
+    // only the first name in the list is actually preceded by "const").
+    newContent = newContent.replace(/TOTAL_QUESTIONS\s*=\s*\d+/, `TOTAL_QUESTIONS = ${qs.length}`);
+
+    // 1b. SELF-HEALING FIX for older quiz papers whose exam engine has the
+    // question count hardcoded as a literal number in a dozen places
+    // (array sizes, the palette-button loop, "Question X of Y", score
+    // fractions, etc.) instead of referencing the TOTAL_QUESTIONS constant
+    // above. That's why changing the question count previously left the
+    // palette and "Question X of Y" label stuck at the paper's original
+    // count. These patches rewrite those known spots to reference
+    // TOTAL_QUESTIONS dynamically — they're safe no-ops on papers that
+    // already do this correctly, and they deliberately do NOT touch the
+    // unrelated ">= 80" pass-percentage threshold used for PASS/FAIL,
+    // which happens to reuse the same digits by coincidence.
+    newContent = newContent
+        .replace(/new Array\(\d+\)\.fill\(1\)/, `new Array(${qs.length}).fill(1)`)
+        .replace(/new Array\(\d+\)\.fill\(null\)/, `new Array(${qs.length}).fill(null)`)
+        .replace(/(\.length\}\/)\d+(`)/, `$1${qs.length}$2`)
+        .replace(/(>Question \$\{[a-zA-Z]\+1\} of )\d+(<\/p>)/, `$1${qs.length}$2`)
+        .replace(/(isExamSubmitted \|\| [a-zA-Z] < 0 \|\| [a-zA-Z] >= )\d+/, `$1${qs.length}`)
+        .replace(/(questionGrid\.innerHTML = "";\s*for \(let [a-zA-Z] = 0; [a-zA-Z] < )\d+(; [a-zA-Z]\+\+\))/, `$1${qs.length}$2`)
+        .replace(/(Total Questions \/ कुल प्रश्न: )\d+/, `$1${qs.length}`)
+        .replace(/(\$\{)\d+(-[a-zA-Z]\.totalAnswered\})/, `$1${qs.length}$2`)
+        .replace(/(\$\{[a-zA-Z]\} \/ )\d+/g, `$1${qs.length}`)
+        .replace(/([a-zA-Z] \/ )\d+( \* 100)/g, `$1${qs.length}$2`)
+        .replace(/(All \()\d+(\)<\/button>)/, `$1${qs.length}$2`)
+        .replace(/(font-weight: bold;">)\d+(<\/td>\\n<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a)/, `$1${qs.length}$2`)
+        .replace(/(<span>Questions: )\d+(<\/span>)/, `$1${qs.length}$2`);
+    newContent = newContent.replace(/APPS_SCRIPT_URL\s*=\s*"[^"]*"/, `APPS_SCRIPT_URL = "${cfg.appUrl}"`);
+    newContent = newContent.replace(/ADMIN_UNLOCK_PASSWORD\s*=\s*"[^"]*"/, `ADMIN_UNLOCK_PASSWORD = "${cfg.password}"`);
+    newContent = newContent.replace(/TOTAL_TIME_SECONDS\s*=\s*\d+(?:\s*\*\s*\d+)?/, `TOTAL_TIME_SECONDS = ${cfg.time * 60}`);
+    newContent = newContent.replace(/MAX_WARNINGS\s*=\s*\d+/, `MAX_WARNINGS = ${cfg.maxWarnings}`);
+    newContent = newContent.replace(/MAX_LOCKS\s*=\s*\d+/, `MAX_LOCKS = ${cfg.maxLocks}`);
+    newContent = newContent.replace(/quizName:\s*"[^"]*"/g, `quizName: "${cfg.name}"`);
+    if (cfg.hasFaceLimit) {
+        let fs = parseInt(cfg.faceSeconds, 10);
+        if (!(fs >= 1 && fs <= 30)) fs = 3;
+        newContent = newContent.replace(/FACE_VIOLATION_LIMIT_SEC\s*=\s*\d+/, `FACE_VIOLATION_LIMIT_SEC = ${fs}`);
+        newContent = newContent.replace(/(camera for more than )\d+( seconds?)/g, `$1${fs}$2`);
+    }
+    if (cfg.hasCameraFeature) {
+        newContent = newContent.replace(/CAMERA_PROCTORING_ENABLED\s*=\s*(?:true|false|!0|!1)/, `CAMERA_PROCTORING_ENABLED = ${cfg.cameraProctoring ? 'true' : 'false'}`);
+    }
+
+    // 2b. Update every OTHER place the quiz name is hardcoded in the paper's
+    // own HTML/JS, which quizName: alone never touched. This is why the old
+    // name kept "coming back" after reopening: the editor was reading the
+    // display name back out of the <title> tag, which this save never wrote to.
+    //   - the browser tab <title> (also refreshes the "(N Questions | M Min)" suffix)
+    //     (lazy match so quiz names that contain brackets, e.g. "PAPER 2 (07.09.2026)", also work)
+    newContent = newContent.replace(/(<title>ASTI Delhi – )(.*?)(\(\s*)\d+(\s*Questions)/,
+        (m, pre, mid, post, tail) => pre + cfg.name + ' ' + post + qs.length + tail);
+    //   - the "here's how your exam screen works" preview's "Question 1 of N" (newer camera papers)
+    newContent = newContent.replace(/(font-weight:700">Question 1 of )\d+(<\/p>)/, `$1${qs.length}$2`);
+    //   - the visible on-screen header (.test-title h3)
+    newContent = newContent.replace(/(<div class="test-title">\s*<h3[^>]*>)([^<]*)(<\/h3>)/,
+        (m, pre, mid, post) => pre + cfg.name + post);
+    //   - the pre-exam setup screen's topbar name (newer camera papers only)
+    newContent = newContent.replace(/(<div class="setup-exam-name">)([^<]*)(<\/div>)/,
+        (m, pre, mid, post) => pre + cfg.name + post);
+    //   - the "here's how your exam screen works" mock walkthrough preview,
+    //     which shows a second hardcoded copy of the name (newer camera papers only)
+    newContent = newContent.replace(/(<div class="mock-header-bar"[^>]*>\s*<div>\s*<div style="font-weight:700;font-size:\.95em">)([^<]*)(<\/div>)/,
+        (m, pre, mid, post) => pre + cfg.name + post);
+    //   - the "Quiz Title:" row in the downloadable PDF performance summary.
+    //     (?:\\n)? handles papers where this row lives inside a template
+    //     literal with a literal escaped "\n" instead of a real newline.
+    newContent = newContent.replace(/(Quiz Title:<\/td>(?:\\n)?\s*<td[^>]*>)([^<]*)(<\/td>)/,
+        (m, pre, mid, post) => pre + cfg.name + post);
+
+    // 3. Inject the anti-cheat lock fix (warning → admin password → auto-submit)
+    newContent = injectLockFix(newContent);
+
+    // 4. Rename: replace the OLD quiz name everywhere it is used as the quiz name
+    //    (HTML text, quizName values, PDF summary, walkthrough preview...), but
+    //    never inside the questions themselves.
+    const oldName = (cfg.loadedName || '').trim();
+    if (oldName && oldName.length >= 4 && oldName !== cfg.name) {
+        const loc2 = locateArrayLiteral(newContent, 'questionData');
+        const re = new RegExp('(?<=>|"|– )' + escapeRegExp(oldName) + '(?=<|"| \\()', 'g');
+        newContent = newContent.slice(0, loc2.start).replace(re, () => cfg.name)
+            + newContent.slice(loc2.start, loc2.end + 1)
+            + newContent.slice(loc2.end + 1).replace(re, () => cfg.name);
+    }
+    //    Browser tab title rebuilt cleanly: "ASTI Delhi – NAME (N Questions | M Min)"
+    newContent = newContent.replace(/<title>ASTI Delhi – [^<]*<\/title>/,
+        () => `<title>ASTI Delhi – ${cfg.name} (${qs.length} Questions | ${minutes} Min)</title>`);
+    //    Every "Duration: 45 Min" label follows the time setting
+    newContent = newContent.replace(/(Duration: )\d+( Min)/g, (m, p1, p2) => p1 + minutes + p2);
+    return newContent;
 }
 
 /* ================= SAVE UPDATED QUIZ FILE BACK TO GITHUB ================= */
@@ -1462,6 +1732,14 @@ async function saveToGithub() {
     for (let i = 0; i < questions.length; i++) {
         if (!questions[i][2] || !questions[i][2].trim()) {
             alert(`Question ${i + 1} is missing English text.`);
+            return;
+        }
+    }
+
+    if (quizConfig.hasFaceLimit) {
+        const fs = parseInt(quizConfig.faceSeconds, 10);
+        if (!(fs >= 1 && fs <= 30)) {
+            alert('Face-Away Limit must be a number of seconds between 1 and 30.');
             return;
         }
     }
@@ -1477,79 +1755,7 @@ async function saveToGithub() {
         const s = getSettings();
         let newContent = currentFile.content;
 
-        // 1. Update questions array
-        const loc = locateArrayLiteral(newContent, 'questionData');
-        newContent = newContent.slice(0, loc.start) + JSON.stringify(questions) + newContent.slice(loc.end + 1);
-
-        // 2. Update Quiz Metadata & Variables
-        // These match on the identifier itself rather than requiring a
-        // literal "const " right before it, so they work whether the paper
-        // declares each constant on its own ("const NAME = value;") or as
-        // one of several comma-separated declarators in a single statement
-        // (the format used by the newer camera-proctoring papers, where
-        // only the first name in the list is actually preceded by "const").
-        newContent = newContent.replace(/TOTAL_QUESTIONS\s*=\s*\d+/, `TOTAL_QUESTIONS = ${questions.length}`);
-
-        // 1b. SELF-HEALING FIX for older quiz papers whose exam engine has the
-        // question count hardcoded as a literal number in a dozen places
-        // (array sizes, the palette-button loop, "Question X of Y", score
-        // fractions, etc.) instead of referencing the TOTAL_QUESTIONS constant
-        // above. That's why changing the question count previously left the
-        // palette and "Question X of Y" label stuck at the paper's original
-        // count. These patches rewrite those known spots to reference
-        // TOTAL_QUESTIONS dynamically — they're safe no-ops on papers that
-        // already do this correctly, and they deliberately do NOT touch the
-        // unrelated ">= 80" pass-percentage threshold used for PASS/FAIL,
-        // which happens to reuse the same digits by coincidence.
-        newContent = newContent
-            .replace(/new Array\(\d+\)\.fill\(1\)/, `new Array(${questions.length}).fill(1)`)
-            .replace(/new Array\(\d+\)\.fill\(null\)/, `new Array(${questions.length}).fill(null)`)
-            .replace(/(\.length\}\/)\d+(`)/, `$1${questions.length}$2`)
-            .replace(/(>Question \$\{[a-zA-Z]\+1\} of )\d+(<\/p>)/, `$1${questions.length}$2`)
-            .replace(/(isExamSubmitted \|\| [a-zA-Z] < 0 \|\| [a-zA-Z] >= )\d+/, `$1${questions.length}`)
-            .replace(/(questionGrid\.innerHTML = "";\s*for \(let [a-zA-Z] = 0; [a-zA-Z] < )\d+(; [a-zA-Z]\+\+\))/, `$1${questions.length}$2`)
-            .replace(/(Total Questions \/ कुल प्रश्न: )\d+/, `$1${questions.length}`)
-            .replace(/(\$\{)\d+(-[a-zA-Z]\.totalAnswered\})/, `$1${questions.length}$2`)
-            .replace(/(\$\{[a-zA-Z]\} \/ )\d+/g, `$1${questions.length}`)
-            .replace(/([a-zA-Z] \/ )\d+( \* 100)/g, `$1${questions.length}$2`)
-            .replace(/(All \()\d+(\)<\/button>)/, `$1${questions.length}$2`)
-            .replace(/(font-weight: bold;">)\d+(<\/td>\\n<td style="padding: 10px; border: 1px solid #ccc; color: #16a34a)/, `$1${questions.length}$2`)
-            .replace(/(<span>Questions: )\d+(<\/span>)/, `$1${questions.length}$2`);
-        newContent = newContent.replace(/APPS_SCRIPT_URL\s*=\s*"[^"]*"/, `APPS_SCRIPT_URL = "${quizConfig.appUrl}"`);
-        newContent = newContent.replace(/ADMIN_UNLOCK_PASSWORD\s*=\s*"[^"]*"/, `ADMIN_UNLOCK_PASSWORD = "${quizConfig.password}"`);
-        newContent = newContent.replace(/TOTAL_TIME_SECONDS\s*=\s*\d+(?:\s*\*\s*\d+)?/, `TOTAL_TIME_SECONDS = ${quizConfig.time * 60}`);
-        newContent = newContent.replace(/MAX_WARNINGS\s*=\s*\d+/, `MAX_WARNINGS = ${quizConfig.maxWarnings}`);
-        newContent = newContent.replace(/MAX_LOCKS\s*=\s*\d+/, `MAX_LOCKS = ${quizConfig.maxLocks}`);
-        newContent = newContent.replace(/quizName:\s*"[^"]*"/g, `quizName: "${quizConfig.name}"`);
-        if (quizConfig.hasCameraFeature) {
-            newContent = newContent.replace(/CAMERA_PROCTORING_ENABLED\s*=\s*(?:true|false|!0|!1)/, `CAMERA_PROCTORING_ENABLED = ${quizConfig.cameraProctoring ? 'true' : 'false'}`);
-        }
-
-        // 2b. Update every OTHER place the quiz name is hardcoded in the paper's
-        // own HTML/JS, which quizName: alone never touched. This is why the old
-        // name kept "coming back" after reopening: the editor was reading the
-        // display name back out of the <title> tag, which this save never wrote to.
-        //   - the browser tab <title> (also refreshes the "(N Questions | M Min)" suffix)
-        newContent = newContent.replace(/(<title>ASTI Delhi – )([^(]+)(\(\s*)\d+(\s*Questions)/,
-            (m, pre, mid, post, tail) => pre + quizConfig.name + ' ' + post + questions.length + tail);
-        //   - the visible on-screen header (.test-title h3)
-        newContent = newContent.replace(/(<div class="test-title">\s*<h3[^>]*>)([^<]*)(<\/h3>)/,
-            (m, pre, mid, post) => pre + quizConfig.name + post);
-        //   - the pre-exam setup screen's topbar name (newer camera papers only)
-        newContent = newContent.replace(/(<div class="setup-exam-name">)([^<]*)(<\/div>)/,
-            (m, pre, mid, post) => pre + quizConfig.name + post);
-        //   - the "here's how your exam screen works" mock walkthrough preview,
-        //     which shows a second hardcoded copy of the name (newer camera papers only)
-        newContent = newContent.replace(/(<div class="mock-header-bar"[^>]*>\s*<div>\s*<div style="font-weight:700;font-size:\.95em">)([^<]*)(<\/div>)/,
-            (m, pre, mid, post) => pre + quizConfig.name + post);
-        //   - the "Quiz Title:" row in the downloadable PDF performance summary.
-        //     (?:\\n)? handles papers where this row lives inside a template
-        //     literal with a literal escaped "\n" instead of a real newline.
-        newContent = newContent.replace(/(Quiz Title:<\/td>(?:\\n)?\s*<td[^>]*>)([^<]*)(<\/td>)/,
-            (m, pre, mid, post) => pre + quizConfig.name + post);
-
-        // 3. Inject the anti-cheat lock fix (warning → admin password → auto-submit)
-        newContent = injectLockFix(newContent);
+        newContent = buildPaperContent(newContent, questions, quizConfig);
 
         const res = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(currentFile.path)}`, {
             method: 'PUT',
@@ -1570,6 +1776,9 @@ async function saveToGithub() {
         const result = await res.json();
         currentFile.content = newContent;
         currentFile.sha = result.content.sha;
+        quizConfig.loadedName = sanitizeQuizName(quizConfig.name);
+        quizConfig.name = quizConfig.loadedName;
+        document.getElementById('cfgQuizName').value = quizConfig.name;
 
         showStatus('loadStatus', '✅ Saved successfully! Changes are live on GitHub.', 'ok');
     } catch (e) {
@@ -1587,5 +1796,41 @@ window.onload = () => {
     }
 };
 </script>
+
+<!-- ================= CREATE NEW PAPER DIALOG ================= -->
+<div id="newPaperModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:12px;max-width:520px;width:100%;max-height:92vh;overflow:auto;padding:20px 22px;box-shadow:0 20px 50px rgba(0,0,0,.3);font-size:14px;color:#0f172a;">
+    <h3 style="margin:0 0 4px 0;">➕ Create New Question Paper</h3>
+    <p style="margin:0 0 14px 0;color:#64748b;font-size:13px;">The new paper gets its own name everywhere inside the file, and its question palette matches the number of questions.</p>
+
+    <label style="display:block;font-weight:600;margin-bottom:4px;">Template paper (layout &amp; settings copied from)</label>
+    <select id="npTemplate" onchange="npLoadTemplate()" style="width:100%;margin-bottom:4px;"></select>
+    <small id="npTemplateInfo" style="display:block;color:#64748b;margin-bottom:12px;">Loading…</small>
+
+    <label style="display:block;font-weight:600;margin-bottom:4px;">New quiz name *</label>
+    <input type="text" id="npName" placeholder="e.g. DAY 6 PAPER 1" oninput="npNameChanged()" style="width:100%;margin-bottom:12px;">
+
+    <label style="display:block;font-weight:600;margin-bottom:4px;">File name</label>
+    <input type="text" id="npFile" placeholder="DAY 6 PAPER 1.html" oninput="npFileEdited=true" style="width:100%;margin-bottom:12px;">
+
+    <label style="display:block;font-weight:600;margin-bottom:4px;">Number of questions *</label>
+    <input type="number" id="npCount" min="1" max="500" value="80" style="width:100%;margin-bottom:4px;">
+    <small style="display:block;color:#64748b;margin-bottom:12px;">The exam's question palette will have exactly this many buttons.</small>
+
+    <label style="display:block;font-weight:600;margin-bottom:6px;">Questions</label>
+    <label style="display:flex;gap:8px;align-items:center;margin-bottom:4px;text-transform:none;font-weight:normal;"><input type="radio" name="npMode" id="npBlank" value="blank" checked style="width:auto;margin:0;"> Start with blank questions (fill in or import from Excel)</label>
+    <label style="display:flex;gap:8px;align-items:center;margin-bottom:12px;text-transform:none;font-weight:normal;"><input type="radio" name="npMode" id="npCopy" value="copy" style="width:auto;margin:0;"> Copy the template's questions (extra ones removed / blank ones added to match the number)</label>
+
+    <label style="display:block;font-weight:600;margin-bottom:6px;">📷 Camera proctoring</label>
+    <label id="npCamBox" style="display:flex;gap:8px;align-items:center;margin-bottom:4px;text-transform:none;font-weight:normal;"><input type="checkbox" id="npCamera" checked style="width:auto;margin:0;"> ON — camera required and face monitored</label>
+    <small id="npCamNote" style="display:none;color:#b45309;margin-bottom:12px;">This template has no camera support. To make a camera paper, choose a camera paper (e.g. CAMTEST.html) as the template.</small>
+
+    <div id="npStatus" style="margin:12px 0 0 0;font-size:13px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button type="button" class="btn-danger" onclick="closeNewPaperModal()">Cancel</button>
+      <button type="button" class="btn-green" id="npCreateBtn" onclick="createNewPaper()">Create Paper</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
