@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bilingual Quiz Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --blue:#0c3b66; --blue-light:#eaf6ff; --accent:#0ea5e9; --border:#cfe6f7;
@@ -33,6 +34,17 @@
   .upload-box:hover{background:#eefaff}
   .upload-box input{display:none}
   #importStatus{margin-top:10px;font-size:.88em}
+  #excelStatus{margin-top:10px;font-size:.88em;line-height:1.5}
+  #excelStatus.ok{color:var(--green)}
+  #excelStatus.warn{color:#8a5a00}
+  #excelStatus.err{color:var(--red)}
+  .qcard.noans{border:2px solid #e0a030;background:#fffaf0}
+  .noans-tag{display:none;color:#8a5a00;font-size:.82em;font-weight:700;margin:4px 0 8px}
+  .qcard.noans .noans-tag{display:block}
+  #undoToast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#263238;color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.3);display:none;align-items:center;gap:14px;z-index:9999;font-size:.92em}
+  #undoToast button{background:#ffd54f;color:#222;border:0;border-radius:5px;padding:5px 12px;font-weight:700;cursor:pointer}
+  #undoBtn:disabled{opacity:.45;cursor:not-allowed}
+  .excel-help{font-size:.82em;color:#567;margin-top:8px;line-height:1.5}
   #importStatus.ok{color:var(--green)}
   #importStatus.err{color:var(--red)}
   details.advanced{margin-top:10px}
@@ -83,6 +95,24 @@
 
 <div class="wrap">
 
+  <!-- EXCEL IMPORT -->
+  <div class="card">
+    <h2>📊 Create quiz from an Excel sheet</h2>
+    <label class="upload-box" for="excelInput">
+      <div style="font-size:1.6em">📗</div>
+      <div><strong>Click to upload</strong> an Excel (.xlsx / .xls) or .csv file of questions</div>
+      <div style="font-size:.8em;color:#789;margin-top:4px">Questions, options and the correct-answer column are loaded below, ready to generate.</div>
+      <input type="file" id="excelInput" accept=".xlsx,.xls,.csv">
+    </label>
+    <div class="actions-row" style="margin-top:10px">
+      <button class="btn btn-secondary" onclick="downloadExcelTemplate()">⬇️ Download blank Excel template</button>
+    </div>
+    <div class="excel-help">
+      <strong>Columns (row 1 = headers):</strong> English Question, Hindi Question, English Option A, Hindi Option A, … Option D, and a last column <strong>Correct Answer</strong> (enter A, B, C or D — numbers 1–4 also work). Hindi columns are optional. Questions without a correct answer are highlighted so you can tick it manually.
+    </div>
+    <div id="excelStatus"></div>
+  </div>
+
   <!-- IMPORT -->
   <div class="card">
     <h2>📤 Import an existing quiz file (optional)</h2>
@@ -119,7 +149,7 @@
     </div>
     <div class="field">
       <label>Web App URL (Google Apps Script /exec URL, for saving results)</label>
-      <input type="url" id="webAppUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      <input type="url" id="webAppUrl" placeholder="https://script.google.com/macros/s/.../exec" value="https://script.google.com/macros/s/AKfycbwq0k5tJyXXus0Nvd9ZpVOBzaJHxQdGPDSckrk6MCmHcdv8OiPxF7B0ZhBBQ6lk8wQU/exec">
     </div>
     <div class="toggle-row">
       <input type="checkbox" id="cameraToggle" checked>
@@ -148,6 +178,7 @@
     <h2>📝 Questions <span class="qcount-badge" id="qCountBadge">0</span></h2>
     <div class="actions-row" style="margin-bottom:14px">
       <button class="btn btn-secondary" id="translateAllBtn" onclick="translateAllQuestions()">🌐 Translate All Questions to Hindi</button>
+      <button class="btn btn-secondary" id="undoBtn" onclick="undoDelete()" disabled>↩️ Undo Delete (0)</button>
       <button class="btn btn-secondary" id="clearHindiBtn" style="color:#8a5a00;border-color:#f0c96b" onclick="clearAllHindi()">🧹 Clear Hindi</button>
     </div>
     <div id="translateAllStatus" style="margin-bottom:10px;font-size:.88em"></div>
@@ -164,6 +195,7 @@
   </div>
 
 </div>
+<div id="undoToast"><span id="undoToastMsg"></span><button onclick="undoDelete()">Undo</button></div>
 <footer class="foot">Runs entirely in your browser — nothing is uploaded anywhere.</footer>
 
 <script>
@@ -179,6 +211,7 @@ function getTemplateHtml(){
 }
 
 /* ======================= QUESTION MODEL ======================= */
+const DEFAULT_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwq0k5tJyXXus0Nvd9ZpVOBzaJHxQdGPDSckrk6MCmHcdv8OiPxF7B0ZhBBQ6lk8wQU/exec';
 let questions = []; // {en, hi, opts:[{en,hi}x4], correct(1-4)}
 
 function blankQuestion(){
@@ -190,9 +223,46 @@ function addQuestion(q){
   renderQuestions();
 }
 
+let deletedStack = []; // {q, idx}
+let undoTimer = null;
+
+function updateUndoBtn(){
+  const b = document.getElementById('undoBtn');
+  if (!b) return;
+  b.disabled = deletedStack.length === 0;
+  b.textContent = '↩️ Undo Delete (' + deletedStack.length + ')';
+}
+
 function removeQuestion(idx){
-  questions.splice(idx,1);
+  const removed = questions.splice(idx,1)[0];
+  if (!removed) return;
+  deletedStack.push({q: removed, idx});
+  if (deletedStack.length > 50) deletedStack.shift();
   renderQuestions();
+  updateUndoBtn();
+  const t = document.getElementById('undoToast');
+  document.getElementById('undoToastMsg').textContent = 'Question ' + (idx+1) + ' deleted.';
+  t.style.display = 'flex';
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(()=>{ t.style.display = 'none'; }, 8000);
+}
+
+function undoDelete(){
+  const last = deletedStack.pop();
+  if (!last) return;
+  const pos = Math.min(last.idx, questions.length);
+  questions.splice(pos, 0, last.q);
+  renderQuestions();
+  updateUndoBtn();
+  const t = document.getElementById('undoToast');
+  if (deletedStack.length){
+    document.getElementById('undoToastMsg').textContent = 'Question ' + (pos+1) + ' restored.';
+    t.style.display = 'flex';
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(()=>{ t.style.display = 'none'; }, 8000);
+  } else { t.style.display = 'none'; }
+  const card = document.querySelectorAll('#questionsList .qcard')[pos];
+  if (card) card.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 function renderQuestions(){
@@ -200,12 +270,13 @@ function renderQuestions(){
   list.innerHTML = '';
   questions.forEach((q, idx) => {
     const card = document.createElement('div');
-    card.className = 'qcard';
+    card.className = 'qcard' + (q.correct>=1 && q.correct<=4 ? '' : ' noans');
     card.innerHTML = `
       <div class="qhead">
         <span class="qnum">Question ${idx+1}</span>
         <button onclick="removeQuestion(${idx})">🗑 Remove</button>
       </div>
+      <div class="noans-tag">⚠️ Select the correct answer for this question (radio button next to the right option).</div>
       <div class="lang-pair">
         <div><label>Question (English)</label><textarea data-role="qen" data-idx="${idx}">${escapeHtml(q.en)}</textarea></div>
         <div><label>Question (Hindi)</label><textarea data-role="qhi" data-idx="${idx}">${escapeHtml(q.hi)}</textarea></div>
@@ -252,6 +323,8 @@ function onFieldInput(e){
 
 function setCorrect(idx, val){
   questions[idx].correct = val;
+  const c = document.querySelectorAll('#questionsList .qcard')[idx];
+  if (c) c.classList.remove('noans');
 }
 
 function escapeHtml(s){
@@ -395,17 +468,20 @@ function buildNewQuiz(){
     if (!ok) return;
   }
   questions = [];
+  deletedStack = []; updateUndoBtn();
+  document.getElementById('undoToast').style.display='none';
   importedFileBaseName = null;
   document.getElementById('quizName').value = '';
   document.getElementById('orgName').value = 'ASTI Delhi';
   document.getElementById('durationMin').value = 45;
   document.getElementById('outFileName').value = '';
-  document.getElementById('webAppUrl').value = '';
+  document.getElementById('webAppUrl').value = DEFAULT_WEBAPP_URL;
   document.getElementById('sheetId').value = '';
   document.getElementById('adminPass').value = 'igiasti123';
   document.getElementById('cameraToggle').checked = true;
   document.getElementById('fileInput').value = '';
   document.getElementById('importStatus').textContent = '';
+  document.getElementById('excelStatus').textContent = '';
   document.getElementById('genStatus').textContent = '';
   document.getElementById('genStatus').className = '';
   document.getElementById('translateAllStatus').textContent = '';
@@ -427,6 +503,7 @@ document.getElementById('fileInput').addEventListener('change', function(e){
       const text = ev.target.result;
       const result = parseQuizFile(text);
       questions = result.questions;
+      deletedStack = []; updateUndoBtn();
       renderQuestions();
       if (result.quizName) document.getElementById('quizName').value = result.quizName;
       // Organization name is fixed to "ASTI Delhi" and is not overwritten on import.
@@ -517,6 +594,116 @@ function decodeHtmlEntities(s){
   return ta.value;
 }
 
+
+/* ======================= EXCEL IMPORT ======================= */
+function normHeader(h){ return String(h||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+
+function parseCorrect(val, opts){
+  if (val===undefined || val===null) return 0;
+  const raw = String(val).trim();
+  if (!raw) return 0;
+  const u = raw.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if (/^[A-D]$/.test(u)) return u.charCodeAt(0)-64;
+  if (/^[1-4]$/.test(u)) return parseInt(u,10);
+  const m = /^(?:OPTION|OPT|ANS|ANSWER)?([A-D1-4])$/.exec(u);
+  if (m) return /[A-D]/.test(m[1]) ? m[1].charCodeAt(0)-64 : parseInt(m[1],10);
+  const t = raw.toLowerCase();
+  for (let i=0;i<4;i++){ if ((opts[i].en||'').trim().toLowerCase()===t) return i+1; }
+  return 0;
+}
+
+function parseExcelRows(rows){
+  if (!rows.length) throw new Error('The sheet is empty.');
+  const head = rows[0].map(normHeader);
+  const find = (...names) => head.findIndex(h => names.includes(h));
+  const L = ['a','b','c','d'];
+  const col = {
+    qen: find('english question','question','question english','question en','q'),
+    qhi: find('hindi question','question hindi','question hi'),
+    oen: L.map(l => find('english option '+l,'option '+l,'option '+l+' english','opt '+l,l)),
+    ohi: L.map(l => find('hindi option '+l,'option '+l+' hindi')),
+    ans: find('correct answer','correct','answer','correct option','right answer','ans','key')
+  };
+  let positional = false;
+  if (col.qen === -1){
+    // no recognisable headers: assume the sample layout (10 columns) + optional 11th answer column
+    positional = true;
+    col.qen=0; col.qhi=1;
+    col.oen=[2,4,6,8]; col.ohi=[3,5,7,9]; col.ans=10;
+  }
+  const g = (r,i) => (i>=0 && r[i]!==undefined && r[i]!==null) ? String(r[i]).trim() : '';
+  const out = []; let skipped = 0, filled = 0;
+  rows.slice(1).forEach(r => {
+    const en = g(r,col.qen);
+    const opts = [0,1,2,3].map(o => ({en:g(r,col.oen[o]), hi:g(r,col.ohi[o])}));
+    if (!en && !opts.some(o=>o.en||o.hi)) return;        // blank row
+    // if an English option is empty but its Hindi text exists, reuse the Hindi text so the row is still usable
+    opts.forEach(o => { if (!o.en && o.hi){ o.en = o.hi; filled++; } });
+    if (!en || opts.filter(o=>o.en).length < 4){ skipped++; return; }
+    out.push({en, hi:g(r,col.qhi), opts, correct: parseCorrect(col.ans>=0 ? r[col.ans] : '', opts)});
+  });
+  return {questions:out, skipped, filled, hasAnswerCol: col.ans>=0 && !positional ? true : (positional && rows[0].length>10), positional};
+}
+
+document.getElementById('excelInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  const st = document.getElementById('excelStatus');
+  st.className=''; st.textContent='Reading Excel file...';
+  if (typeof XLSX === 'undefined'){
+    st.className='err';
+    st.textContent='❌ Excel reader could not load (needs internet on first open). Connect to the internet and reload this page.';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const wb = XLSX.read(new Uint8Array(ev.target.result), {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', blankrows:false});
+      const res = parseExcelRows(rows);
+      if (!res.questions.length) throw new Error('No valid questions found. Each row needs a question and 4 options.');
+      questions = res.questions;
+      deletedStack = []; updateUndoBtn();
+      renderQuestions();
+      const base = file.name.replace(/\.(xlsx|xls|csv)$/i,'');
+      importedFileBaseName = base;
+      const qn = document.getElementById('quizName');
+      if (!qn.value.trim()) qn.value = wb.SheetNames[0] && wb.SheetNames[0] !== 'Sheet1' ? wb.SheetNames[0] : base;
+      const missing = res.questions.filter(q => !(q.correct>=1 && q.correct<=4)).length;
+      let msg = `✅ Loaded ${res.questions.length} question(s) from "${file.name}".`;
+      if (res.filled) msg += ` ${res.filled} empty English option(s) were filled from the Hindi text — please review.`;
+      if (res.skipped) msg += ` Skipped ${res.skipped} incomplete row(s) (need a question and 4 options).`;
+      if (missing === res.questions.length){
+        st.className='warn';
+        msg += ` ⚠️ No correct answers were found (add a "Correct Answer" column with A/B/C/D, or tick the answers manually below). Quiz cannot be generated until every question has an answer.`;
+      } else if (missing){
+        st.className='warn';
+        msg += ` ⚠️ ${missing} question(s) have no valid correct answer — they are highlighted below; pick the answer for each.`;
+      } else { st.className='ok'; msg += ' All questions have a correct answer.'; }
+      st.textContent = msg;
+      document.getElementById('questionsList').scrollIntoView({behavior:'smooth'});
+    }catch(err){
+      console.error(err);
+      st.className='err';
+      st.textContent='❌ Could not read this file: '+err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value='';
+});
+
+function downloadExcelTemplate(){
+  if (typeof XLSX === 'undefined'){ alert('Excel library not loaded. Connect to the internet and reload.'); return; }
+  const header = ['English Question','Hindi Question','English Option A','Hindi Option A','English Option B','Hindi Option B','English Option C','Hindi Option C','English Option D','Hindi Option D','Correct Answer'];
+  const sample = ['ICAO came into existence in the year?','आई.सी.ए.ओ किस वर्ष अस्तित्व में आया?','1947','1947','1948','1948','1944','1944','1963','1963','C'];
+  const ws = XLSX.utils.aoa_to_sheet([header, sample]);
+  ws['!cols'] = header.map((h,i)=>({wch: i===0||i===1 ? 45 : (i===10 ? 16 : 24)}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Quiz');
+  XLSX.writeFile(wb, 'Quiz_Template.xlsx');
+}
+
 /* ======================= GENERATE LOGIC ======================= */
 function sanitizeEmbed(s){
   return String(s||'').replace(/[`"\\\\]/g, '').trim();
@@ -539,6 +726,7 @@ function generateQuiz(){
       q.opts.forEach((o,oi) => {
         if (!o.en.trim()) throw new Error(`Question ${i+1}, Option ${String.fromCharCode(65+oi)} is missing English text.`);
       });
+      if (!(q.correct>=1 && q.correct<=4)) throw new Error(`Question ${i+1} has no correct answer selected.`);
       if (!q.hi.trim()) q.hi = q.en;
       q.opts.forEach(o => { if (!o.hi.trim()) o.hi = o.en; });
     });
