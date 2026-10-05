@@ -148,6 +148,11 @@
 
     /* ---------- Reading column ---------- */
     .page-wrap { position: relative; display: flex; justify-content: center; padding: 40px 20px 120px; }
+    @media (max-width: 640px) { .page-wrap { padding: 16px 8px 100px; } }
+    @media (min-width: 1200px) { .page-wrap { padding-left: 40px; padding-right: 40px; } }
+    /* Google Drive fallback preview: use the full width, not the narrow status card */
+    .status-box.preview-mode { max-width: 1100px; width: 100%; margin: 0 auto; text-align: initial; }
+    .status-box.preview-mode iframe { width: 100%; height: calc(100vh - 150px); min-height: 480px; border: 0; display: block; }
     .doc-meta {
         font-family: 'Inter', sans-serif; font-size: 13px; color: var(--muted);
         margin: 0 0 40px 0; padding-bottom: 24px; border-bottom: 1px solid var(--paper-edge);
@@ -175,7 +180,7 @@
        real page text can still be selected/copied (which is what powers
        the Google Assistant lookup below). */
     .pdf-native-wrap {
-        width: 100%; max-width: 880px;
+        width: 100%; max-width: 1100px;
         display: flex; flex-direction: column; align-items: center; gap: 22px;
     }
     .pdf-native-wrap .pdf-doc-header { width: 100%; text-align: left; }
@@ -537,7 +542,8 @@ function showDrivePreview(previewUrl) {
     const box = document.getElementById('statusBox');
     box.style.display = 'block';
     box.style.padding = '0';
-    box.innerHTML = '<iframe src="' + previewUrl + '" style="width:100%;height:85vh;border:0;" allow="autoplay"></iframe>';
+    box.classList.add('preview-mode');
+    box.innerHTML = '<iframe src="' + previewUrl + '" allow="autoplay"></iframe>';
     document.getElementById('nativeView').style.display = 'none';
 }
 
@@ -564,6 +570,7 @@ document.getElementById('howtoDismiss').addEventListener('click', () => {
 function showStatus(html) {
     const box = document.getElementById('statusBox');
     box.style.display = 'block';
+    box.classList.remove('preview-mode');
     box.innerHTML = html;
     document.getElementById('nativeView').style.display = 'none';
 }
@@ -842,8 +849,19 @@ function handlePageIntersection(entries) {
     });
 }
 
+let currentPdf = null;
+let lastLayoutWidth = 0;
+
 async function renderPdf(data, fileName) {
-    const pdf = await pdfjsLib.getDocument({ data }).promise;
+    currentPdf = await pdfjsLib.getDocument({ data }).promise;
+    await layoutPdf();
+}
+
+async function layoutPdf() {
+    const pdf = currentPdf;
+    if (!pdf) return;
+    if (pageObserver) { try { pageObserver.disconnect(); } catch (e) {} }
+    pageStates.forEach(st => { if (st.renderTask && st.renderTask.cancel) { try { st.renderTask.cancel(); } catch (e) {} } });
 
     const nativeEl = document.getElementById('nativeView');
     nativeEl.innerHTML = `<div class="pdf-doc-header">
@@ -860,7 +878,8 @@ async function renderPdf(data, fileName) {
     document.getElementById('statusBox').style.display = 'none';
     nativeEl.style.display = 'flex';
 
-    const targetWidth = Math.min(nativeEl.clientWidth || 860, 880);
+    const targetWidth = Math.min(nativeEl.clientWidth || 860, 1100);
+    lastLayoutWidth = nativeEl.clientWidth;
     pageStates = [];
     pageObserver = new IntersectionObserver(handlePageIntersection, {
         root: null,
@@ -899,6 +918,17 @@ async function renderPdf(data, fileName) {
         pageObserver.observe(shell);
     }
 }
+
+// Re-fit pages when the window is resized / rotated (PC <-> mobile widths).
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        const el = document.getElementById('nativeView');
+        if (!currentPdf || el.style.display === 'none') return;
+        if (Math.abs(el.clientWidth - lastLayoutWidth) > 40) layoutPdf();
+    }, 300);
+});
 
 /* ---------- Text selection → choose Translate or Google Assistant ---------- */
 // Google actively blocks its own pages from being framed by other sites
