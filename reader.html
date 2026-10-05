@@ -152,6 +152,15 @@
     @media (min-width: 1200px) { .page-wrap { padding-left: 40px; padding-right: 40px; } }
     /* Google Drive fallback preview: use the full width, not the narrow status card */
     .status-box.preview-mode { max-width: 1100px; width: 100%; margin: 0 auto; text-align: initial; }
+    .preview-tools { font-family: 'Inter', var(--indic-fonts), sans-serif; background: #eef6ff; border: 1px solid #cfe0ee; border-radius: 10px; padding: 12px 14px; margin: 0 0 12px; line-height: 1.5; }
+    .preview-tools .pt-note { font-size: 13px; color: var(--navy-deep); margin: 0 0 8px; }
+    .preview-tools .pt-err { font-size: 11.5px; color: var(--muted); margin: 0 0 8px; }
+    .preview-tools textarea { width: 100%; min-height: 70px; resize: vertical; padding: 9px 10px; border: 1px solid #b9cde0; border-radius: 8px; font: 14px 'Inter', var(--indic-fonts), sans-serif; }
+    .preview-tools .pt-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+    .preview-tools select { padding: 8px; border-radius: 8px; border: 1px solid #b9cde0; font-size: 13px; max-width: 100%; }
+    .preview-tools button { background: var(--navy); color: #fff; border: 0; padding: 9px 14px; border-radius: 100px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .preview-tools button.alt { background: var(--gold-deep); }
+    .preview-tools .pt-out { margin-top: 10px; padding: 10px 12px; background: #fff; border-radius: 8px; font-size: 15px; display: none; white-space: pre-wrap; }
     .status-box.preview-mode iframe { width: 100%; height: calc(100vh - 150px); min-height: 480px; border: 0; display: block; }
     .doc-meta {
         font-family: 'Inter', sans-serif; font-size: 13px; color: var(--muted);
@@ -538,13 +547,46 @@ const SPREADSHEET_ID = localStorage.getItem('globalSpreadsheetId') || "1q94opoGz
 const READER_API_KEY = "AIzaSyDsPByBImZKL7ytVGrXYaHm8rPGE-OF62M";
 
 // Simple fallback: show the PDF in Google Drive's own preview.
-function showDrivePreview(previewUrl) {
+function showDrivePreview(previewUrl, reason) {
     const box = document.getElementById('statusBox');
     box.style.display = 'block';
     box.style.padding = '0';
     box.classList.add('preview-mode');
-    box.innerHTML = '<iframe src="' + previewUrl + '" allow="autoplay"></iframe>';
+    const langOptions = document.getElementById('tpLangSelect').innerHTML;
+    box.innerHTML =
+        '<div class="preview-tools">' +
+          '<p class="pt-note"><strong>Simple preview mode:</strong> text can\'t be selected inside this preview. ' +
+          'Type or paste the text here to <strong>Translate</strong> it or <strong>Ask Google</strong>.</p>' +
+          (reason ? '<p class="pt-err">Why the full reader did not load: ' + String(reason).replace(/[<>&]/g, '') + '</p>' : '') +
+          '<textarea id="ptText" placeholder="Paste or type the text you want to translate / search…"></textarea>' +
+          '<div class="pt-row">' +
+            '<select id="ptLang">' + langOptions + '</select>' +
+            '<button type="button" id="ptTranslate">🌐 Translate</button>' +
+            '<button type="button" class="alt" id="ptAsk">🔎 Ask Google</button>' +
+          '</div>' +
+          '<div class="pt-out" id="ptOut"></div>' +
+        '</div>' +
+        '<iframe src="' + previewUrl + '" allow="autoplay"></iframe>';
     document.getElementById('nativeView').style.display = 'none';
+
+    const ta = document.getElementById('ptText');
+    const out = document.getElementById('ptOut');
+    document.getElementById('ptTranslate').addEventListener('click', async () => {
+        const text = ta.value.trim();
+        if (!text) { showToast('Type or paste some text first.'); return; }
+        out.style.display = 'block';
+        out.textContent = 'Translating…';
+        try {
+            out.textContent = await translateOne(text, document.getElementById('ptLang').value);
+        } catch (e) {
+            out.textContent = "Couldn't translate right now — check your connection and try again.";
+        }
+    });
+    document.getElementById('ptAsk').addEventListener('click', () => {
+        const text = ta.value.trim();
+        if (!text) { showToast('Type or paste some text first.'); return; }
+        window.open('https://www.google.com/search?q=' + encodeURIComponent(text), '_blank', 'noopener');
+    });
 }
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -650,7 +692,7 @@ async function loadMaterial() {
         // SECURITY: the server no longer sends its Google access token.
         // Full reader = public file + restricted API key; otherwise preview.
         if (!READER_API_KEY) {
-            showDrivePreview(result.previewUrl);
+            showDrivePreview(result.previewUrl, 'no API key set');
             return;
         }
         try {
@@ -664,7 +706,7 @@ async function loadMaterial() {
             await renderPdf(pdfBytes, result.fileName || materialTitle);
         } catch (driveErr) {
             console.warn("Full reader failed, using preview:", driveErr);
-            showDrivePreview(result.previewUrl);
+            showDrivePreview(result.previewUrl, driveErr && driveErr.message ? driveErr.message : 'unknown error');
         }
 
     } catch (err) {
