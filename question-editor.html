@@ -319,10 +319,12 @@
     <h3 id="editorTitle">3. Edit Questions</h3>
     <small class="hint">Click bubble (A, B, C, D) to set correct answer. Use "Paste Options" to paste 4 options copied from Excel, "Translate" to auto-fill Hindi for one question, "Import Questions from Excel" to bulk-load English questions from the template file, and "Translate All to Hindi" to fill in every missing Hindi field at once.</small>
     <div class="q-tools" style="margin-bottom:10px; flex-wrap: wrap;">
-        <button class="btn-tool" onclick="document.getElementById('excelFileInput').click()">📥 Import Questions from Excel</button>
+        <button class="btn-tool" onclick="document.getElementById('excelFileInput').click()">📥 Upload Questions from Excel</button>
+        <button class="btn-tool" onclick="downloadExcelTemplate()">📄 Download Excel Template</button>
         <button class="btn-tool" onclick="setQuestionCount()">🔢 Set No. of Questions</button>
         <button class="btn-tool" id="translateAllBtn" onclick="translateAllQuestions()">🌐 Translate All to Hindi</button>
-        <button class="btn-tool" onclick="exportQuestionsToExcel()">📤 Export to Excel</button>
+        <button class="btn-tool" onclick="exportQuestionsToExcel()">📤 Download Questions as Excel</button>
+        <button class="btn-tool" onclick="downloadQuizHtml()">⬇️ Download Quiz (HTML)</button>
         <button class="btn-danger" style="flex:1; padding: 6px 10px; font-size:12px;" onclick="deleteAllQuestions()">🗑️ Delete All Questions</button>
     </div>
     <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(event)">
@@ -332,6 +334,7 @@
 
 <div class="bottom-bar" id="bottomBar" style="display:none;">
     <span class="info" id="questionCountLabel">0 questions</span>
+    <button class="btn-tool" style="flex:none;padding:10px 14px;" onclick="downloadQuizHtml()">⬇️ Download Quiz (HTML)</button>
     <button class="btn-green" onclick="saveToGithub()" id="saveBtn">💾 Save Changes to GitHub</button>
 </div>
 
@@ -363,6 +366,23 @@ function showStatus(elId, msg, type) {
 }
 
 /* ================= GITHUB API HELPERS ================= */
+/* Force every GitHub API read to bypass the browser cache, so the editor
+   always loads the latest file + sha (a stale copy made saves look like they "did nothing"). */
+(function () {
+    const _origFetch = window.fetch.bind(window);
+    window.fetch = function (url, opts) {
+        if (typeof url === 'string' && url.startsWith('https://api.github.com/')) {
+            opts = Object.assign({ cache: 'no-store' }, opts || {});
+        }
+        return _origFetch(url, opts);
+    };
+})();
+/* Warn before closing the tab if edits were made since the last successful save */
+let hasUnsavedChanges = false;
+document.addEventListener('input', e => {
+    if (e.target.closest && e.target.closest('#editorCard, #quizConfigCard')) hasUnsavedChanges = true;
+});
+window.addEventListener('beforeunload', e => { if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ''; } });
 function ghHeaders(token) {
     return {
         "Authorization": "Bearer " + token,
@@ -657,6 +677,8 @@ function renderQuestions() {
                 </div>
                 <div class="q-tools">
                     <button class="btn-tool" id="pasteBtn-${idx}" onclick="pasteOptions(${idx})">📋 Paste Options</button>
+                    <button class="btn-tool" onclick="copyQuestionToHindi(${idx})">📄 Copy Question to Hindi</button>
+                    <button class="btn-tool" onclick="copyOptionsToHindi(${idx})">📄 Copy Options to Hindi</button>
                     <button class="btn-tool" id="translateBtn-${idx}" onclick="translateQuestion(${idx})">🌐 Translate</button>
                 </div>
             </div>`;
@@ -673,6 +695,34 @@ function updateOption(idx, optIdx, langIdx, value) {
     questions[idx][4 + optIdx][langIdx] = value;
 }
 function setCorrect(idx, optionNumber) { questions[idx][1] = optionNumber; renderQuestions(); }
+
+/* Copy the English question text into the Hindi box as-is (no translation) */
+function copyQuestionToHindi(idx) {
+    const q = questions[idx];
+    if (!q[2] || !q[2].trim()) { alert(`Question ${idx + 1} has no English text to copy.`); return; }
+    q[3] = q[2];
+    const card = document.getElementById('qcard-' + idx);
+    if (card) { const tas = card.querySelectorAll('textarea'); if (tas[1]) tas[1].value = q[3]; }
+    hasUnsavedChanges = true;
+}
+/* Copy all four English options into the Hindi option boxes as-is (no translation) */
+function copyOptionsToHindi(idx) {
+    const q = questions[idx];
+    const card = document.getElementById('qcard-' + idx);
+    const blocks = card ? card.querySelectorAll('.opt-block') : [];
+    let copied = 0;
+    for (let oi = 0; oi < 4; oi++) {
+        if (!q[4 + oi]) q[4 + oi] = ['', ''];
+        const en = q[4 + oi][0] || '';
+        if (!en.trim()) continue;
+        q[4 + oi][1] = en;
+        copied++;
+        const inputs = blocks[oi] ? blocks[oi].querySelectorAll('input[type="text"]') : [];
+        if (inputs[1]) inputs[1].value = en;
+    }
+    if (!copied) alert(`Question ${idx + 1} has no English options to copy.`);
+    else hasUnsavedChanges = true;
+}
 
 /* Clear a single question's text and options (keeps its position/number) */
 function clearQuestion(idx) {
@@ -965,7 +1015,7 @@ async function convertToCameraTemplate() {
    QUESTION_TEMPLATE.xlsx header wording. Hindi columns are optional — any
    left blank (or missing) can be filled later with "Translate All to Hindi". */
 function resolveCorrectIndex(val, optsEnglish) {
-    const raw = String(val === undefined || val === null ? '' : val).trim();
+    const raw = String(val === undefined || val === null ? '' : val).trim().replace(/^option\s*/i, '');
     if (!raw) return null;
     if (/^[A-Da-d]$/.test(raw)) return raw.toUpperCase().charCodeAt(0) - 64;
     if (/^[1-4]$/.test(raw)) return parseInt(raw, 10);
@@ -1007,15 +1057,17 @@ async function handleExcelFile(event) {
             let eIdx = -1, hIdx = -1;
             for (let i = 0; i < headers.length; i++) {
                 const h = headers[i].toLowerCase();
-                if (h.includes('option') && h.includes(String(n))) {
-                    if (h.includes('hindi')) hIdx = i; else eIdx = i;
+                const om = h.match(/option\s*\(?\s*([a-d1-4])\b/);
+                if (om) {
+                    const num = /[a-d]/.test(om[1]) ? om[1].charCodeAt(0) - 96 : parseInt(om[1], 10);
+                    if (num === n) { if (h.includes('hindi')) hIdx = i; else eIdx = i; }
                 }
             }
             optEng.push(eIdx); optHin.push(hIdx);
         }
 
         if (cEngQ === -1 || optEng.some(i => i === -1)) {
-            throw new Error('Could not find the expected English question/option columns. Please use the headers from QUESTION_TEMPLATE.xlsx.');
+            throw new Error('Could not find the expected English question/option columns. Please use the headers from Quiz_Template.xlsx (use the Download Excel Template button).');
         }
 
         const dataRows = rows.slice(1).filter(r => r.some(c => String(c).trim() !== ''));
@@ -1062,6 +1114,7 @@ async function handleExcelFile(event) {
         }
         renumberQuestions();
         renderQuestions();
+        hasUnsavedChanges = true;
 
         let msg = `Imported ${imported.length} question(s) from Excel.`;
         if (allBlank) {
@@ -1157,6 +1210,47 @@ function deleteAllQuestions() {
 /* ================= EXPORT QUESTIONS TO EXCEL ================= */
 /* Downloads the current paper's questions as an .xlsx file, using the same
    column layout expected by the Excel importer (so the file can be re-imported). */
+const QUIZ_EXCEL_HEADERS = [
+    'English Question', 'Hindi Question',
+    'English Option A', 'Hindi Option A',
+    'English Option B', 'Hindi Option B',
+    'English Option C', 'Hindi Option C',
+    'English Option D', 'Hindi Option D',
+    'Correct Answer'
+];
+
+/* Blank template with the same columns + one sample row */
+function downloadExcelTemplate() {
+    if (typeof XLSX === 'undefined') { alert('The Excel writer failed to load. Reload the page and try again.'); return; }
+    const sample = ['ICAO came into existence in the year?', 'आई.सी.ए.ओ किस वर्ष अस्तित्व में आया?',
+        '1947', '1947', '1948', '1948', '1944', '1944', '1963', '1963', 'C'];
+    const ws = XLSX.utils.aoa_to_sheet([QUIZ_EXCEL_HEADERS, sample]);
+    ws['!cols'] = QUIZ_EXCEL_HEADERS.map((h, i) => ({ wch: i < 2 ? 40 : (i === 10 ? 14 : 22) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Quiz');
+    XLSX.writeFile(wb, 'Quiz_Template.xlsx');
+}
+
+/* Download the paper (with all current edits) as an .html file — a local backup
+   that does not touch GitHub. */
+function downloadQuizHtml() {
+    if (!currentFile) { alert('Open a quiz paper first.'); return; }
+    try {
+        renumberQuestions();
+        const content = buildPaperContent(currentFile.content, questions, quizConfig);
+        const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = currentFile.path.split('/').pop();
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        showStatus('loadStatus', `⬇️ Downloaded "${a.download}" with ${questions.length} question(s). (Not saved to GitHub yet.)`, 'info');
+    } catch (e) {
+        alert('Could not build the download: ' + e.message);
+    }
+}
+
 function exportQuestionsToExcel() {
     if (!questions.length) { alert('There are no questions to export.'); return; }
     if (typeof XLSX === 'undefined') {
@@ -1165,14 +1259,7 @@ function exportQuestionsToExcel() {
     }
 
     const letters = ['A', 'B', 'C', 'D'];
-    const headers = [
-        'Question (English)', 'Question (Hindi)',
-        'Option 1 (English)', 'Option 1 (Hindi)',
-        'Option 2 (English)', 'Option 2 (Hindi)',
-        'Option 3 (English)', 'Option 3 (Hindi)',
-        'Option 4 (English)', 'Option 4 (Hindi)',
-        'Correct Answer'
-    ];
+    const headers = QUIZ_EXCEL_HEADERS;
 
     const rows = questions.map(q => {
         const [, correct, engQ, hinQ, o1, o2, o3, o4] = q;
@@ -1198,7 +1285,7 @@ function exportQuestionsToExcel() {
     ];
 
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Questions');
+    XLSX.utils.book_append_sheet(wb, ws, 'Quiz');
 
     const baseName = currentFile ? currentFile.path.replace(/\.html$/i, '').split('/').pop() : 'quiz-questions';
     XLSX.writeFile(wb, `${baseName}-questions.xlsx`);
@@ -1780,7 +1867,25 @@ async function saveToGithub() {
         quizConfig.name = quizConfig.loadedName;
         document.getElementById('cfgQuizName').value = quizConfig.name;
 
-        showStatus('loadStatus', '✅ Saved successfully! Changes are live on GitHub.', 'ok');
+        // Verify: read the file straight back from GitHub and compare with what we sent
+        let verified = false;
+        try {
+            const vr = await fetch(`https://api.github.com/repos/${s.owner}/${s.repo}/contents/${encodeURIComponent(currentFile.path)}?ref=${encodeURIComponent(s.branch)}`, { headers: ghHeaders(s.token) });
+            if (vr.ok) {
+                const vd = await vr.json();
+                verified = (base64ToUtf8(vd.content) === newContent);
+            }
+        } catch (_) {}
+        const commitSha = (result.commit && result.commit.sha || '').slice(0, 7);
+        const commitUrl = result.commit && result.commit.html_url;
+        hasUnsavedChanges = false;
+        if (verified) {
+            showStatus('loadStatus', `✅ Saved & verified on GitHub (commit ${commitSha}, ${questions.length} questions). ` +
+                
+                `If the live quiz still looks old, wait 1–2 minutes for GitHub Pages and hard-refresh (Ctrl+Shift+R).`, 'ok');
+        } else {
+            showStatus('loadStatus', '⚠️ GitHub accepted the save but the re-check did not match. Please check the commit history before closing this page.', 'err');
+        }
     } catch (e) {
         showStatus('loadStatus', 'Failed to save: ' + e.message, 'err');
     } finally {
