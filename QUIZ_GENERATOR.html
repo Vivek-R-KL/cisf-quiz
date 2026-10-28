@@ -335,14 +335,55 @@ function escapeAttr(s){
 }
 
 /* ======================= TRANSLATION (Google Translate, unofficial endpoint) ======================= */
+const _sleep = ms => new Promise(r => setTimeout(r, ms));
+let _tlClientIdx = 0;
+const _TL_CLIENTS = ['gtx', 'dict-chrome-ex'];
+
 async function translateText(text, targetLang){
   const t = (text||'').trim();
   if (!t) return '';
-  const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=' + targetLang + '&dt=t&q=' + encodeURIComponent(t);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Translate request failed (' + res.status + ')');
-  const data = await res.json();
-  return data[0].map(seg => seg[0]).join('');
+  let lastErr;
+  // Up to 6 attempts; back off on rate-limit (429) / server errors / network errors
+  for (let attempt = 0; attempt < 6; attempt++){
+    const client = _TL_CLIENTS[(_tlClientIdx + attempt) % _TL_CLIENTS.length];
+    const url = 'https://translate.googleapis.com/translate_a/single?client=' + client +
+                '&sl=en&tl=' + targetLang + '&dt=t&q=' + encodeURIComponent(t);
+    try {
+      const res = await fetch(url);
+      if (res.ok){
+        const data = await res.json();
+        _tlClientIdx = (_tlClientIdx + attempt) % _TL_CLIENTS.length; // remember the one that worked
+        return data[0].map(seg => seg[0]).join('');
+      }
+      lastErr = new Error('Translate request failed (HTTP ' + res.status + ')');
+      lastErr.status = res.status;
+    } catch(e){
+      lastErr = e; // network error or CORS-blocked 429 shows up here
+    }
+    await _sleep(1500 * Math.pow(2, attempt)); // 1.5s, 3s, 6s, 12s, 24s, 48s
+  }
+  throw lastErr || new Error('Translate failed');
+}
+
+/* Translate a question + all its options in ONE request (5x fewer requests => avoids rate limit) */
+async function translateQuestionSet(q){
+  const parts = [q.en.trim()];
+  const optIdx = [];
+  q.opts.forEach((o, i) => { if (o.en.trim()){ parts.push(o.en.trim()); optIdx.push(i); } });
+  const SEP = '\n@@@\n';
+  const joined = parts.map(p => p.replace(/\n+/g, ' ')).join(SEP);
+  let out = null;
+  try {
+    const res = await translateText(joined, 'hi');
+    const pieces = res.split(/\s*@@@\s*/).map(x => x.trim());
+    if (pieces.length === parts.length) out = pieces;
+  } catch(e){ /* fall through to one-by-one */ }
+  if (!out){
+    out = [];
+    for (const p of parts) out.push(await translateText(p, 'hi'));
+  }
+  q.hi = out[0];
+  optIdx.forEach((oi, k) => { q.opts[oi].hi = out[k + 1]; });
 }
 
 async function translateQuestion(idx){
@@ -355,17 +396,14 @@ async function translateQuestion(idx){
   }
   if (statusEl){ statusEl.className='q-status'; statusEl.textContent = '⏳ Translating...'; }
   try {
-    q.hi = await translateText(q.en, 'hi');
-    for (const o of q.opts){
-      if (o.en.trim()) o.hi = await translateText(o.en, 'hi');
-    }
+    await translateQuestionSet(q);
     renderQuestions();
     const newStatusEl = document.getElementById('qStatus-' + idx);
     if (newStatusEl){ newStatusEl.className='q-status status-ok'; newStatusEl.textContent = '✅ Translated to Hindi.'; }
   } catch(err){
     console.error(err);
     const errEl = document.getElementById('qStatus-' + idx);
-    if (errEl){ errEl.className='q-status status-err'; errEl.textContent = '❌ Translation failed. Check your internet connection and try again.'; }
+    if (errEl){ errEl.className='q-status status-err'; errEl.textContent = '❌ Translation failed (' + (err && err.message ? err.message : 'network error') + '). If other questions translated fine, Google is rate-limiting you: wait a few minutes or switch network (e.g. mobile hotspot) and retry.'; }
   }
 }
 
@@ -416,20 +454,22 @@ async function translateAllQuestions(){
     return;
   }
   btn.disabled = true;
-  let failCount = 0;
+  let failCount = 0, lastErrMsg = '';
   for (let i = 0; i < questions.length; i++){
     statusEl.className = '';
     statusEl.textContent = `⏳ Translating question ${i+1} of ${questions.length}...`;
     const q = questions[i];
     if (!q.en.trim()) continue;
+    const alreadyDone = q.hi.trim() && q.opts.every(o => !o.en.trim() || o.hi.trim());
+    if (alreadyDone) continue; // resume support: skip questions already translated
     try {
-      q.hi = await translateText(q.en, 'hi');
-      for (const o of q.opts){
-        if (o.en.trim()) o.hi = await translateText(o.en, 'hi');
-      }
+      await translateQuestionSet(q);
+      await _sleep(400); // gentle pacing to avoid rate limit
     } catch(err){
       console.error('Translate failed for question', i+1, err);
       failCount++;
+      lastErrMsg = err && err.message ? err.message : 'network error';
+      if (failCount >= 3) break; // rate-limited: stop early, keep what is done
     }
   }
   renderQuestions();
@@ -439,7 +479,7 @@ async function translateAllQuestions(){
     statusEl.textContent = `✅ Translated ${questions.length} question(s) to Hindi.`;
   } else {
     statusEl.className = 'status-err';
-    statusEl.textContent = `⚠️ Translated with ${failCount} failure(s). Check your internet connection and try again for those questions.`;
+    statusEl.textContent = `⚠️ Stopped after ${failCount} failure(s) (${lastErrMsg}). Google is likely rate-limiting this network. Progress is kept - wait a few minutes (or switch network) and click Translate All again; finished questions are skipped.`;
   }
 }
 
