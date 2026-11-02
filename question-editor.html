@@ -104,57 +104,52 @@
     .err { display: block !important; background: #fee2e2; color: #991b1b; }
     .info { display: block !important; background: #dbeafe; color: #1e40af; }
 
-    /* COMPACT QUESTION CARD DESIGN */
+    /* QUESTION CARD - EXCEL-STYLE GRID LAYOUT
+       columns: [Q no / radio / paste] [English] [Hindi] [actions] */
     .q-card {
+        display: grid;
+        grid-template-columns: 140px minmax(0, 1fr) minmax(0, 1fr) 100px;
+        gap: 8px;
+        align-items: center;
         border: 1px solid var(--card-border);
         border-left: 4px solid var(--accent-yellow);
-        border-radius: 6px;
-        padding: 10px;
-        margin-bottom: 10px;
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 32px;
         background: #fdfdfd;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
-    .q-card .q-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-    .q-card .q-top .q-num {
+    .q-card:last-child { margin-bottom: 12px; }
+    .q-card .q-num {
         font-weight: bold;
-        font-size: 14px;
+        font-size: 16px;
         color: var(--accent-blue);
+        align-self: start;
+        padding-top: 8px;
     }
-    .q-actions { display: flex; gap: 4px; }
+    .q-card textarea { min-height: 52px; align-self: stretch; }
+    .q-card .q-move { display: flex; gap: 4px; justify-content: flex-end; align-self: start; }
+    .q-card .cell-actions { display: flex; }
+    .q-card .cell-actions button { width: 100%; }
 
-    /* SIDE-BY-SIDE HINDI AND ENGLISH LAYOUT */
-    .side-by-side {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-    }
-    @media (max-width: 650px) { .side-by-side { grid-template-columns: 1fr; } }
-
-    .opt-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-top: 6px;
-    }
-    @media (max-width: 850px) { .opt-grid { grid-template-columns: 1fr; } }
-
-    .opt-block {
+    .opt-block { display: contents; }
+    .correct-toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        user-select: none;
+        padding: 6px 8px;
         border: 1px solid #e5e7eb;
         border-radius: 5px;
-        padding: 6px 8px;
         background: #fff;
+        margin: 0;
+        text-transform: none;
     }
-    .opt-block.correct { border-color: var(--accent-green); background: #f0fdf9; }
-    .opt-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 4px;
-    }
+    .correct-toggle input { width: auto; margin: 0; }
     .opt-letter {
         display: inline-flex;
         align-items: center;
@@ -165,23 +160,22 @@
         background: #e5e7eb;
         font-weight: bold;
         font-size: 11px;
-        margin-right: 6px;
+        color: var(--text-primary);
     }
+    .opt-block.correct .correct-toggle { background: #f0fdf9; border-color: var(--accent-green); color: #047857; }
     .opt-block.correct .opt-letter { background: var(--accent-green); color: #fff; }
-    .correct-toggle {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        cursor: pointer;
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--text-muted);
-        user-select: none;
-    }
-    .opt-block.correct .correct-toggle { color: #047857; }
-    .correct-toggle input { width: auto; margin: 0; }
+    .opt-block.correct input[type="text"] { border-color: var(--accent-green); background: #f0fdf9; }
 
-    .q-tools { display: flex; gap: 8px; margin-top: 8px; }
+    .top-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .top-tools button { flex: 1 1 auto; width: auto; }
+    .q-tools { display: contents; }
+    .q-tools .btn-tool { flex: none; width: 100%; }
+
+    @media (max-width: 850px) {
+        .q-card { grid-template-columns: 1fr; }
+        .q-card .q-num { padding-top: 0; }
+        .q-card .q-move { justify-content: flex-start; }
+    }
 
     .empty-state { text-align: center; color: var(--text-muted); padding: 20px 10px; }
 
@@ -318,7 +312,7 @@
 <div class="card" id="editorCard" style="display:none;">
     <h3 id="editorTitle">3. Edit Questions</h3>
     <small class="hint">Click bubble (A, B, C, D) to set correct answer. Use "Paste Options" to paste 4 options copied from Excel, "Translate" to auto-fill Hindi for one question, "Import Questions from Excel" to bulk-load English questions from the template file, and "Translate All to Hindi" to fill in every missing Hindi field at once.</small>
-    <div class="q-tools" style="margin-bottom:10px; flex-wrap: wrap;">
+    <div class="top-tools">
         <button class="btn-tool" onclick="document.getElementById('excelFileInput').click()">📥 Upload Questions from Excel</button>
         <button class="btn-tool" onclick="downloadExcelTemplate()">📄 Download Excel Template</button>
         <button class="btn-tool" onclick="setQuestionCount()">🔢 Set No. of Questions</button>
@@ -635,46 +629,32 @@ function renderQuestions() {
             const isCorrect = (correct === (oi + 1));
             const oEn = (opt && opt[0]) || '';
             const oHi = (opt && opt[1]) || '';
+            let actionCell = '<div></div>';
+            if (oi === 0) actionCell = `<div class="cell-actions"><button class="btn-clear" onclick="clearQuestion(${idx})">Clear</button></div>`;
+            if (oi === 1) actionCell = `<div class="cell-actions"><button class="btn-danger" onclick="deleteQuestion(${idx})">Delete</button></div>`;
             return `
                 <div class="opt-block ${isCorrect ? 'correct' : ''}">
-                    <div class="opt-header">
-                        <span><span class="opt-letter">${letters[oi]}</span>Opt ${letters[oi]}</span>
-                        <label class="correct-toggle">
-                            <input type="radio" name="correct-${idx}" ${isCorrect ? 'checked' : ''}
-                                onchange="setCorrect(${idx}, ${oi + 1})"> Correct
-                        </label>
-                    </div>
-                    <div class="side-by-side">
-                        <input type="text" value="${escapeAttr(oEn)}" oninput="updateOption(${idx}, ${oi}, 0, this.value)" placeholder="English Option">
-                        <input type="text" value="${escapeAttr(oHi)}" oninput="updateOption(${idx}, ${oi}, 1, this.value)" placeholder="Hindi Option">
-                    </div>
+                    <label class="correct-toggle">
+                        <input type="radio" name="correct-${idx}" ${isCorrect ? 'checked' : ''}
+                            onchange="setCorrect(${idx}, ${oi + 1})">
+                        <span class="opt-letter">${letters[oi]}</span>${isCorrect ? ' Correct' : ''}
+                    </label>
+                    <input type="text" value="${escapeAttr(oEn)}" oninput="updateOption(${idx}, ${oi}, 0, this.value)" placeholder="English Option ${letters[oi]}">
+                    <input type="text" value="${escapeAttr(oHi)}" oninput="updateOption(${idx}, ${oi}, 1, this.value)" placeholder="Hindi Option ${letters[oi]}">
+                    ${actionCell}
                 </div>`;
         }).join('');
 
         return `
             <div class="q-card" id="qcard-${idx}">
-                <div class="q-top">
-                    <span class="q-num">Q${idx + 1}</span>
-                    <div class="q-actions">
-                        <button class="btn-clear" onclick="clearQuestion(${idx})">Clear</button>
-                        <button class="btn-danger" onclick="deleteQuestion(${idx})">Delete</button>
-                        <button class="btn-mini" onclick="moveQuestion(${idx}, -1)">⬆️</button>
-                        <button class="btn-mini" onclick="moveQuestion(${idx}, 1)">⬇️</button>
-                    </div>
+                <span class="q-num">Q${idx + 1}</span>
+                <textarea oninput="updateQuestionText(${idx}, 0, this.value)" placeholder="English Question Text">${escapeHtml(engQ || '')}</textarea>
+                <textarea oninput="updateQuestionText(${idx}, 1, this.value)" placeholder="Hindi Question Text">${escapeHtml(hinQ || '')}</textarea>
+                <div class="q-move">
+                    <button class="btn-mini" onclick="moveQuestion(${idx}, -1)">⬆️</button>
+                    <button class="btn-mini" onclick="moveQuestion(${idx}, 1)">⬇️</button>
                 </div>
-                <div class="side-by-side">
-                    <div>
-                        <label>English Question</label>
-                        <textarea oninput="updateQuestionText(${idx}, 0, this.value)" placeholder="English Question Text">${escapeHtml(engQ || '')}</textarea>
-                    </div>
-                    <div>
-                        <label>Hindi Question</label>
-                        <textarea oninput="updateQuestionText(${idx}, 1, this.value)" placeholder="Hindi Question Text">${escapeHtml(hinQ || '')}</textarea>
-                    </div>
-                </div>
-                <div class="opt-grid">
-                    ${optsHtml}
-                </div>
+                ${optsHtml}
                 <div class="q-tools">
                     <button class="btn-tool" id="pasteBtn-${idx}" onclick="pasteOptions(${idx})">📋 Paste Options</button>
                     <button class="btn-tool" onclick="copyQuestionToHindi(${idx})">📄 Copy Question to Hindi</button>
